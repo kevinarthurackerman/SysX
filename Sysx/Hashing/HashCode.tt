@@ -1,0 +1,42 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Linq.Expressions" #>
+<#var enumerations = 8;#>
+namespace Sysx.Hashing
+{
+    public static class HashCode
+    {
+<#for(var genericArgs = 1; genericArgs <= enumerations; genericArgs++) {#>
+        public static int Combine<<#=List(genericArgs, i => "T" + i)#>>(<#=List(genericArgs, i => "T" + i + " item" + i)#>)
+        {
+            unchecked
+            {
+                int hash = 17;
+<#  for(var item = 1; item <= genericArgs; item++) {#>
+                hash = hash * 31 + item<#=item#>?.GetHashCode() ?? 0;
+<#  }#>
+                return hash;
+            }
+        }
+<#  if(genericArgs != enumerations) WriteLine(string.Empty);#>
+<#}#>
+    }
+}
+<#+
+private string List(int count, Func<int,string> valueSelector)
+{
+    var sb = new StringBuilder();
+
+    for(var i = 1; i <= count; i++)
+    {
+        sb.Append(valueSelector(i));
+
+        if (i < count) sb.Append(", ");
+    }
+
+    return sb.ToString();
+}
+#>
