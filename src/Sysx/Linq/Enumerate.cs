@@ -6,6 +6,9 @@ namespace Sysx.Linq
 {
     public static class Enumerate
     {
+        /// <summary>
+        /// Returns the descendants of the root nearest to furthest, breadth first.
+        /// </summary>
         public static IEnumerable<T> Descendants<T>(this T root, Func<T, IEnumerable<T>> childSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
         {
             if (includeRoot) yield return root;
@@ -14,7 +17,6 @@ namespace Sysx.Linq
             var descendantsToCheck = new List<T>();
             var childrenBeingChecked = childSelector(root);
             var depth = 0;
-
             while (childrenBeingChecked.Any() && depth++ < maxDepth)
             {
                 foreach (var childBeingChecked in childrenBeingChecked)
@@ -32,7 +34,10 @@ namespace Sysx.Linq
                 descendantsToCheck = new List<T>();
             }
         }
-
+        
+        /// <summary>
+        /// Returns the ancestors of the root nearest to furthest.
+        /// </summary>
         public static IEnumerable<T> Ancestors<T>(this T root, Func<T, T> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
         {
             if (includeRoot) yield return root;

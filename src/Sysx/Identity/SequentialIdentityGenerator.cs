@@ -3,10 +3,17 @@ using System.Data.SqlTypes;
 
 namespace Sysx.Identity
 {
+	/// <summary>
+	/// Generates semi-sequentially ordered GUIDs that will sort correctly in memory and SQL Server.
+	/// </summary>
     public static class SequentialIdentityGenerator
     {
 		private static readonly long baseDateTicks = new DateTime(1900, 1, 1).Ticks;
 
+		/// <summary>
+		/// Produces a semi-sequentially ordered SQL GUID.
+		/// </summary>
+		/// <returns></returns>
 		public static SqlGuid Next()
 		{
 			var guidArray = Guid.NewGuid().ToByteArray();

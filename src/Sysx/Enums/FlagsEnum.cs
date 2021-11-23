@@ -6,25 +6,40 @@ using Sysx.Expressions;
 
 namespace Sysx.Enums
 {
+    /// <inheritdoc cref="FlagsEnum{TEnum}"/>
     public static class FlagsEnum
     {
-        public static bool Has<TEnum>(TEnum current, TEnum flag) => FlagsEnum<TEnum>.Has(current, flag);
-
-        public static bool HasAny<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.HasAny(current, flags);
-
-        public static TEnum Add<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.Add(current, flags);
-
-        public static TEnum Remove<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.Remove(current, flags);
-
+        /// <inheritdoc cref="FlagsEnum{TEnum}.None"/>
         public static TEnum None<TEnum>() => FlagsEnum<TEnum>.None;
 
+        /// <inheritdoc cref="FlagsEnum{TEnum}.Values"/>
+        public static IEnumerable<TEnum> Values<TEnum>() => FlagsEnum<TEnum>.Values;
+
+        /// <inheritdoc cref="FlagsEnum{TEnum}.All"/>
         public static TEnum All<TEnum>() => FlagsEnum<TEnum>.All;
 
+        /// <inheritdoc cref="FlagsEnum{TEnum}.Expand"/>
         public static IEnumerable<TEnum> Expand<TEnum>(TEnum value) => FlagsEnum<TEnum>.Expand(value);
 
+        /// <inheritdoc cref="FlagsEnum{TEnum}.Combine"/>
         public static TEnum Combine<TEnum>(params TEnum[] values) => FlagsEnum<TEnum>.Combine(values);
+
+        /// <inheritdoc cref="FlagsEnum{TEnum}.Has"/>
+        public static bool Has<TEnum>(TEnum current, TEnum flag) => FlagsEnum<TEnum>.Has(current, flag);
+
+        /// <inheritdoc cref="FlagsEnum{TEnum}.HasAny"/>
+        public static bool HasAny<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.HasAny(current, flags);
+
+        /// <inheritdoc cref="FlagsEnum{TEnum}.Add"/>
+        public static TEnum Add<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.Add(current, flags);
+
+        /// <inheritdoc cref="FlagsEnum{TEnum}.Remove"/>
+        public static TEnum Remove<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.Remove(current, flags);
     }
 
+    /// <summary>
+    /// Provides operations for manipulating flags enums
+    /// </summary>
     public static class FlagsEnum<TEnum>
     {
         private static readonly Func<TEnum, TEnum, bool> has =
@@ -77,24 +92,51 @@ namespace Sysx.Enums
                 return convertResult;
             }, nameof(FlagsEnum<TEnum>.Remove));
 
-        private static readonly IEnumerable<TEnum> values = Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
-
-        public static bool Has(TEnum current, TEnum flag) => has(current, flag);
-
-        public static bool HasAny(TEnum current, TEnum flags) => hasAny(current, flags);
-
-        public static TEnum Add(TEnum current, TEnum flags) => add(current, flags);
-
-        public static TEnum Remove(TEnum current, TEnum flags) => remove(current, flags);
-
+        /// <summary>
+        /// A value representing no flags set.
+        /// </summary>
         public static TEnum None { get; } = (TEnum)Convert.ChangeType(0, typeof(TEnum).GetEnumUnderlyingType());
 
+        /// <summary>
+        /// A list of all the defined values of the enum.
+        /// </summary>
+        public static IEnumerable<TEnum> Values { get; } = Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
+
+        /// <summary>
+        /// A value representing all values of the flag being set.
+        /// </summary>
         public static TEnum All { get; } = Enum.GetValues(typeof(TEnum))
-                .Cast<TEnum>()
-                .Aggregate(None, (l, r) => Add(l, r));
+            .Cast<TEnum>()
+            .Aggregate(None, (l, r) => Add(l, r));
 
-        public static IEnumerable<TEnum> Expand(TEnum value) => values.Where(x => Has(value, x)).ToArray();
+        /// <summary>
+        /// Expands the flag value to a list of defined flags.
+        /// </summary>
+        public static IEnumerable<TEnum> Expand(TEnum value) => Values.Where(x => Has(value, x)).ToArray();
 
+        /// <summary>
+        /// Combines the flag values into a single flag.
+        /// </summary>
         public static TEnum Combine(params TEnum[] values) => values.Aggregate(None, (left, right) => Add(left, right));
+
+        /// <summary>
+        /// Checks if the current flag value contains a specific flag.
+        /// </summary>
+        public static bool Has(TEnum current, TEnum flag) => has(current, flag);
+
+        /// <summary>
+        /// Checks if the current flag value contains any of the flags.
+        /// </summary>
+        public static bool HasAny(TEnum current, TEnum flags) => hasAny(current, flags);
+
+        /// <summary>
+        /// Adds the flags value to the current flag.
+        /// </summary>
+        public static TEnum Add(TEnum current, TEnum flags) => add(current, flags);
+
+        /// <summary>
+        /// Removes the flags value from the current flag.
+        /// </summary>
+        public static TEnum Remove(TEnum current, TEnum flags) => remove(current, flags);
     }
 }

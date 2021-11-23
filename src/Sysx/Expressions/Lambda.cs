@@ -5,8 +5,14 @@ namespace Sysx.Expressions
 {
     using Expression = System.Linq.Expressions.Expression;
 
+    /// <summary>
+    /// Helper to generate functions during class initialization that if valid will only throw an exception if called.
+    /// </summary>
     public static class Lambda
     {
+        /// <summary>
+        /// Creates a nullary function
+        /// </summary>
         public static Func<TResult> Create<TResult>(Func<Expression> func, string operatorName)
         {
             try
@@ -21,6 +27,9 @@ namespace Sysx.Expressions
             }
         }
 
+        /// <summary>
+        /// Creates a unary function
+        /// </summary>
         public static Func<TValue, TResult> Create<TValue, TResult>(Func<ParameterExpression, Expression> func, string operatorName)
         {
             try
@@ -49,6 +58,9 @@ namespace Sysx.Expressions
             }
         }
 
+        /// <summary>
+        /// Creates a binary function
+        /// </summary>
         public static Func<TLeft, TRight, TResult> Create<TLeft, TRight, TResult>(Func<ParameterExpression, ParameterExpression, Expression> func, string operatorName)
         {
             try

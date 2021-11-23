@@ -4,12 +4,18 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Linq.Expressions" #>
-<#var enumerations = 8;#>
+<#var enumerations = 16;#>
 namespace Sysx.Hashing
 {
+    /// <summary>
+    /// Generates strong hashcodes from supplied values on the class.
+    /// </summary>
     public static class HashCode
     {
 <#for(var genericArgs = 1; genericArgs <= enumerations; genericArgs++) {#>
+        /// <summary>
+        /// Creates a hashcode from the supplied values.
+        /// </summary>
         public static int Combine<<#=List(genericArgs, i => "T" + i)#>>(<#=List(genericArgs, i => "T" + i + " item" + i)#>)
         {
             unchecked

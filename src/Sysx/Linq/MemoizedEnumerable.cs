@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Sysx.Linq
 {
+    /// <summary>
+    /// Memoizes the enumerable, ensuring that it will only be evaluated up to one time, even if it is called more than once.
+    /// </summary>
     public class MemoizedEnumerable<T> : IEnumerable<T>
     {
         private readonly object locker = new { };

@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace Sysx.Enums
 {
+    /// <summary>
+    /// Base class for implementing type safe class enums.
+    /// </summary>
     [DebuggerDisplay("{Value}: {DisplayName}")]
     public abstract class BaseEnumClass<TEnum, TValue> : IComparable<TEnum>, IEquatable<TEnum>
         where TEnum : BaseEnumClass<TEnum, TValue>
@@ -17,6 +20,9 @@ namespace Sysx.Enums
         private static IDictionary<TValue, TEnum>? lookupUpValue;
         private static IDictionary<string, TEnum>? lookupUpDisplayName;
 
+        /// <summary>
+        /// Returns all the values of the enum.
+        /// </summary>
         public static IEnumerable<TEnum> All
         {   
             get
