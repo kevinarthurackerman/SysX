@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq.Expressions;
 using Lambda = Sysx.Expressions.Lambda;
 
 namespace Sysx.Math
 {
     using Expression = System.Linq.Expressions.Expression;
-
+    
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator
     {
         /// <inheritdoc cref="Operator{TValue}.Zero" />
@@ -194,6 +196,7 @@ namespace Sysx.Math
         public static TResult RightShift<TLeft, TRight, TResult>(TLeft left, TRight right) => Operator<TLeft, TRight, TResult>.RightShift(left, right);
     }
 
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator<TValue>
     {
         private static INullOp<TValue> NullOp { get; }
@@ -324,6 +327,7 @@ namespace Sysx.Math
         }
     }
 
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator<TValue, TResult>
     {
         private static readonly Func<TValue, TResult> not = Lambda.Create<TValue, TResult>(Expression.Not, "Not");
@@ -335,41 +339,44 @@ namespace Sysx.Math
         private static readonly Func<TValue, TResult> onesComplement = Lambda.Create<TValue, TResult>(Expression.OnesComplement, "OnesComplement");
 
         /// <summary>
-        /// Executes the unary not operator (!x)
+        /// Executes the unary Not operator (!x)
         /// </summary>
         public static TResult Not(TValue value) => not(value);
 
         /// <summary>
-        /// Executes the unary increment operator (x+1)
+        /// Executes the unary Increment operator (x+1)
         /// </summary>
         public static TResult Increment(TValue value) => increment(value);
 
         /// <summary>
-        /// Executes the unary decrement operator (x-1)
+        /// Executes the unary Decrement operator (x-1)
         /// </summary>
         public static TResult Decrement(TValue value) => decrement(value);
 
         /// <summary>
-        /// Executes the unary unaryPlus operator (+x)
+        /// Executes the unary UnaryPlus operator (+x)
         /// </summary>
         public static TResult UnaryPlus(TValue value) => unaryPlus(value);
 
         /// <summary>
-        /// Executes the unary negate operator (-x)
+        /// Executes the unary Negate operator (-x)
         /// </summary>
         public static TResult Negate(TValue value) => negate(value);
 
         /// <summary>
-        /// Executes the unary negateChecked operator (checked(-x))
+        /// Executes the unary NegateChecked operator (checked(-x))
         /// </summary>
         public static TResult NegateChecked(TValue value) => negateChecked(value);
 
         /// <summary>
-        /// Executes the unary onesComplement operator (~x)
+        /// Executes the unary OnesComplement operator (~x)
         /// </summary>
         public static TResult OnesComplement(TValue value) => onesComplement(value);
     }
 
+    /// <summary>
+    /// Provides methods for executing operations on any valid type
+    /// </summary>
     public static class Operator<TLeft, TRight, TResult>
     {
         private static readonly Func<TLeft, TRight, TResult> and = Lambda.Create<TLeft, TRight, TResult>(Expression.And, "And");
@@ -397,117 +404,117 @@ namespace Sysx.Math
         private static readonly Func<TLeft, TRight, TResult> rightShift = Lambda.Create<TLeft, TRight, TResult>(Expression.RightShift, "RightShift");
 
         /// <summary>
-        /// Executes the binary and operator (x&y)
+        /// Executes the binary And operator (x&y)
         /// </summary>
         public static TResult And(TLeft left, TRight right) => and(left, right);
 
         /// <summary>
-        /// Executes the binary andAlso operator (x&&y)
+        /// Executes the binary AndAlso operator (x&&y)
         /// </summary>
         public static TResult AndAlso(TLeft left, TRight right) => andAlso(left, right);
 
         /// <summary>
-        /// Executes the binary or operator (x|y)
+        /// Executes the binary Or operator (x|y)
         /// </summary>
         public static TResult Or(TLeft left, TRight right) => or(left, right);
 
         /// <summary>
-        /// Executes the binary orElse operator (x||y)
+        /// Executes the binary OrElse operator (x||y)
         /// </summary>
         public static TResult OrElse(TLeft left, TRight right) => orElse(left, right);
 
         /// <summary>
-        /// Executes the binary exclusiveOr operator (x^y)
+        /// Executes the binary ExclusiveOr operator (x^y)
         /// </summary>
         public static TResult ExclusiveOr(TLeft left, TRight right) => exclusiveOr(left, right);
 
         /// <summary>
-        /// Executes the binary equal operator (x==y)
+        /// Executes the binary Equal operator (x==y)
         /// </summary>
         public static TResult Equal(TLeft left, TRight right) => equal(left, right);
 
         /// <summary>
-        /// Executes the binary notEqual operator (x!=y)
+        /// Executes the binary NotEqual operator (x!=y)
         /// </summary>
         public static TResult NotEqual(TLeft left, TRight right) => notEqual(left, right);
 
         /// <summary>
-        /// Executes the binary referenceEqual operator (System.Object.ReferenceEquals(x,y))
+        /// Executes the binary ReferenceEqual operator (System.Object.ReferenceEquals(x,y))
         /// </summary>
         public static TResult ReferenceEqual(TLeft left, TRight right) => referenceEqual(left, right);
 
         /// <summary>
-        /// Executes the binary referenceNotEqual operator (!System.Object.ReferenceEquals(x,y))
+        /// Executes the binary ReferenceNotEqual operator (!System.Object.ReferenceEquals(x,y))
         /// </summary>
         public static TResult ReferenceNotEqual(TLeft left, TRight right) => referenceNotEqual(left, right);
 
         /// <summary>
-        /// Executes the binary greaterThan operator (x>y)
+        /// Executes the binary GreaterThan operator (x>y)
         /// </summary>
         public static TResult GreaterThan(TLeft left, TRight right) => greaterThan(left, right);
 
         /// <summary>
-        /// Executes the binary greaterThanOrEqual operator (x>=y)
+        /// Executes the binary GreaterThanOrEqual operator (x>=y)
         /// </summary>
         public static TResult GreaterThanOrEqual(TLeft left, TRight right) => greaterThanOrEqual(left, right);
 
         /// <summary>
-        /// Executes the binary lessThan operator (x<y)
+        /// Executes the binary LessThan operator (x<y)
         /// </summary>
         public static TResult LessThan(TLeft left, TRight right) => lessThan(left, right);
 
         /// <summary>
-        /// Executes the binary lessThanOrEqual operator (x<=y)
+        /// Executes the binary LessThanOrEqual operator (x<=y)
         /// </summary>
         public static TResult LessThanOrEqual(TLeft left, TRight right) => lessThanOrEqual(left, right);
 
         /// <summary>
-        /// Executes the binary multiply operator (x*y)
+        /// Executes the binary Multiply operator (x*y)
         /// </summary>
         public static TResult Multiply(TLeft left, TRight right) => multiply(left, right);
 
         /// <summary>
-        /// Executes the binary multiplyChecked operator (checked(x*y))
+        /// Executes the binary MultiplyChecked operator (checked(x*y))
         /// </summary>
         public static TResult MultiplyChecked(TLeft left, TRight right) => multiplyChecked(left, right);
 
         /// <summary>
-        /// Executes the binary divide operator (x/y)
+        /// Executes the binary Divide operator (x/y)
         /// </summary>
         public static TResult Divide(TLeft left, TRight right) => divide(left, right);
 
         /// <summary>
-        /// Executes the binary modulo operator (x%y)
+        /// Executes the binary Modulo operator (x%y)
         /// </summary>
         public static TResult Modulo(TLeft left, TRight right) => modulo(left, right);
 
         /// <summary>
-        /// Executes the binary add operator (x+y)
+        /// Executes the binary Add operator (x+y)
         /// </summary>
         public static TResult Add(TLeft left, TRight right) => add(left, right);
 
         /// <summary>
-        /// Executes the binary addChecked operator (checked(x+y))
+        /// Executes the binary AddChecked operator (checked(x+y))
         /// </summary>
         public static TResult AddChecked(TLeft left, TRight right) => addChecked(left, right);
 
         /// <summary>
-        /// Executes the binary subtract operator (x-y)
+        /// Executes the binary Subtract operator (x-y)
         /// </summary>
         public static TResult Subtract(TLeft left, TRight right) => subtract(left, right);
 
         /// <summary>
-        /// Executes the binary subtractChecked operator (x-y)
+        /// Executes the binary SubtractChecked operator (x-y)
         /// </summary>
         public static TResult SubtractChecked(TLeft left, TRight right) => subtractChecked(left, right);
 
         /// <summary>
-        /// Executes the binary leftShift operator (x<<y)
+        /// Executes the binary LeftShift operator (x<<y)
         /// </summary>
         public static TResult LeftShift(TLeft left, TRight right) => leftShift(left, right);
 
         /// <summary>
-        /// Executes the binary rightShift operator (x>>y)
+        /// Executes the binary RightShift operator (x>>y)
         /// </summary>
         public static TResult RightShift(TLeft left, TRight right) => rightShift(left, right);
     }

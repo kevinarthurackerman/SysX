@@ -49,7 +49,8 @@ using Lambda = Sysx.Expressions.Lambda;
 namespace Sysx.Math
 {
     using Expression = System.Linq.Expressions.Expression;
-
+    
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator
     {
         /// <inheritdoc cref="Operator{TValue}.Zero" />
@@ -77,6 +78,7 @@ namespace Sysx.Math
 <#}#>
     }
 
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator<TValue>
     {
         private static INullOp<TValue> NullOp { get; }
@@ -129,6 +131,7 @@ namespace Sysx.Math
         }
     }
 
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator<TValue, TResult>
     {
 <#foreach(var op in unaryOperators) {#>
@@ -137,13 +140,16 @@ namespace Sysx.Math
 
 <#foreach(var op in unaryOperators) {#>
         /// <summary>
-        /// Executes the unary <#=CamelCase(op.Name)#> operator (<#=op.Symbol#>)
+        /// Executes the unary <#=op.Name#> operator (<#=op.Symbol#>)
         /// </summary>
         public static TResult <#=op.Name#>(TValue value) => <#=CamelCase(op.Name)#>(value);
 <#  if(op != unaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
     }
 
+    /// <summary>
+    /// Provides methods for executing operations on any valid type
+    /// </summary>
     public static class Operator<TLeft, TRight, TResult>
     {
 <#foreach(var op in binaryOperators) {#>
@@ -152,7 +158,7 @@ namespace Sysx.Math
 
 <#foreach(var op in binaryOperators) {#>
         /// <summary>
-        /// Executes the binary <#=CamelCase(op.Name)#> operator (<#=op.Symbol#>)
+        /// Executes the binary <#=op.Name#> operator (<#=op.Symbol#>)
         /// </summary>
         public static TResult <#=op.Name#>(TLeft left, TRight right) => <#=CamelCase(op.Name)#>(left, right);
 <#  if(op != binaryOperators.Last()) WriteLine(string.Empty);#>
