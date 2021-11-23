@@ -6,52 +6,45 @@ namespace Sysx.Linq
 {
     public static class Enumerate
     {
-        public static IEnumerable<T> Descendants<T>(this T root, Func<T, IEnumerable<T>> childSelector, bool includeRoot = false)
+        public static IEnumerable<T> Descendants<T>(this T root, Func<T, IEnumerable<T>> childSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
         {
+            if (includeRoot) yield return root;
+
             var descendantsChecked = new HashSet<T>();
-            var descendantsToCheck = new Stack<T>();
+            var descendantsToCheck = new List<T>();
+            var childrenBeingChecked = childSelector(root);
+            var depth = 0;
 
-            if(includeRoot)
+            while (childrenBeingChecked.Any() && depth++ < maxDepth)
             {
-                descendantsToCheck.Push(root);
-            }
-            else
-            {
-                var children = childSelector(root);
+                foreach (var childBeingChecked in childrenBeingChecked)
+                {
+                    if (!descendantsChecked.Add(childBeingChecked)) continue;
 
-                foreach (var child in children)
-                    descendantsToCheck.Push(child);
-            }
+                    var children = childSelector(childBeingChecked);
 
-            while (descendantsToCheck.Any())
-            {
-                var parent = descendantsToCheck.Pop();
+                    descendantsToCheck.AddRange(children);
 
-                if (!descendantsChecked.Add(parent)) continue;
+                    yield return childBeingChecked;
+                }
 
-                var children = childSelector(parent);
-
-                foreach (var child in children)
-                    descendantsToCheck.Push(child);
-
-                yield return parent;
+                childrenBeingChecked = descendantsToCheck;
+                descendantsToCheck = new List<T>();
             }
         }
 
-        public static IEnumerable<T> Ancestors<T>(this T root, Func<T, T> ancestorSelector, bool includeRoot = false)
+        public static IEnumerable<T> Ancestors<T>(this T root, Func<T, T> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
         {
-            if (includeRoot)
+            if (includeRoot) yield return root;
+
+            var ancestor = ancestorSelector(root);
+            var depth = 0;
+
+            while (ancestor != null && depth++ < maxDepth)
             {
-                yield return root;
-            }
-
-            var ancestor = root;
-
-            while (ancestor != null)
-            {
-                ancestor = ancestorSelector(ancestor);
-
                 yield return ancestor;
+
+                ancestor = ancestorSelector(ancestor);
             }
         }
     }
