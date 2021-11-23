@@ -20,5 +20,7 @@ namespace Sysx.Linq
             return left.Join(right, x => true, x => true, (left, right) => (Left: left, Right: right))
                 .Select(x => resultSelector(x.Left, x.Right));
         }
+
+        public static IEnumerable<T> Memoize<T>(this IEnumerable<T> enumerable) => new MemoizedEnumerable<T>(enumerable);
     }
 }
