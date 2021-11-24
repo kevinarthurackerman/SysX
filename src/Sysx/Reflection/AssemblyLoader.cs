@@ -16,8 +16,7 @@ namespace Sysx.Reflection
         internal static IEnumerable<Assembly> LoadDependencies(Assembly rootAssembly)
         {
             return rootAssembly
-                .Descendants(x => x.GetReferencedAssemblies().Select(y => Assembly.Load(y)))
-                .ToArray();
+                .Descendants(x => x.GetReferencedAssemblies().Select(y => Assembly.Load(y)));
         }
     }
 }
