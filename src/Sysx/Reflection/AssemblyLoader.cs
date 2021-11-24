@@ -5,9 +5,15 @@ using Assembly = System.Reflection.Assembly;
 
 namespace Sysx.Reflection
 {
+    /// <summary>
+    /// Used to recursively load the dependencies of an assembly.
+    /// </summary>
     internal static class AssemblyLoader
     {
-        internal static IEnumerable<Assembly> Load(Assembly rootAssembly)
+        /// <summary>
+        /// Recursively loads the dependencies of an assembly.
+        /// </summary>
+        internal static IEnumerable<Assembly> LoadDependencies(Assembly rootAssembly)
         {
             return rootAssembly
                 .Descendants(x => x.GetReferencedAssemblies().Select(y => Assembly.Load(y)))
