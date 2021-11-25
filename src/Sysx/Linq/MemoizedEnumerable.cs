@@ -16,8 +16,9 @@ namespace Sysx.Linq
         private IEnumerable<T>? cache;
         private IEnumerable<T>? source;
 
-        public static IEnumerable<T> Create(IEnumerable<T> enumerable)
+        public static IEnumerable<T>? Create(IEnumerable<T> enumerable)
         {
+            if (enumerable == null) return null;
             if (enumerable is T[] array) return array;
 #if NET5_0 || NETCOREAPP3_1
             if (enumerable is ImmutableArray<T> immutableArray) return immutableArray;

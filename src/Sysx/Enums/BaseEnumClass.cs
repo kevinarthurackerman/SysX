@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using EnsureThat;
 
 namespace Sysx.Enums
 {
@@ -40,17 +41,17 @@ namespace Sysx.Enums
             {
                 if (isInitialized) return;
 
-                all = typeof(TEnum)
+                var fields = typeof(TEnum)
                     .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
                     .Where(info => typeof(TEnum).IsAssignableFrom(info.FieldType))
-                    .Select(info => info.GetValue(null))
-                    .Concat(
-                        typeof(TEnum)
-                            .GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                            .Where(info => typeof(TEnum).IsAssignableFrom(info.PropertyType))
-                            .Select(info => info.GetValue(null))
-                            .ToArray()
-                    )
+                    .Select(info => info.GetValue(null));
+
+                var properties = typeof(TEnum)
+                    .GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                    .Where(info => typeof(TEnum).IsAssignableFrom(info.PropertyType))
+                    .Select(info => info.GetValue(null));
+
+                all = fields.Concat(properties)
                     .Cast<TEnum>()
                     .OrderBy(x => x.Value)
                     .ToArray();
@@ -64,13 +65,16 @@ namespace Sysx.Enums
 
         static BaseEnumClass()
         {
-            if (typeof(TEnum).GetConstructors(BindingFlags.Public).Any())
-                throw new InvalidOperationException($"Enum class {typeof(TEnum).Name} should not have a public constructor.");
+            var publicConstructors = typeof(TEnum).GetConstructors(BindingFlags.Public);
+
+            Ensure.That(!publicConstructors.Any(),
+                optsFn: x => x.WithMessage($"Enum class {typeof(TEnum).Name} should not have a public constructor."));
         }
 
         protected BaseEnumClass(TValue value, string displayName)
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
+            EnsureArg.HasValue(value, nameof(value));
+            EnsureArg.IsNotNullOrWhiteSpace(displayName, nameof(displayName));
 
             Value = value;
             DisplayName = displayName;
@@ -99,40 +103,54 @@ namespace Sysx.Enums
 
         public static TEnum ParseValue(TValue value)
         {
+            EnsureArg.HasValue(value, nameof(value));
+
             Initialize();
 
-            if(!TryParseValue(value, out var result))
+            if(!lookupUpValue!.TryGetValue(value, out var enumValue))
             {
                 throw new ArgumentException($"No enum of type {typeof(TEnum).Name} exists with value {value}");
             }
 
-            return result!;
+            return enumValue;
         }
 
         public static bool TryParseValue(TValue value, out TEnum? enumValue)
         {
+            EnsureArg.HasValue(value, nameof(value));
+
             Initialize();
             return lookupUpValue!.TryGetValue(value, out enumValue);
         }
 
         public static TEnum Parse(string displayName)
         {
+            EnsureArg.IsNotNullOrWhiteSpace(displayName, nameof(displayName));
+
             Initialize();
 
-            if (!TryParse(displayName, out var result))
+            if (!lookupUpDisplayName!.TryGetValue(displayName, out var enumValue))
             {
                 throw new ArgumentException($"No enum of type {typeof(TEnum).Name} exists with name {displayName}");
             }
 
-            return result!;
+            return enumValue;
         }
 
         public static bool TryParse(string displayName, out TEnum? enumValue)
         {
+            EnsureArg.IsNotNullOrWhiteSpace(displayName, nameof(displayName));
+
             Initialize();
+
             return lookupUpDisplayName!.TryGetValue(displayName, out enumValue);
         }
 
-        protected virtual bool ValueEquals(TValue value) => Value.Equals(value);
+        protected virtual bool ValueEquals(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return Value.Equals(value);
+        }
     }
 }

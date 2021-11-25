@@ -44,6 +44,7 @@
 #>
 using System;
 using System.Linq.Expressions;
+using EnsureThat;
 using Lambda = Sysx.Expressions.Lambda;
 
 namespace Sysx.Math
@@ -142,7 +143,12 @@ namespace Sysx.Math
         /// <summary>
         /// Executes the unary <#=op.Name#> operator (<#=op.Symbol#>)
         /// </summary>
-        public static TResult <#=op.Name#>(TValue value) => <#=CamelCase(op.Name)#>(value);
+        public static TResult <#=op.Name#>(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return <#=CamelCase(op.Name)#>(value);
+        }
 <#  if(op != unaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
     }
@@ -160,7 +166,13 @@ namespace Sysx.Math
         /// <summary>
         /// Executes the binary <#=op.Name#> operator (<#=op.Symbol#>)
         /// </summary>
-        public static TResult <#=op.Name#>(TLeft left, TRight right) => <#=CamelCase(op.Name)#>(left, right);
+        public static TResult <#=op.Name#>(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return <#=CamelCase(op.Name)#>(left, right);
+        }
 <#  if(op != binaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnsureThat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,6 +12,10 @@ namespace Sysx.Linq
         /// </summary>
         public static IEnumerable<T> Descendants<T>(this T root, Func<T, IEnumerable<T>> childSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
         {
+            EnsureArg.HasValue(root, nameof(root));
+            EnsureArg.IsNotNull(childSelector, nameof(childSelector));
+            EnsureArg.IsInRange(maxDepth, 0, int.MaxValue, nameof(maxDepth));
+
             if (includeRoot) yield return root;
 
             var descendantsChecked = new HashSet<T>();
@@ -40,6 +45,10 @@ namespace Sysx.Linq
         /// </summary>
         public static IEnumerable<T> Ancestors<T>(this T root, Func<T, T> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
         {
+            EnsureArg.HasValue(root, nameof(root));
+            EnsureArg.IsNotNull(ancestorSelector, nameof(ancestorSelector));
+            EnsureArg.IsInRange(maxDepth, 0, int.MaxValue, nameof(maxDepth));
+
             if (includeRoot) yield return root;
 
             var ancestor = ancestorSelector(root);

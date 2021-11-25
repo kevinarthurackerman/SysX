@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnsureThat;
+using System;
 using System.Linq.Expressions;
 
 namespace Sysx.Expressions
@@ -13,8 +14,10 @@ namespace Sysx.Expressions
         /// <summary>
         /// Creates a nullary function
         /// </summary>
-        public static Func<TResult> Create<TResult>(Func<Expression> func, string operatorName)
+        public static Func<TResult> Create<TResult>(Func<Expression> func, string? operatorName = null)
         {
+            EnsureArg.IsNotNull(func, nameof(func));
+
             try
             {
                 var expression = func();
@@ -23,15 +26,17 @@ namespace Sysx.Expressions
             }
             catch (Exception)
             {
-                return () => throw new InvalidOperationException($"No operator exists for {operatorName}() => {typeof(TResult).Name}.");
+                return () => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}() => {typeof(TResult).Name}.");
             }
         }
 
         /// <summary>
         /// Creates a unary function
         /// </summary>
-        public static Func<TValue, TResult> Create<TValue, TResult>(Func<ParameterExpression, Expression> func, string operatorName)
+        public static Func<TValue, TResult> Create<TValue, TResult>(Func<ParameterExpression, Expression> func, string? operatorName = null)
         {
+            EnsureArg.IsNotNull(func, nameof(func));
+
             try
             {
                 var valueParam = Expression.Parameter(typeof(TValue), "value");
@@ -46,7 +51,7 @@ namespace Sysx.Expressions
                     }
                     catch (Exception)
                     {
-                        return (value) => throw new InvalidCastException($"Operator {operatorName}({typeof(TValue).Name}) could not cast to result type {typeof(TResult).Name}.");
+                        return (value) => throw new InvalidCastException($"Operator {operatorName ?? string.Empty}({typeof(TValue).Name}) could not cast to result type {typeof(TResult).Name}.");
                     }
                 }
 
@@ -54,15 +59,17 @@ namespace Sysx.Expressions
             }
             catch (Exception)
             {
-                return (value) => throw new InvalidOperationException($"No operator exists for {operatorName}({typeof(TValue).Name}) => {typeof(TResult).Name}.");
+                return (value) => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}({typeof(TValue).Name}) => {typeof(TResult).Name}.");
             }
         }
 
         /// <summary>
         /// Creates a binary function
         /// </summary>
-        public static Func<TLeft, TRight, TResult> Create<TLeft, TRight, TResult>(Func<ParameterExpression, ParameterExpression, Expression> func, string operatorName)
+        public static Func<TLeft, TRight, TResult> Create<TLeft, TRight, TResult>(Func<ParameterExpression, ParameterExpression, Expression> func, string? operatorName = null)
         {
+            EnsureArg.IsNotNull(func, nameof(func));
+
             try
             {
                 var leftParam = Expression.Parameter(typeof(TLeft), "left");
@@ -78,7 +85,7 @@ namespace Sysx.Expressions
                     }
                     catch (Exception)
                     {
-                        return (left, right) => throw new InvalidCastException($"Operator {operatorName}({typeof(TLeft).Name}, {typeof(TRight).Name}) could not cast to result type {typeof(TResult).Name}.");
+                        return (left, right) => throw new InvalidCastException($"Operator {operatorName ?? string.Empty}({typeof(TLeft).Name}, {typeof(TRight).Name}) could not cast to result type {typeof(TResult).Name}.");
                     }
                 }
 
@@ -86,7 +93,7 @@ namespace Sysx.Expressions
             }
             catch (Exception)
             {
-                return (left, right) => throw new InvalidOperationException($"No operator exists for {operatorName}({typeof(TLeft).Name}, {typeof(TRight).Name}) => {typeof(TResult).Name}.");
+                return (left, right) => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}({typeof(TLeft).Name}, {typeof(TRight).Name}) => {typeof(TResult).Name}.");
             }
         }
     }

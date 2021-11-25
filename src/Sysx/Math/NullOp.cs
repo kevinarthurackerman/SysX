@@ -10,9 +10,7 @@
     }
 
     /// <inheritdoc cref="INullOp{T}"/>
-    internal sealed class StructNullOp<T>
-        : INullOp<T>, INullOp<T?>
-        where T : struct
+    internal sealed class StructNullOp<T> : INullOp<T>, INullOp<T?> where T : struct
     {
         public bool HasValue(T value) => true;
         
@@ -21,17 +19,17 @@
             accumulator = Operator<T>.Add(accumulator, value);
             return true;
         }
+
         public bool HasValue(T? value) => value.HasValue;
         
         public bool AddIfNotNull(ref T? accumulator, T? value)
         {
             if (value.HasValue)
             {
-                accumulator = accumulator.HasValue ?
-                    Operator<T>.Add(
-                        accumulator.GetValueOrDefault(),
-                        value.GetValueOrDefault())
+                accumulator = accumulator.HasValue
+                    ? Operator<T>.Add(accumulator.GetValueOrDefault(), value.GetValueOrDefault())
                     : value;
+
                 return true;
             }
 
@@ -40,9 +38,7 @@
     }
 
     /// <inheritdoc cref="INullOp{T}"/>
-    internal sealed class ClassNullOp<T>
-        : INullOp<T>
-        where T : class
+    internal sealed class ClassNullOp<T> : INullOp<T> where T : class
     {
         public bool HasValue(T value) =>  value != null;
         
@@ -50,8 +46,10 @@
         {
             if (value != null)
             {
-                accumulator = accumulator == null ?
-                    value : Operator<T>.Add(accumulator, value);
+                accumulator = accumulator == null
+                    ? value
+                    : Operator<T>.Add(accumulator, value);
+
                 return true;
             }
 

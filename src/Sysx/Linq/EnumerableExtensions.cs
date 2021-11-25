@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnsureThat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,6 +30,10 @@ namespace Sysx.Linq
         /// </summary>
         public static IEnumerable<TResult> CrossApply<TLeft, TRight, TResult>(this IEnumerable<TLeft> left, IEnumerable<TRight> right, Func<TLeft,TRight,TResult> resultSelector)
         {
+            EnsureArg.IsNotNull(left, nameof(left));
+            EnsureArg.IsNotNull(right, nameof(right));
+            EnsureArg.IsNotNull(resultSelector, nameof(resultSelector));
+
             return left.Join(right, x => true, x => true, (left, right) => (Left: left, Right: right))
                 .Select(x => resultSelector(x.Left, x.Right));
         }

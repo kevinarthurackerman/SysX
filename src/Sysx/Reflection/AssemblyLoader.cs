@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EnsureThat;
+using System.Collections.Generic;
 using System.Linq;
 using Sysx.Linq;
 using Assembly = System.Reflection.Assembly;
@@ -15,6 +16,8 @@ namespace Sysx.Reflection
         /// </summary>
         internal static IEnumerable<Assembly> LoadDependencies(Assembly rootAssembly)
         {
+            EnsureArg.IsNotNull(rootAssembly, nameof(rootAssembly));
+
             return rootAssembly
                 .Descendants(x => x.GetReferencedAssemblies().Select(y => Assembly.Load(y)));
         }

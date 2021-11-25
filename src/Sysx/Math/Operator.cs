@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using EnsureThat;
 using Lambda = Sysx.Expressions.Lambda;
 
 namespace Sysx.Math
@@ -341,37 +342,72 @@ namespace Sysx.Math
         /// <summary>
         /// Executes the unary Not operator (!x)
         /// </summary>
-        public static TResult Not(TValue value) => not(value);
+        public static TResult Not(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return not(value);
+        }
 
         /// <summary>
         /// Executes the unary Increment operator (x+1)
         /// </summary>
-        public static TResult Increment(TValue value) => increment(value);
+        public static TResult Increment(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return increment(value);
+        }
 
         /// <summary>
         /// Executes the unary Decrement operator (x-1)
         /// </summary>
-        public static TResult Decrement(TValue value) => decrement(value);
+        public static TResult Decrement(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return decrement(value);
+        }
 
         /// <summary>
         /// Executes the unary UnaryPlus operator (+x)
         /// </summary>
-        public static TResult UnaryPlus(TValue value) => unaryPlus(value);
+        public static TResult UnaryPlus(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return unaryPlus(value);
+        }
 
         /// <summary>
         /// Executes the unary Negate operator (-x)
         /// </summary>
-        public static TResult Negate(TValue value) => negate(value);
+        public static TResult Negate(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return negate(value);
+        }
 
         /// <summary>
         /// Executes the unary NegateChecked operator (checked(-x))
         /// </summary>
-        public static TResult NegateChecked(TValue value) => negateChecked(value);
+        public static TResult NegateChecked(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return negateChecked(value);
+        }
 
         /// <summary>
         /// Executes the unary OnesComplement operator (~x)
         /// </summary>
-        public static TResult OnesComplement(TValue value) => onesComplement(value);
+        public static TResult OnesComplement(TValue value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return onesComplement(value);
+        }
     }
 
     /// <summary>
@@ -406,116 +442,254 @@ namespace Sysx.Math
         /// <summary>
         /// Executes the binary And operator (x&y)
         /// </summary>
-        public static TResult And(TLeft left, TRight right) => and(left, right);
+        public static TResult And(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return and(left, right);
+        }
 
         /// <summary>
         /// Executes the binary AndAlso operator (x&&y)
         /// </summary>
-        public static TResult AndAlso(TLeft left, TRight right) => andAlso(left, right);
+        public static TResult AndAlso(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return andAlso(left, right);
+        }
 
         /// <summary>
         /// Executes the binary Or operator (x|y)
         /// </summary>
-        public static TResult Or(TLeft left, TRight right) => or(left, right);
+        public static TResult Or(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return or(left, right);
+        }
 
         /// <summary>
         /// Executes the binary OrElse operator (x||y)
         /// </summary>
-        public static TResult OrElse(TLeft left, TRight right) => orElse(left, right);
+        public static TResult OrElse(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return orElse(left, right);
+        }
 
         /// <summary>
         /// Executes the binary ExclusiveOr operator (x^y)
         /// </summary>
-        public static TResult ExclusiveOr(TLeft left, TRight right) => exclusiveOr(left, right);
+        public static TResult ExclusiveOr(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return exclusiveOr(left, right);
+        }
 
         /// <summary>
         /// Executes the binary Equal operator (x==y)
         /// </summary>
-        public static TResult Equal(TLeft left, TRight right) => equal(left, right);
+        public static TResult Equal(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return equal(left, right);
+        }
 
         /// <summary>
         /// Executes the binary NotEqual operator (x!=y)
         /// </summary>
-        public static TResult NotEqual(TLeft left, TRight right) => notEqual(left, right);
+        public static TResult NotEqual(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return notEqual(left, right);
+        }
 
         /// <summary>
         /// Executes the binary ReferenceEqual operator (System.Object.ReferenceEquals(x,y))
         /// </summary>
-        public static TResult ReferenceEqual(TLeft left, TRight right) => referenceEqual(left, right);
+        public static TResult ReferenceEqual(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return referenceEqual(left, right);
+        }
 
         /// <summary>
         /// Executes the binary ReferenceNotEqual operator (!System.Object.ReferenceEquals(x,y))
         /// </summary>
-        public static TResult ReferenceNotEqual(TLeft left, TRight right) => referenceNotEqual(left, right);
+        public static TResult ReferenceNotEqual(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return referenceNotEqual(left, right);
+        }
 
         /// <summary>
         /// Executes the binary GreaterThan operator (x>y)
         /// </summary>
-        public static TResult GreaterThan(TLeft left, TRight right) => greaterThan(left, right);
+        public static TResult GreaterThan(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return greaterThan(left, right);
+        }
 
         /// <summary>
         /// Executes the binary GreaterThanOrEqual operator (x>=y)
         /// </summary>
-        public static TResult GreaterThanOrEqual(TLeft left, TRight right) => greaterThanOrEqual(left, right);
+        public static TResult GreaterThanOrEqual(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return greaterThanOrEqual(left, right);
+        }
 
         /// <summary>
         /// Executes the binary LessThan operator (x<y)
         /// </summary>
-        public static TResult LessThan(TLeft left, TRight right) => lessThan(left, right);
+        public static TResult LessThan(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return lessThan(left, right);
+        }
 
         /// <summary>
         /// Executes the binary LessThanOrEqual operator (x<=y)
         /// </summary>
-        public static TResult LessThanOrEqual(TLeft left, TRight right) => lessThanOrEqual(left, right);
+        public static TResult LessThanOrEqual(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return lessThanOrEqual(left, right);
+        }
 
         /// <summary>
         /// Executes the binary Multiply operator (x*y)
         /// </summary>
-        public static TResult Multiply(TLeft left, TRight right) => multiply(left, right);
+        public static TResult Multiply(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return multiply(left, right);
+        }
 
         /// <summary>
         /// Executes the binary MultiplyChecked operator (checked(x*y))
         /// </summary>
-        public static TResult MultiplyChecked(TLeft left, TRight right) => multiplyChecked(left, right);
+        public static TResult MultiplyChecked(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return multiplyChecked(left, right);
+        }
 
         /// <summary>
         /// Executes the binary Divide operator (x/y)
         /// </summary>
-        public static TResult Divide(TLeft left, TRight right) => divide(left, right);
+        public static TResult Divide(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return divide(left, right);
+        }
 
         /// <summary>
         /// Executes the binary Modulo operator (x%y)
         /// </summary>
-        public static TResult Modulo(TLeft left, TRight right) => modulo(left, right);
+        public static TResult Modulo(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return modulo(left, right);
+        }
 
         /// <summary>
         /// Executes the binary Add operator (x+y)
         /// </summary>
-        public static TResult Add(TLeft left, TRight right) => add(left, right);
+        public static TResult Add(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return add(left, right);
+        }
 
         /// <summary>
         /// Executes the binary AddChecked operator (checked(x+y))
         /// </summary>
-        public static TResult AddChecked(TLeft left, TRight right) => addChecked(left, right);
+        public static TResult AddChecked(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return addChecked(left, right);
+        }
 
         /// <summary>
         /// Executes the binary Subtract operator (x-y)
         /// </summary>
-        public static TResult Subtract(TLeft left, TRight right) => subtract(left, right);
+        public static TResult Subtract(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return subtract(left, right);
+        }
 
         /// <summary>
         /// Executes the binary SubtractChecked operator (x-y)
         /// </summary>
-        public static TResult SubtractChecked(TLeft left, TRight right) => subtractChecked(left, right);
+        public static TResult SubtractChecked(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return subtractChecked(left, right);
+        }
 
         /// <summary>
         /// Executes the binary LeftShift operator (x<<y)
         /// </summary>
-        public static TResult LeftShift(TLeft left, TRight right) => leftShift(left, right);
+        public static TResult LeftShift(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return leftShift(left, right);
+        }
 
         /// <summary>
         /// Executes the binary RightShift operator (x>>y)
         /// </summary>
-        public static TResult RightShift(TLeft left, TRight right) => rightShift(left, right);
+        public static TResult RightShift(TLeft left, TRight right)
+        {
+            EnsureArg.HasValue(left, nameof(left));
+            EnsureArg.HasValue(right, nameof(right));
+
+            return rightShift(left, right);
+        }
     }
 }

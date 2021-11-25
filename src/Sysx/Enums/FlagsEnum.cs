@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnsureThat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -112,31 +113,65 @@ namespace Sysx.Enums
         /// <summary>
         /// Expands the flag value to a list of defined flags.
         /// </summary>
-        public static IEnumerable<TEnum> Expand(TEnum value) => Values.Where(x => Has(value, x)).ToArray();
+        public static IEnumerable<TEnum> Expand(TEnum value)
+        {
+            EnsureArg.HasValue(value, nameof(value));
+
+            return Values.Where(x => Has(value, x)).ToArray();
+        }
 
         /// <summary>
         /// Combines the flag values into a single flag.
         /// </summary>
-        public static TEnum Combine(params TEnum[] values) => values.Aggregate(None, (left, right) => Add(left, right));
+        public static TEnum Combine(params TEnum[] values)
+        {
+            EnsureArg.IsNotNull(values, nameof(values));
+
+            return values.Aggregate(None, (left, right) => Add(left, right));
+        }
 
         /// <summary>
         /// Checks if the current flag value contains a specific flag.
         /// </summary>
-        public static bool Has(TEnum current, TEnum flag) => has(current, flag);
+        public static bool Has(TEnum current, TEnum flag)
+        {
+            EnsureArg.HasValue(current, nameof(current));
+            EnsureArg.HasValue(flag, nameof(flag));
+
+            return has(current, flag);
+        }
 
         /// <summary>
         /// Checks if the current flag value contains any of the flags.
         /// </summary>
-        public static bool HasAny(TEnum current, TEnum flags) => hasAny(current, flags);
+        public static bool HasAny(TEnum current, TEnum flags) 
+        {
+            EnsureArg.HasValue(current, nameof(current));
+            EnsureArg.HasValue(flags, nameof(flags));
+
+            return hasAny(current, flags);
+        }
 
         /// <summary>
         /// Adds the flags value to the current flag.
         /// </summary>
-        public static TEnum Add(TEnum current, TEnum flags) => add(current, flags);
+        public static TEnum Add(TEnum current, TEnum flags)
+        {
+            EnsureArg.HasValue(current, nameof(current));
+            EnsureArg.HasValue(flags, nameof(flags));
+
+            return add(current, flags);
+        }
 
         /// <summary>
         /// Removes the flags value from the current flag.
         /// </summary>
-        public static TEnum Remove(TEnum current, TEnum flags) => remove(current, flags);
-    }
+        public static TEnum Remove(TEnum current, TEnum flags)
+        {
+            EnsureArg.HasValue(current, nameof(current));
+            EnsureArg.HasValue(flags, nameof(flags));
+
+            return remove(current, flags);
+        }
+     }
 }
