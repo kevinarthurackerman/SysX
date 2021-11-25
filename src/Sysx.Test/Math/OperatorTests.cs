@@ -1,9 +1,10 @@
 ﻿using System;
 using Sysx.Math;
-using Xunit;
 
 namespace Sysx.Test.Math
 {
+    using Xunit;
+
     public class OperatorTests
     {
         [Fact]

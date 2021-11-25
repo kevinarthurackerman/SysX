@@ -59,6 +59,8 @@ namespace Sysx.Linq
                 cache = source!.ToArray();
                 source = null;
             }
+
+            Assert.That(cache == null ^ source == null);
         }
     }
 }

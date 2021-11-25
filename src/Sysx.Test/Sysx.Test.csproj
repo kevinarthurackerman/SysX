@@ -1,9 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-
+    <TargetFrameworks>net5.0;netcoreapp3.1;net48</TargetFrameworks>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DefineConstants>ASSERTIONS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

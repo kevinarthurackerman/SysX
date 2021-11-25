@@ -1,7 +1,7 @@
-﻿using Xunit;
-
-namespace Sysx.Test.Enums.BaseEnumClass
+﻿namespace Sysx.Test.Enums.BaseEnumClass
 {
+    using Xunit;
+
     public class CompareTests
     {
         [Fact]

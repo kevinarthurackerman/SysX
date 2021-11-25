@@ -1,8 +1,9 @@
 ﻿using System;
-using Xunit;
 
 namespace Sysx.Test.Enums.BaseEnumClass
 {
+    using Xunit;
+
     public class ParseTests
     {
         private const string BadDisplayName = "Blarg";

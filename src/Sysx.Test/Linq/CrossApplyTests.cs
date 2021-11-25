@@ -1,9 +1,10 @@
 ﻿using System.Linq;
 using Sysx.Linq;
-using Xunit;
 
 namespace Sysx.Test.Linq
 {
+    using Xunit;
+
     public class CrossApplyTests
     {
         [Fact]

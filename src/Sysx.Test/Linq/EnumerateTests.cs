@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Sysx.Linq;
-using Xunit;
 
 namespace Sysx.Test.Linq
 {
+    using Xunit;
+
     public class EnumerateTests
     {
         private readonly Node NodeA;

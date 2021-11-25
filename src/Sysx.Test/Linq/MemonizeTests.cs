@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Sysx.Linq;
-using Xunit;
 
 namespace Sysx.Test.Linq
 {
+    using Xunit;
+
     public class MemonizeTests
     {
         [Fact]

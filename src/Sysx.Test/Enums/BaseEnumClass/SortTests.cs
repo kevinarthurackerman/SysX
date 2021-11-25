@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Xunit;
 
 namespace Sysx.Test.Enums.BaseEnumClass
 {
+    using Xunit;
+
     public class SortTests
     {
         [Fact]

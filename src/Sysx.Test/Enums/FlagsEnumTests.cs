@@ -1,9 +1,10 @@
 ﻿using System.Linq;
 using Sysx.Enums;
-using Xunit;
 
 namespace Sysx.Test.Math
 {
+    using Xunit;
+
     public class FlagsEnumTests
     {
         [Fact]
