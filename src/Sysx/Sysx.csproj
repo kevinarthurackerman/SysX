@@ -11,26 +11,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Hashing\HashCode.cs">
+    <Compile Update="**\*.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>HashCode.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Math\Operator.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Operator.tt</DependentUpon>
+      <DependentUpon>%(Filename).tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Hashing\HashCode.tt">
+    <None Update="**\*.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>HashCode.cs</LastGenOutput>
-    </None>
-    <None Update="Math\Operator.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Operator.cs</LastGenOutput>
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
     </None>
   </ItemGroup>
 
