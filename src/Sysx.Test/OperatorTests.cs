@@ -1,7 +1,6 @@
 ﻿using System;
-using Sysx.Math;
 
-namespace Sysx.Test.Math
+namespace Sysx.Test
 {
     using Xunit;
 

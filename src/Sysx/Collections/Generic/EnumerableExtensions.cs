@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sysx.Linq
+namespace Sysx.Collections.Generic
 {
     public static class EnumerableExtensions
     {

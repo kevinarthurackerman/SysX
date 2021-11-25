@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using Sysx.Linq;
 
-namespace Sysx.Test.Linq
+namespace Sysx.Test.Collections.Generic
 {
+    using Sysx.Collections.Generic;
     using Xunit;
 
     public class MemonizeTests

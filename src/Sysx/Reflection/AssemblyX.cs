@@ -1,15 +1,15 @@
 ﻿using EnsureThat;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Sysx.Linq;
-using Assembly = System.Reflection.Assembly;
 
 namespace Sysx.Reflection
 {
     /// <summary>
     /// Used to recursively load the dependencies of an assembly.
     /// </summary>
-    internal static class AssemblyLoader
+    internal static class AssemblyX
     {
         /// <summary>
         /// Recursively loads the dependencies of an assembly.

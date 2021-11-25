@@ -34,12 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Operator.cs">
-      <DesignTime>True</DesignTime>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Operator.tt">
       <LastGenOutput>Operator.cs</LastGenOutput>
     </None>

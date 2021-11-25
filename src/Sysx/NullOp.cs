@@ -1,4 +1,4 @@
-﻿namespace Sysx.Math
+﻿namespace Sysx
 {
     /// <summary>
     /// Represents a potentially nullable unknown value type

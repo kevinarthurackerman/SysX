@@ -6,7 +6,7 @@ namespace Sysx.Test.Identity
 {
     using Xunit;
 
-    public class SequentialIdentityGeneratorTests
+    public class SequentialGuidTests
     {
         [Fact]
         public void Should_Order_Sequentially()
@@ -15,7 +15,7 @@ namespace Sysx.Test.Identity
                 .Select(x => 
                 {
                     Thread.Sleep(1);
-                    return new { Order = x, SqlGuid = SequentialIdentityGenerator.Next() };
+                    return new { Order = x, SqlGuid = SequentialGuid.Next() };
                 })
                 .ToArray();
 
@@ -29,7 +29,7 @@ namespace Sysx.Test.Identity
         public void Should_Generate_Unique_Values()
         {
             var guids = Enumerable.Range(0, 1000)
-                .Select(x => new { Order = x, SqlGuid = SequentialIdentityGenerator.Next() })
+                .Select(x => new { Order = x, SqlGuid = SequentialGuid.Next() })
                 .ToArray();
 
             var uniqueGuids = guids.Distinct().ToArray();

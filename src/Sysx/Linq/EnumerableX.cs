@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Sysx.Linq
 {
-    public static class Enumerate
+    public static class EnumerableX
     {
         /// <summary>
         /// Returns the descendants of the root nearest to furthest, breadth first.
@@ -15,7 +15,7 @@ namespace Sysx.Linq
             EnsureArg.HasValue(root, nameof(root));
             EnsureArg.IsNotNull(childSelector, nameof(childSelector));
             EnsureArg.IsInRange(maxDepth, 0, int.MaxValue, nameof(maxDepth));
-
+            
             if (includeRoot) yield return root;
 
             var descendantsChecked = new HashSet<T>();
@@ -43,7 +43,7 @@ namespace Sysx.Linq
         /// <summary>
         /// Returns the ancestors of the root nearest to furthest.
         /// </summary>
-        public static IEnumerable<T> Ancestors<T>(this T root, Func<T, T> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
+        public static IEnumerable<T> Ancestors<T>(this T root, Func<T, T?> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
         {
             EnsureArg.HasValue(root, nameof(root));
             EnsureArg.IsNotNull(ancestorSelector, nameof(ancestorSelector));

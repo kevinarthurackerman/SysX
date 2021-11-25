@@ -5,7 +5,7 @@ using System.Linq;
 using System.Collections.Immutable;
 #endif
 
-namespace Sysx.Linq
+namespace Sysx.Collections.Generic
 {
     /// <summary>
     /// Memoizes the enumerable, ensuring that it will only be evaluated up to one time, even if it is called more than once.

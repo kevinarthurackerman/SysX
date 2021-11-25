@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Sysx.Expressions;
+using Sysx.Linq.Expressions;
 
 namespace Sysx.Enums
 {
@@ -44,7 +44,7 @@ namespace Sysx.Enums
     public static class FlagsEnum<TEnum>
     {
         private static readonly Func<TEnum, TEnum, bool> has =
-            Lambda.Create<TEnum, TEnum, bool>((current, flag) =>
+            ExpressionX.Function<TEnum, TEnum, bool>((current, flag) =>
             {
                 // current & flag == flag
                 var realType = typeof(TEnum).GetEnumUnderlyingType();
@@ -56,7 +56,7 @@ namespace Sysx.Enums
             }, nameof(FlagsEnum<TEnum>.Has));
 
         private static readonly Func<TEnum, TEnum, bool> hasAny =
-            Lambda.Create<TEnum, TEnum, bool>((current, flag) =>
+            ExpressionX.Function<TEnum, TEnum, bool>((current, flag) =>
             {
                 // current & flag != 0
                 var realType = typeof(TEnum).GetEnumUnderlyingType();
@@ -69,7 +69,7 @@ namespace Sysx.Enums
             }, nameof(FlagsEnum<TEnum>.HasAny));
 
         private static readonly Func<TEnum, TEnum, TEnum> add =
-            Lambda.Create<TEnum, TEnum, TEnum>((current, flags) =>
+            ExpressionX.Function<TEnum, TEnum, TEnum>((current, flags) =>
             {
                 // current | flag
                 var realType = typeof(TEnum).GetEnumUnderlyingType();
@@ -81,7 +81,7 @@ namespace Sysx.Enums
             }, nameof(FlagsEnum<TEnum>.Add));
 
         private static readonly Func<TEnum, TEnum, TEnum> remove =
-            Lambda.Create<TEnum, TEnum, TEnum>((current, flags) =>
+            ExpressionX.Function<TEnum, TEnum, TEnum>((current, flags) =>
             {
                 // current & ~flags
                 var realType = typeof(TEnum).GetEnumUnderlyingType();

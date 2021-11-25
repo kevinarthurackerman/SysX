@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Linq.Expressions;
 using EnsureThat;
-using Lambda = Sysx.Expressions.Lambda;
+using Sysx.Linq.Expressions;
 
-namespace Sysx.Math
+namespace Sysx
 {
-    using Expression = System.Linq.Expressions.Expression;
-    
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator
     {
@@ -331,13 +329,13 @@ namespace Sysx.Math
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator<TValue, TResult>
     {
-        private static readonly Func<TValue, TResult> not = Lambda.Create<TValue, TResult>(Expression.Not, "Not");
-        private static readonly Func<TValue, TResult> increment = Lambda.Create<TValue, TResult>(Expression.Increment, "Increment");
-        private static readonly Func<TValue, TResult> decrement = Lambda.Create<TValue, TResult>(Expression.Decrement, "Decrement");
-        private static readonly Func<TValue, TResult> unaryPlus = Lambda.Create<TValue, TResult>(Expression.UnaryPlus, "UnaryPlus");
-        private static readonly Func<TValue, TResult> negate = Lambda.Create<TValue, TResult>(Expression.Negate, "Negate");
-        private static readonly Func<TValue, TResult> negateChecked = Lambda.Create<TValue, TResult>(Expression.NegateChecked, "NegateChecked");
-        private static readonly Func<TValue, TResult> onesComplement = Lambda.Create<TValue, TResult>(Expression.OnesComplement, "OnesComplement");
+        private static readonly Func<TValue, TResult> not = ExpressionX.Function<TValue, TResult>(Expression.Not, "Not");
+        private static readonly Func<TValue, TResult> increment = ExpressionX.Function<TValue, TResult>(Expression.Increment, "Increment");
+        private static readonly Func<TValue, TResult> decrement = ExpressionX.Function<TValue, TResult>(Expression.Decrement, "Decrement");
+        private static readonly Func<TValue, TResult> unaryPlus = ExpressionX.Function<TValue, TResult>(Expression.UnaryPlus, "UnaryPlus");
+        private static readonly Func<TValue, TResult> negate = ExpressionX.Function<TValue, TResult>(Expression.Negate, "Negate");
+        private static readonly Func<TValue, TResult> negateChecked = ExpressionX.Function<TValue, TResult>(Expression.NegateChecked, "NegateChecked");
+        private static readonly Func<TValue, TResult> onesComplement = ExpressionX.Function<TValue, TResult>(Expression.OnesComplement, "OnesComplement");
 
         /// <summary>
         /// Executes the unary Not operator (!x)
@@ -415,29 +413,29 @@ namespace Sysx.Math
     /// </summary>
     public static class Operator<TLeft, TRight, TResult>
     {
-        private static readonly Func<TLeft, TRight, TResult> and = Lambda.Create<TLeft, TRight, TResult>(Expression.And, "And");
-        private static readonly Func<TLeft, TRight, TResult> andAlso = Lambda.Create<TLeft, TRight, TResult>(Expression.AndAlso, "AndAlso");
-        private static readonly Func<TLeft, TRight, TResult> or = Lambda.Create<TLeft, TRight, TResult>(Expression.Or, "Or");
-        private static readonly Func<TLeft, TRight, TResult> orElse = Lambda.Create<TLeft, TRight, TResult>(Expression.OrElse, "OrElse");
-        private static readonly Func<TLeft, TRight, TResult> exclusiveOr = Lambda.Create<TLeft, TRight, TResult>(Expression.ExclusiveOr, "ExclusiveOr");
-        private static readonly Func<TLeft, TRight, TResult> equal = Lambda.Create<TLeft, TRight, TResult>(Expression.Equal, "Equal");
-        private static readonly Func<TLeft, TRight, TResult> notEqual = Lambda.Create<TLeft, TRight, TResult>(Expression.NotEqual, "NotEqual");
-        private static readonly Func<TLeft, TRight, TResult> referenceEqual = Lambda.Create<TLeft, TRight, TResult>(Expression.ReferenceEqual, "ReferenceEqual");
-        private static readonly Func<TLeft, TRight, TResult> referenceNotEqual = Lambda.Create<TLeft, TRight, TResult>(Expression.ReferenceNotEqual, "ReferenceNotEqual");
-        private static readonly Func<TLeft, TRight, TResult> greaterThan = Lambda.Create<TLeft, TRight, TResult>(Expression.GreaterThan, "GreaterThan");
-        private static readonly Func<TLeft, TRight, TResult> greaterThanOrEqual = Lambda.Create<TLeft, TRight, TResult>(Expression.GreaterThanOrEqual, "GreaterThanOrEqual");
-        private static readonly Func<TLeft, TRight, TResult> lessThan = Lambda.Create<TLeft, TRight, TResult>(Expression.LessThan, "LessThan");
-        private static readonly Func<TLeft, TRight, TResult> lessThanOrEqual = Lambda.Create<TLeft, TRight, TResult>(Expression.LessThanOrEqual, "LessThanOrEqual");
-        private static readonly Func<TLeft, TRight, TResult> multiply = Lambda.Create<TLeft, TRight, TResult>(Expression.Multiply, "Multiply");
-        private static readonly Func<TLeft, TRight, TResult> multiplyChecked = Lambda.Create<TLeft, TRight, TResult>(Expression.MultiplyChecked, "MultiplyChecked");
-        private static readonly Func<TLeft, TRight, TResult> divide = Lambda.Create<TLeft, TRight, TResult>(Expression.Divide, "Divide");
-        private static readonly Func<TLeft, TRight, TResult> modulo = Lambda.Create<TLeft, TRight, TResult>(Expression.Modulo, "Modulo");
-        private static readonly Func<TLeft, TRight, TResult> add = Lambda.Create<TLeft, TRight, TResult>(Expression.Add, "Add");
-        private static readonly Func<TLeft, TRight, TResult> addChecked = Lambda.Create<TLeft, TRight, TResult>(Expression.AddChecked, "AddChecked");
-        private static readonly Func<TLeft, TRight, TResult> subtract = Lambda.Create<TLeft, TRight, TResult>(Expression.Subtract, "Subtract");
-        private static readonly Func<TLeft, TRight, TResult> subtractChecked = Lambda.Create<TLeft, TRight, TResult>(Expression.SubtractChecked, "SubtractChecked");
-        private static readonly Func<TLeft, TRight, TResult> leftShift = Lambda.Create<TLeft, TRight, TResult>(Expression.LeftShift, "LeftShift");
-        private static readonly Func<TLeft, TRight, TResult> rightShift = Lambda.Create<TLeft, TRight, TResult>(Expression.RightShift, "RightShift");
+        private static readonly Func<TLeft, TRight, TResult> and = ExpressionX.Function<TLeft, TRight, TResult>(Expression.And, "And");
+        private static readonly Func<TLeft, TRight, TResult> andAlso = ExpressionX.Function<TLeft, TRight, TResult>(Expression.AndAlso, "AndAlso");
+        private static readonly Func<TLeft, TRight, TResult> or = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Or, "Or");
+        private static readonly Func<TLeft, TRight, TResult> orElse = ExpressionX.Function<TLeft, TRight, TResult>(Expression.OrElse, "OrElse");
+        private static readonly Func<TLeft, TRight, TResult> exclusiveOr = ExpressionX.Function<TLeft, TRight, TResult>(Expression.ExclusiveOr, "ExclusiveOr");
+        private static readonly Func<TLeft, TRight, TResult> equal = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Equal, "Equal");
+        private static readonly Func<TLeft, TRight, TResult> notEqual = ExpressionX.Function<TLeft, TRight, TResult>(Expression.NotEqual, "NotEqual");
+        private static readonly Func<TLeft, TRight, TResult> referenceEqual = ExpressionX.Function<TLeft, TRight, TResult>(Expression.ReferenceEqual, "ReferenceEqual");
+        private static readonly Func<TLeft, TRight, TResult> referenceNotEqual = ExpressionX.Function<TLeft, TRight, TResult>(Expression.ReferenceNotEqual, "ReferenceNotEqual");
+        private static readonly Func<TLeft, TRight, TResult> greaterThan = ExpressionX.Function<TLeft, TRight, TResult>(Expression.GreaterThan, "GreaterThan");
+        private static readonly Func<TLeft, TRight, TResult> greaterThanOrEqual = ExpressionX.Function<TLeft, TRight, TResult>(Expression.GreaterThanOrEqual, "GreaterThanOrEqual");
+        private static readonly Func<TLeft, TRight, TResult> lessThan = ExpressionX.Function<TLeft, TRight, TResult>(Expression.LessThan, "LessThan");
+        private static readonly Func<TLeft, TRight, TResult> lessThanOrEqual = ExpressionX.Function<TLeft, TRight, TResult>(Expression.LessThanOrEqual, "LessThanOrEqual");
+        private static readonly Func<TLeft, TRight, TResult> multiply = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Multiply, "Multiply");
+        private static readonly Func<TLeft, TRight, TResult> multiplyChecked = ExpressionX.Function<TLeft, TRight, TResult>(Expression.MultiplyChecked, "MultiplyChecked");
+        private static readonly Func<TLeft, TRight, TResult> divide = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Divide, "Divide");
+        private static readonly Func<TLeft, TRight, TResult> modulo = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Modulo, "Modulo");
+        private static readonly Func<TLeft, TRight, TResult> add = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Add, "Add");
+        private static readonly Func<TLeft, TRight, TResult> addChecked = ExpressionX.Function<TLeft, TRight, TResult>(Expression.AddChecked, "AddChecked");
+        private static readonly Func<TLeft, TRight, TResult> subtract = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Subtract, "Subtract");
+        private static readonly Func<TLeft, TRight, TResult> subtractChecked = ExpressionX.Function<TLeft, TRight, TResult>(Expression.SubtractChecked, "SubtractChecked");
+        private static readonly Func<TLeft, TRight, TResult> leftShift = ExpressionX.Function<TLeft, TRight, TResult>(Expression.LeftShift, "LeftShift");
+        private static readonly Func<TLeft, TRight, TResult> rightShift = ExpressionX.Function<TLeft, TRight, TResult>(Expression.RightShift, "RightShift");
 
         /// <summary>
         /// Executes the binary And operator (x&y)

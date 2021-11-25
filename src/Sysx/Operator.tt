@@ -45,12 +45,10 @@
 using System;
 using System.Linq.Expressions;
 using EnsureThat;
-using Lambda = Sysx.Expressions.Lambda;
+using Sysx.Linq.Expressions;
 
-namespace Sysx.Math
+namespace Sysx
 {
-    using Expression = System.Linq.Expressions.Expression;
-    
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
     public static class Operator
     {
@@ -136,7 +134,7 @@ namespace Sysx.Math
     public static class Operator<TValue, TResult>
     {
 <#foreach(var op in unaryOperators) {#>
-        private static readonly Func<TValue, TResult> <#=CamelCase(op.Name)#> = Lambda.Create<TValue, TResult>(Expression.<#=op.Name#>, "<#=op.Name#>");
+        private static readonly Func<TValue, TResult> <#=CamelCase(op.Name)#> = ExpressionX.Function<TValue, TResult>(Expression.<#=op.Name#>, "<#=op.Name#>");
 <#}#>
 
 <#foreach(var op in unaryOperators) {#>
@@ -159,7 +157,7 @@ namespace Sysx.Math
     public static class Operator<TLeft, TRight, TResult>
     {
 <#foreach(var op in binaryOperators) {#>
-        private static readonly Func<TLeft, TRight, TResult> <#=CamelCase(op.Name)#> = Lambda.Create<TLeft, TRight, TResult>(Expression.<#=op.Name#>, "<#=op.Name#>");
+        private static readonly Func<TLeft, TRight, TResult> <#=CamelCase(op.Name)#> = ExpressionX.Function<TLeft, TRight, TResult>(Expression.<#=op.Name#>, "<#=op.Name#>");
 <#}#>
 
 <#foreach(var op in binaryOperators) {#>

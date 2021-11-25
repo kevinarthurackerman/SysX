@@ -6,7 +6,7 @@ namespace Sysx.Identity
 	/// <summary>
 	/// Generates semi-sequentially ordered GUIDs that will sort correctly in memory and SQL Server.
 	/// </summary>
-    public static class SequentialIdentityGenerator
+    public static class SequentialGuid
     {
 		private static readonly long baseDateTicks = new DateTime(1900, 1, 1).Ticks;
 
@@ -17,7 +17,7 @@ namespace Sysx.Identity
 		public static SqlGuid Next()
 		{
 			var guidArray = Guid.NewGuid().ToByteArray();
-
+			
 			var now = DateTime.UtcNow;
 
 			// Get the days and milliseconds which will be used to build the byte string 

@@ -6,7 +6,7 @@ namespace Sysx.Test.Linq
 {
     using Xunit;
 
-    public class EnumerateTests
+    public class EnumerableXTests
     {
         private readonly Node NodeA;
         private readonly Node NodeB;
@@ -20,7 +20,7 @@ namespace Sysx.Test.Linq
         private readonly Node NodeJ;
         private readonly Node NodeK;
 
-        public EnumerateTests()
+        public EnumerableXTests()
         {
             NodeA = new Node("A");
             NodeB = new Node("B");
@@ -54,7 +54,7 @@ namespace Sysx.Test.Linq
         [Fact]
         public void Should_Get_Ancestors()
         {
-            var actual = Enumerate.Ancestors(NodeD, x => x.Parent).ToArray();
+            var actual = EnumerableX.Ancestors(NodeD, x => x.Parent).ToArray();
 
             var expected = new[] { NodeB, NodeA };
 
@@ -67,7 +67,7 @@ namespace Sysx.Test.Linq
         [Fact]
         public void Should_Get_Ancestors_With_Root()
         {
-            var actual = Enumerate.Ancestors(NodeD, x => x.Parent, includeRoot: true).ToArray();
+            var actual = EnumerableX.Ancestors(NodeD, x => x.Parent, includeRoot: true).ToArray();
 
             var expected = new[] { NodeD, NodeB, NodeA };
 
@@ -80,7 +80,7 @@ namespace Sysx.Test.Linq
         [Fact]
         public void Should_Restrict_Ancestors_Depth()
         {
-            var actual = Enumerate.Ancestors(NodeD, x => x.Parent, maxDepth: 1).ToArray();
+            var actual = EnumerableX.Ancestors(NodeD, x => x.Parent, maxDepth: 1).ToArray();
 
             var expected = new[] { NodeB };
 
@@ -93,7 +93,7 @@ namespace Sysx.Test.Linq
         [Fact]
         public void Should_Get_Descendants()
         {
-            var actual = Enumerate.Descendants(NodeD, x => x.Children).ToArray();
+            var actual = EnumerableX.Descendants(NodeD, x => x.Children).ToArray();
 
             var expected = new[] { NodeH, NodeI, NodeJ, NodeK };
 
@@ -106,7 +106,7 @@ namespace Sysx.Test.Linq
         [Fact]
         public void Should_Get_Descendants_With_Root()
         {
-            var actual = Enumerate.Descendants(NodeD, x => x.Children, includeRoot: true).ToArray();
+            var actual = EnumerableX.Descendants(NodeD, x => x.Children, includeRoot: true).ToArray();
 
             var expected = new[] { NodeD, NodeH, NodeI, NodeJ, NodeK };
 
@@ -119,7 +119,7 @@ namespace Sysx.Test.Linq
         [Fact]
         public void Should_Restrict_Descendants_Depth()
         {
-            var actual = Enumerate.Descendants(NodeD, x => x.Children, maxDepth: 1).ToArray();
+            var actual = EnumerableX.Descendants(NodeD, x => x.Children, maxDepth: 1).ToArray();
 
             var expected = new[] { NodeH, NodeI };
 
