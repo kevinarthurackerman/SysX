@@ -41,6 +41,6 @@ namespace Sysx.Linq
         /// <summary>
         /// Memoizes the enumerable, ensuring that it will only be evaluated up to one time, even if it is called more than once.
         /// </summary>
-        public static IEnumerable<T> Memoize<T>(this IEnumerable<T> enumerable) => MemoizedEnumerable<T>.Create(enumerable);
+        public static IEnumerable<T>? Memoize<T>(this IEnumerable<T>? enumerable) => MemoizedEnumerable<T>.Create(enumerable);
     }
 }

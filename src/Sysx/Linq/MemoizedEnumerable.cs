@@ -16,7 +16,7 @@ namespace Sysx.Linq
         private IEnumerable<T>? cache;
         private IEnumerable<T>? source;
 
-        public static IEnumerable<T>? Create(IEnumerable<T> enumerable)
+        public static IEnumerable<T>? Create(IEnumerable<T>? enumerable)
         {
             if (enumerable == null) return null;
             if (enumerable is T[] array) return array;

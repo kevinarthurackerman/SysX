@@ -134,7 +134,7 @@ namespace Sysx.Test.Linq
             private readonly IList<Node> children = new List<Node>();
 
             public string Name { get; }
-            public Node Parent { get; private set; }
+            public Node? Parent { get; private set; }
             public IEnumerable<Node> Children => children;
 
             public Node(string name)
@@ -144,9 +144,9 @@ namespace Sysx.Test.Linq
 
             public void AddToParent(Node parent)
             {
-                parent?.children.Remove(this);
+                Parent?.children.Remove(this);
                 Parent = parent;
-                parent.children.Add(this);
+                Parent.children.Add(this);
             }
         }
     }
