@@ -27,6 +27,7 @@ namespace Sysx.Test
             var varA = 1;
             var varB = 2;
 
+            var filePath = GetFilePath();
             var lineNumber = GetLineNumber() + 1;
             var exception = Record.Exception(() => Sysx.Assert.That(varA == varB));
 
@@ -34,10 +35,10 @@ namespace Sysx.Test
             Assert.Equal(typeof(ContractException), exception.GetType());
 
     #if NET5_0 || NETCOREAPP3_1
-            Assert.Equal($@"Condition 'varA == varB' failed at C:\Users\User\source\repos\Sysx\src\Sysx.Test\AssertTests.cs line {lineNumber}: Should_Throw_With_Message", exception.Message);
+            Assert.Equal($@"Condition 'varA == varB' failed at {filePath} line {lineNumber}: Should_Throw_With_Message", exception.Message);
     #endif
     #if NET48
-            Assert.Equal($@"Condition failed at C:\Users\User\source\repos\Sysx\src\Sysx.Test\AssertTests.cs line {lineNumber}: Should_Throw_With_Message", exception.Message);
+            Assert.Equal($@"Condition failed at {filePath} line {lineNumber}: Should_Throw_With_Message", exception.Message);
     #endif
         }
 
@@ -64,5 +65,7 @@ namespace Sysx.Test
 #endif
 
         private static int? GetLineNumber([CallerLineNumber] int? lineNumber = null) => lineNumber;
+
+        private static string? GetFilePath([CallerFilePath] string? filePath = null) => filePath;
     }
 }
