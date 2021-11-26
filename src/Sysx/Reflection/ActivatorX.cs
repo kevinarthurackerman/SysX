@@ -66,7 +66,7 @@ namespace Sysx.Reflection
             var interfaceMembers = typeof(TAsInterface)
                 .GetMembers()
                 .Where(x => FlagsEnum.HasAny(x.MemberType, handledTypes))
-                .Where(x => x is not MethodInfo xMethod || !xMethod.IsHideBySig)
+                .Where(x => x is not MethodInfo xMethod || !xMethod.IsSpecialName)
                 .ToArray();
 
             foreach (var interfaceMember in interfaceMembers)
@@ -163,15 +163,13 @@ namespace Sysx.Reflection
             }
             else if (interfaceMember is MethodInfo interfaceMethod)
             {
-                if (innerValueMember is PropertyInfo innerValueProperty)
+                if (innerValueMember is MethodInfo innerValueMethod)
                 {
-                    // handle method
-                    throw new NotImplementedException();
+                    HandleMethod(wrapperType, innerValue, interfaceMethod, innerValueMethod);
                 }
                 else
                 {
-                    // handle missing method
-                    throw new NotImplementedException();
+                    HandleMissingMethod(wrapperType, interfaceMethod);
                 }
             }
         }
@@ -184,7 +182,7 @@ namespace Sysx.Reflection
 
             var wrapperProperty = wrapperType.DefineProperty(
                 interfaceProperty.Name,
-                interfaceProperty.Attributes,
+                PropertyAttributes.None,
                 interfaceProperty.PropertyType,
                 parameters.Select(x => x.ParameterType).ToArray());
 
@@ -249,7 +247,7 @@ namespace Sysx.Reflection
 
             var wrapperProperty = wrapperType.DefineProperty(
                 interfaceProperty.Name,
-                interfaceProperty.Attributes,
+                PropertyAttributes.None,
                 interfaceProperty.PropertyType,
                 parameters.Select(x => x.ParameterType).ToArray());
 
@@ -290,11 +288,12 @@ namespace Sysx.Reflection
                 wrapperProperty.PropertyType,
                 null);
 
+            var callOpCode = typeof(TValue).IsValueType ? OpCodes.Call : OpCodes.Callvirt;
+
             var ilGen = valuePropertyGetMethod.GetILGenerator();
             ilGen.Emit(OpCodes.Ldarg_0);
             ilGen.Emit(OpCodes.Ldfld, innerValue);
-            var opCode = typeof(TValue).IsValueType ? OpCodes.Call : OpCodes.Callvirt;
-            ilGen.Emit(opCode, innerValuePropertyGetter);
+            ilGen.Emit(callOpCode, innerValuePropertyGetter);
             ilGen.Emit(OpCodes.Ret);
 
             wrapperProperty.SetGetMethod(valuePropertyGetMethod);
@@ -308,12 +307,13 @@ namespace Sysx.Reflection
                 null,
                 new[] { wrapperProperty.PropertyType });
 
+            var callOpCode = typeof(TValue).IsValueType ? OpCodes.Call : OpCodes.Callvirt;
+
             var ilGen = valuePropertySetMethod.GetILGenerator();
             ilGen.Emit(OpCodes.Ldarg_0);
             ilGen.Emit(OpCodes.Ldfld, innerValue);
             ilGen.Emit(OpCodes.Ldarg_1);
-            var opCode = typeof(TValue).IsValueType ? OpCodes.Call : OpCodes.Callvirt;
-            ilGen.Emit(opCode, innerValuePropertySetter);
+            ilGen.Emit(callOpCode, innerValuePropertySetter);
             ilGen.Emit(OpCodes.Nop);
             ilGen.Emit(OpCodes.Ret);
 
@@ -328,7 +328,7 @@ namespace Sysx.Reflection
 
             var wrapperProperty = wrapperType.DefineProperty(
                 interfaceProperty.Name,
-                interfaceProperty.Attributes,
+                PropertyAttributes.None,
                 interfaceProperty.PropertyType,
                 parameters.Select(x => x.ParameterType).ToArray());
 
@@ -369,6 +369,70 @@ namespace Sysx.Reflection
             ilGen.Emit(OpCodes.Throw);
 
             wrapperProperty.SetSetMethod(wrapperPropertySetMethod);
+        }
+
+        private static void HandleMethod(TypeBuilder wrapperType, FieldBuilder innerValue, MethodInfo interfaceMethod, MethodInfo innerValueMethod)
+        {
+            var parameters = interfaceMethod.GetParameters();
+
+            var wrapperProperty = wrapperType.DefineMethod(
+                interfaceMethod.Name,
+                MethodAttributes.Public | MethodAttributes.Virtual,
+                interfaceMethod.ReturnType,
+                parameters.Select(x => x.ParameterType).ToArray());
+
+            var ilGen = wrapperProperty.GetILGenerator();
+            ilGen.Emit(OpCodes.Ldarg_0);
+            ilGen.Emit(OpCodes.Ldfld, innerValue);
+
+            var callOpCode = typeof(TValue).IsValueType ? OpCodes.Call : OpCodes.Callvirt;
+
+            if (parameters.Any())
+            {
+                if(interfaceMethod.ReturnType == null)
+                {
+                    ilGen.Emit(OpCodes.Ldarg_1);
+                    ilGen.Emit(callOpCode, innerValueMethod);
+                    ilGen.Emit(OpCodes.Nop);
+                    ilGen.Emit(OpCodes.Ret);
+                }
+                else
+                {
+                    ilGen.Emit(OpCodes.Ldarg_1);
+                    ilGen.Emit(callOpCode, innerValueMethod);
+                    ilGen.Emit(OpCodes.Ret);
+                }
+            }
+            else
+            {
+                if (interfaceMethod.ReturnType == null)
+                {
+                    ilGen.Emit(callOpCode, innerValueMethod);
+                    ilGen.Emit(OpCodes.Nop);
+                    ilGen.Emit(OpCodes.Ret);
+                }
+                else
+                {
+                    ilGen.Emit(callOpCode, innerValueMethod);
+                    ilGen.Emit(OpCodes.Ret);
+                }
+            }
+        }
+
+        private static void HandleMissingMethod(TypeBuilder wrapperType, MethodInfo interfaceMethod)
+        {
+            var parameters = interfaceMethod.GetParameters();
+
+            var wrapperMethod = wrapperType.DefineMethod(
+                interfaceMethod.Name,
+                MethodAttributes.Public | MethodAttributes.Virtual,
+                interfaceMethod.ReturnType,
+                parameters.Select(x => x.ParameterType).ToArray());
+
+            var ilGen = wrapperMethod.GetILGenerator();
+            ilGen.Emit(OpCodes.Ldstr, $"The method {wrapperMethod.Name} does not exist or does not return {wrapperMethod.ReturnType.Name} on the wrapped type {typeof(TValue).Name}");
+            ilGen.Emit(OpCodes.Newobj, ActivatorX.InvalidOperationExceptionCtor);
+            ilGen.Emit(OpCodes.Throw);
         }
     }
 }

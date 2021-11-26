@@ -11,7 +11,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Field()
         {
             var value = new DuckLikeClass { quackField = "quack" };
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("quack", valueWrapper.quackField);
@@ -25,7 +25,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Readonly_Field()
         {
             var value = new DuckLikeClass();
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("quack", valueWrapper.quackFieldReadonly);
@@ -39,7 +39,7 @@ namespace Sysx.Test.Reflection
         public void Should_Access_Inherited_Field()
         {
             var value = new DuckLikeClassExtension { quackField = "Quack" };
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", valueWrapper.quackField);
@@ -53,7 +53,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Property()
         {
             var value = new DuckLikeClass { QuackProp = "Quack" };
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", valueWrapper.QuackProp);
@@ -67,7 +67,7 @@ namespace Sysx.Test.Reflection
         public void Should_Access_Inherited_Property()
         {
             var value = new DuckLikeClassExtension { QuackProp = "Quack" };
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClassExtension, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClassExtension, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", valueWrapper.QuackProp);
@@ -81,7 +81,7 @@ namespace Sysx.Test.Reflection
         public void Should_Access_Virtual_Property()
         {
             var value = new DuckLikeClass { VirtualQuackProp = "Quack" };
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", valueWrapper.VirtualQuackProp);
@@ -95,7 +95,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Property_With_Private_Getter()
         {
             var value = new DuckLikeClass { QuackPropPrivateGet = "Quack" };
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", value.GetQuackPropPrivateGetValue());
@@ -113,7 +113,7 @@ namespace Sysx.Test.Reflection
             var value = new DuckLikeClass();
             value.SetQuackPropPrivateSetValue("Quack");
 
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", value.QuackPropPrivateSet);
@@ -125,6 +125,54 @@ namespace Sysx.Test.Reflection
             value.SetQuackPropPrivateSetValue("Quack!");
 
             Assert.Equal("Quack!", value.QuackPropPrivateSet);
+        }
+
+        [Fact]
+        public void Should_Wrap_Get_Method()
+        {
+            var value = new DuckLikeClass();
+            value.SetQuackPropPrivateSetValue("quack");
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
+
+            Assert.NotNull(valueWrapper);
+            Assert.Equal("quack", valueWrapper.QuackPropPrivateSet);
+        }
+
+        [Fact]
+        public void Should_Wrap_Set_Method()
+        {
+            var value = new DuckLikeClass();
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
+
+            Assert.NotNull(valueWrapper);
+
+            valueWrapper.QuackPropPrivateGet = "quack";
+
+            Assert.Equal("quack", valueWrapper.GetQuackPropPrivateGetValue());
+        }
+
+        [Fact]
+        public void Should_Wrap_GetSet_Method()
+        {
+            var value = new DuckLikeClass();
+            value.QuackPropPrivate("quack");
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
+
+            Assert.NotNull(valueWrapper);
+            Assert.Equal("quack", valueWrapper.QuackPropPrivate("quack!"));
+            Assert.Equal("quack!", valueWrapper.QuackPropPrivate("quack"));
+        }
+
+        [Fact]
+        public void Should_Wrap_Parameterless_Void_Method()
+        {
+            var value = new DuckLikeClass();
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
+
+            valueWrapper.Quack();
+
+            Assert.NotNull(valueWrapper);
+            Assert.Equal("Quack", value.QuackProp);
         }
 
         [Fact]
@@ -145,7 +193,7 @@ namespace Sysx.Test.Reflection
         public void Should_Not_Wrap_To_Wrong_Type()
         {
             var value = new DuckLikeClass { QuackWithWrongType = "Quack" };
-            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuckType>(value);
+            var valueWrapper = ActivatorX.CreateInstanceAsInterface<DuckLikeClass, IDuck>(value);
 
             Assert.NotNull(valueWrapper);
 
@@ -154,7 +202,7 @@ namespace Sysx.Test.Reflection
             Assert.Equal("Quack", value.QuackWithWrongType);
         }
 
-        public interface IDuckType
+        public interface IDuck
         {
             string? PropMissingFromDuckLikeClass { get; set; }
             string? quackField { get; set; }
@@ -164,10 +212,15 @@ namespace Sysx.Test.Reflection
             public string? QuackPropPrivateSet { get; set; }
             public string? QuackPropPrivateGet { get; set; }
             public object? QuackWithWrongType { get; set; }
+            void SetQuackPropPrivateSetValue(string? value);
+            string? GetQuackPropPrivateGetValue();
+            string? QuackPropPrivate(string? value);
+            void Quack();
         }
 
         public class DuckLikeClass
         {
+            private string? quackPrivate;
             public string? NonDucklikeProp { get; set; }
             public string? quackField;
             public readonly string? quackFieldReadonly = "quack";
@@ -179,6 +232,13 @@ namespace Sysx.Test.Reflection
 
             public void SetQuackPropPrivateSetValue(string? value) => QuackPropPrivateSet = value;
             public string? GetQuackPropPrivateGetValue() => QuackPropPrivateGet;
+            public string? QuackPropPrivate(string? value)
+            {   
+                var val = quackPrivate;
+                quackPrivate = value;
+                return val;
+            }
+            public void Quack() => QuackProp = "Quack";
         }
 
         public class DuckLikeClassExtension : DuckLikeClass { }
