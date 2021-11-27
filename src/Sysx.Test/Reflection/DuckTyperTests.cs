@@ -8,6 +8,26 @@ namespace Sysx.Test.Reflection
     public class DuckTyperTests
     {
         [Fact]
+        public void Should_TryWrap()
+        {
+            var value = new CowLikeClass();
+            var success = DuckTyper.TryWrap<ICow>(value, out var valueWrapper);
+
+            Assert.True(success);
+            Assert.NotNull(valueWrapper);
+        }
+
+        [Fact]
+        public void Should_Not_TryWrap()
+        {
+            var value = new DuckLikeClass();
+            var success = DuckTyper.TryWrap<IDuck>(value, out var valueWrapper);
+
+            Assert.False(success);
+            Assert.Null(valueWrapper);
+        }
+
+        [Fact]
         public void Should_Wrap_Field()
         {
             var value = new DuckLikeClass { quackField = "quack" };

@@ -10,7 +10,8 @@ namespace Sysx.Reflection
 {
     public class DuckTyper
     {
-        private static readonly ConcurrentDictionary<(Type ValueType, Type WithInterfaceType), Func<object, object>> cache = new();
+        private static readonly ConcurrentDictionary<CacheKey, WrapMethod> wrapCache = new();
+        private static readonly ConcurrentDictionary<CacheKey, TryWrapMethod> tryWrapCache = new();
 
         internal static readonly ModuleBuilder DynamicModule;
         internal static readonly ConstructorInfo InvalidOperationExceptionCtor;
@@ -18,7 +19,7 @@ namespace Sysx.Reflection
         static DuckTyper()
         {
             var assemblyName = new AssemblyName($"{nameof(DuckTyper)}_{Guid.NewGuid()}");
-
+            
 #if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
             var dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 #endif
@@ -47,25 +48,71 @@ namespace Sysx.Reflection
         {
             EnsureArg.HasValue(value);
 
-            var wrapMethod = cache.GetOrAdd((value.GetType(), typeof(TWithInterface)), x =>
-            {
-                var duckTyperMethod = typeof(DuckTyper<,>)
-                    .MakeGenericType(x.ValueType, x.WithInterfaceType)
-                    .GetMethod(nameof(DuckTyper<object,object>.Wrap))!;
+            var key = new CacheKey(value.GetType(), typeof(TWithInterface));
 
-                return value => duckTyperMethod.Invoke(null, new[] { value })!;
+            var wrapMethod = wrapCache.GetOrAdd(key, x =>
+            {
+                var wrapMethod = typeof(DuckTyper<,>)
+                    .MakeGenericType(x.ValueType, x.WithInterfaceType)
+                    .GetMethod(nameof(DuckTyper<object, object>.Wrap))!;
+
+                return value => wrapMethod.Invoke(null, new[] { value })!;
             });
 
             return (TWithInterface)wrapMethod(value);
         }
 
+        public static bool TryWrap<TWithInterface>(object value, out TWithInterface? withInterface)
+        {
+            EnsureArg.HasValue(value);
+
+            var key = new CacheKey(value.GetType(), typeof(TWithInterface));
+
+            var wrapMethod = tryWrapCache.GetOrAdd(key, x =>
+            {
+                var tryWrapMethod = typeof(DuckTyper<,>)
+                    .MakeGenericType(x.ValueType, x.WithInterfaceType)
+                    .GetMethod(nameof(DuckTyper<object, object>.TryWrap))!;
+
+                return (object value, out object? withInterface) =>
+                {
+                    var parameters = new[] { value, null };
+                    var success = (bool)tryWrapMethod.Invoke(null, parameters)!;
+
+                    if (success)
+                    {
+                        withInterface = parameters[1];
+                        return true;
+                    }
+
+                    withInterface = default;
+                    return false;
+                };
+            });
+
+            if (wrapMethod(value, out var tryResult))
+            {
+                withInterface = (TWithInterface)tryResult!;
+                return true;
+            }
+
+            withInterface = default;
+            return false;
+        }
+
         public static TWithInterface Wrap<TValue, TWithInterface>(TValue value) =>
             DuckTyper<TValue, TWithInterface>.Wrap(value);
+
+        private record struct CacheKey(Type ValueType, Type WithInterfaceType);
+        private delegate object WrapMethod(object value);
+        private delegate bool TryWrapMethod(object value, out object? withInterface);
     }
 
     public static class DuckTyper<TValue, TWithInterface>
     {
         private static readonly ConstructorInfo wrapperCtor;
+
+        public static bool CompletelyMapped { get; }
 
         static DuckTyper()
         {
@@ -83,8 +130,10 @@ namespace Sysx.Reflection
                 .Where(x => x is not MethodInfo xMethod || !xMethod.IsSpecialName)
                 .ToArray();
 
+            CompletelyMapped = true;
+
             foreach (var interfaceMember in interfaceMembers)
-                HandleMember(wrapperType, innerValueField, interfaceMember);
+                CompletelyMapped &= HandleMember(wrapperType, innerValueField, interfaceMember);
 
             wrapperType.AddInterfaceImplementation(typeof(TWithInterface));
 
@@ -97,6 +146,20 @@ namespace Sysx.Reflection
             EnsureArg.HasValue(value);
 
             return (TWithInterface)wrapperCtor.Invoke(new object[] { value })!;
+        }
+
+        public static bool TryWrap(TValue value, out TWithInterface? withInterface)
+        {
+            EnsureArg.HasValue(value);
+
+            if (CompletelyMapped)
+            {
+                withInterface = (TWithInterface)wrapperCtor.Invoke(new object[] { value })!;
+                return true;
+            }
+
+            withInterface = default;
+            return false;
         }
 
         private static TypeBuilder CreateType(ModuleBuilder moduleBuilder)
@@ -140,7 +203,7 @@ namespace Sysx.Reflection
             return constructor;
         }
 
-        private static void HandleMember(TypeBuilder wrapperType, FieldBuilder innerValue, MemberInfo interfaceMember)
+        private static bool HandleMember(TypeBuilder wrapperType, FieldBuilder innerValue, MemberInfo interfaceMember)
         {
             var innerValueMember = typeof(TValue)
                 .GetMembers()
@@ -152,43 +215,45 @@ namespace Sysx.Reflection
                 {
                     if (interfaceProperty.PropertyType == innerValueField.FieldType)
                     {
-                        HandleField(wrapperType, innerValue, interfaceProperty, innerValueField);
+                        return HandleField(wrapperType, innerValue, interfaceProperty, innerValueField);
                     }
                     else
                     {
-                        HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
+                        return HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
                     }
                 }
                 else if (innerValueMember is PropertyInfo innerValueProperty)
                 {
                     if (interfaceProperty.PropertyType == innerValueProperty.PropertyType)
                     {
-                        HandleProperty(wrapperType, innerValue, interfaceProperty, innerValueProperty);
+                        return HandleProperty(wrapperType, innerValue, interfaceProperty, innerValueProperty);
                     }
                     else
                     {
-                        HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
+                        return HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
                     }
                 }
                 else
                 {
-                    HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
+                    return HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
                 }
             }
             else if (interfaceMember is MethodInfo interfaceMethod)
             {
                 if (innerValueMember is MethodInfo innerValueMethod)
                 {
-                    HandleMethod(wrapperType, innerValue, interfaceMethod, innerValueMethod);
+                    return HandleMethod(wrapperType, innerValue, interfaceMethod, innerValueMethod);
                 }
                 else
                 {
-                    HandleMissingMethod(wrapperType, interfaceMethod);
+                    return HandleMissingMethod(wrapperType, interfaceMethod);
                 }
             }
+
+            return false;
         }
 
-        private static void HandleField(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty, FieldInfo innerValueField)
+        private static bool HandleField(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty, FieldInfo innerValueField)
         {
             var interfaceGetMethodInfo = interfaceProperty.GetGetMethod();
             var interfaceSetMethodInfo = interfaceProperty.GetSetMethod();
@@ -200,25 +265,29 @@ namespace Sysx.Reflection
                 interfaceProperty.PropertyType,
                 parameters.Select(x => x.ParameterType).ToArray());
 
+            var mappedCompletely = true;
+
             if (interfaceGetMethodInfo != null)
             {
-                HandleFieldGetter(wrapperType, innerValue, wrapperProperty, innerValueField);
+                mappedCompletely &= HandleFieldGetter(wrapperType, innerValue, wrapperProperty, innerValueField);
             }
 
             if (interfaceSetMethodInfo != null)
             {
                 if (innerValueField.IsInitOnly)
                 {
-                    HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
+                    mappedCompletely &= HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
                 }
                 else
                 {
-                    HandleFieldSetter(wrapperType, innerValue, wrapperProperty, innerValueField);
+                    mappedCompletely &= HandleFieldSetter(wrapperType, innerValue, wrapperProperty, innerValueField);
                 }
             }
+
+            return mappedCompletely;
         }
 
-        private static void HandleFieldGetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, FieldInfo innerValueField)
+        private static bool HandleFieldGetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, FieldInfo innerValueField)
         {
             var wrapperPropertyGetMethod = wrapperType.DefineMethod(
                 $"get_{wrapperProperty.Name}",
@@ -233,9 +302,11 @@ namespace Sysx.Reflection
             ilGen.Emit(OpCodes.Ret);
 
             wrapperProperty.SetGetMethod(wrapperPropertyGetMethod);
+
+            return true;
         }
 
-        private static void HandleFieldSetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, FieldInfo innerValueField)
+        private static bool HandleFieldSetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, FieldInfo innerValueField)
         {
             var wrapperPropertySetMethod = wrapperType.DefineMethod(
                 $"set_{wrapperProperty.Name}",
@@ -251,9 +322,11 @@ namespace Sysx.Reflection
             ilGen.Emit(OpCodes.Ret);
 
             wrapperProperty.SetSetMethod(wrapperPropertySetMethod);
+
+            return true;
         }
 
-        private static void HandleProperty(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty, PropertyInfo innerValueProperty)
+        private static bool HandleProperty(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty, PropertyInfo innerValueProperty)
         {
             var interfaceGetMethodInfo = interfaceProperty.GetGetMethod();
             var interfaceSetMethodInfo = interfaceProperty.GetSetMethod();
@@ -268,15 +341,17 @@ namespace Sysx.Reflection
             var innerValuePropertyGetter = innerValueProperty.GetGetMethod();
             var innerValuePropertySetter = innerValueProperty.GetSetMethod();
 
+            var mappedCompletely = true;
+
             if (interfaceGetMethodInfo != null)
             {
                 if (innerValuePropertyGetter != null)
                 {
-                    HandlePropertyGetter(wrapperType, innerValue, wrapperProperty, innerValuePropertyGetter);
+                    mappedCompletely &= HandlePropertyGetter(wrapperType, innerValue, wrapperProperty, innerValuePropertyGetter);
                 }
                 else
                 {
-                    HandleMissingFieldOrPropertyGetter(wrapperType, wrapperProperty);
+                    mappedCompletely &= HandleMissingFieldOrPropertyGetter(wrapperType, wrapperProperty);
                 }
             }
 
@@ -284,16 +359,18 @@ namespace Sysx.Reflection
             {
                 if (innerValuePropertySetter != null)
                 {
-                    HandlePropertySetter(wrapperType, innerValue, wrapperProperty, innerValuePropertySetter);
+                    mappedCompletely &= HandlePropertySetter(wrapperType, innerValue, wrapperProperty, innerValuePropertySetter);
                 }
                 else
                 {
-                    HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
+                    mappedCompletely &= HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
                 }
             }
+
+            return mappedCompletely;
         }
 
-        private static void HandlePropertyGetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, MethodInfo innerValuePropertyGetter)
+        private static bool HandlePropertyGetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, MethodInfo innerValuePropertyGetter)
         {
             var valuePropertyGetMethod = wrapperType.DefineMethod(
                 $"get_{wrapperProperty.Name}",
@@ -310,9 +387,11 @@ namespace Sysx.Reflection
             ilGen.Emit(OpCodes.Ret);
 
             wrapperProperty.SetGetMethod(valuePropertyGetMethod);
+
+            return true;
         }
 
-        private static void HandlePropertySetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, MethodInfo innerValuePropertySetter)
+        private static bool HandlePropertySetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, MethodInfo innerValuePropertySetter)
         {
             var valuePropertySetMethod = wrapperType.DefineMethod(
                 $"set_{wrapperProperty.Name}",
@@ -331,9 +410,11 @@ namespace Sysx.Reflection
             ilGen.Emit(OpCodes.Ret);
 
             wrapperProperty.SetSetMethod(valuePropertySetMethod);
+
+            return true;
         }
 
-        private static void HandleMissingFieldOrProperty(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty)
+        private static bool HandleMissingFieldOrProperty(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty)
         {
             var interfaceGetMethodInfo = interfaceProperty.GetGetMethod();
             var interfaceSetMethodInfo = interfaceProperty.GetSetMethod();
@@ -350,9 +431,11 @@ namespace Sysx.Reflection
 
             if (interfaceSetMethodInfo != null)
                 HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
+
+            return false;
         }
 
-        private static void HandleMissingFieldOrPropertyGetter(TypeBuilder wrapperType, PropertyBuilder wrapperProperty)
+        private static bool HandleMissingFieldOrPropertyGetter(TypeBuilder wrapperType, PropertyBuilder wrapperProperty)
         {
             var wrapperPropertyGetMethod = wrapperType.DefineMethod(
                 $"get_{wrapperProperty.Name}",
@@ -366,9 +449,11 @@ namespace Sysx.Reflection
             ilGen.Emit(OpCodes.Throw);
 
             wrapperProperty.SetGetMethod(wrapperPropertyGetMethod);
+
+            return false;
         }
 
-        private static void HandleMissingFieldOrPropertySetter(TypeBuilder wrapperType, PropertyBuilder wrapperProperty)
+        private static bool HandleMissingFieldOrPropertySetter(TypeBuilder wrapperType, PropertyBuilder wrapperProperty)
         {
             var wrapperPropertySetMethod = wrapperType.DefineMethod(
                 $"set_{wrapperProperty.Name}",
@@ -382,9 +467,11 @@ namespace Sysx.Reflection
             ilGen.Emit(OpCodes.Throw);
 
             wrapperProperty.SetSetMethod(wrapperPropertySetMethod);
+
+            return false;
         }
 
-        private static void HandleMethod(TypeBuilder wrapperType, FieldBuilder innerValue, MethodInfo interfaceMethod, MethodInfo innerValueMethod)
+        private static bool HandleMethod(TypeBuilder wrapperType, FieldBuilder innerValue, MethodInfo interfaceMethod, MethodInfo innerValueMethod)
         {
             var parameters = interfaceMethod.GetParameters();
 
@@ -430,9 +517,11 @@ namespace Sysx.Reflection
                     ilGen.Emit(OpCodes.Ret);
                 }
             }
+
+            return true;
         }
 
-        private static void HandleMissingMethod(TypeBuilder wrapperType, MethodInfo interfaceMethod)
+        private static bool HandleMissingMethod(TypeBuilder wrapperType, MethodInfo interfaceMethod)
         {
             var parameters = interfaceMethod.GetParameters();
 
@@ -446,6 +535,8 @@ namespace Sysx.Reflection
             ilGen.Emit(OpCodes.Ldstr, $"The method {wrapperMethod.Name} does not exist or does not return {wrapperMethod.ReturnType.Name} on the wrapped type {typeof(TValue).Name}");
             ilGen.Emit(OpCodes.Newobj, DuckTyper.InvalidOperationExceptionCtor);
             ilGen.Emit(OpCodes.Throw);
+
+            return false;
         }
     }
 }
