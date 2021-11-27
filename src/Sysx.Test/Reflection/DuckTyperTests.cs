@@ -11,7 +11,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Field()
         {
             var value = new DuckLikeClass { quackField = "quack" };
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("quack", valueWrapper.quackField);
@@ -25,7 +25,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Readonly_Field()
         {
             var value = new DuckLikeClass();
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("quack", valueWrapper.quackFieldReadonly);
@@ -39,7 +39,7 @@ namespace Sysx.Test.Reflection
         public void Should_Access_Inherited_Field()
         {
             var value = new DuckLikeClassExtension { quackField = "Quack" };
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", valueWrapper.quackField);
@@ -53,7 +53,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Property()
         {
             var value = new DuckLikeClass { QuackProp = "Quack" };
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", valueWrapper.QuackProp);
@@ -67,7 +67,7 @@ namespace Sysx.Test.Reflection
         public void Should_Access_Inherited_Property()
         {
             var value = new DuckLikeClassExtension { QuackProp = "Quack" };
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClassExtension, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", valueWrapper.QuackProp);
@@ -81,7 +81,7 @@ namespace Sysx.Test.Reflection
         public void Should_Access_Virtual_Property()
         {
             var value = new DuckLikeClass { VirtualQuackProp = "Quack" };
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", valueWrapper.VirtualQuackProp);
@@ -95,7 +95,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Property_With_Private_Getter()
         {
             var value = new DuckLikeClass { QuackPropPrivateGet = "Quack" };
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", value.GetQuackPropPrivateGetValue());
@@ -113,7 +113,7 @@ namespace Sysx.Test.Reflection
             var value = new DuckLikeClass();
             value.SetQuackPropPrivateSetValue("Quack");
 
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Quack", value.QuackPropPrivateSet);
@@ -132,7 +132,7 @@ namespace Sysx.Test.Reflection
         {
             var value = new DuckLikeClass();
             value.SetQuackPropPrivateSetValue("quack");
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("quack", valueWrapper.QuackPropPrivateSet);
@@ -142,7 +142,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Set_Method()
         {
             var value = new DuckLikeClass();
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
 
@@ -156,7 +156,7 @@ namespace Sysx.Test.Reflection
         {
             var value = new DuckLikeClass();
             value.QuackPropPrivate("quack");
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("quack", valueWrapper.QuackPropPrivate("quack!"));
@@ -167,7 +167,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Parameterless_Void_Method()
         {
             var value = new DuckLikeClass();
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             valueWrapper.Quack();
 
@@ -179,7 +179,7 @@ namespace Sysx.Test.Reflection
         public void Should_Wrap_Second_Type()
         {
             var value = new CowLikeClass { MooProp = "Moo" };
-            var valueWrapper = DuckTyper.Wrap<CowLikeClass, ICow>(value);
+            var valueWrapper = DuckTyper.Wrap<ICow>(value);
 
             Assert.NotNull(valueWrapper);
             Assert.Equal("Moo", valueWrapper.MooProp);
@@ -193,7 +193,7 @@ namespace Sysx.Test.Reflection
         public void Should_Not_Wrap_To_Wrong_Type()
         {
             var value = new DuckLikeClass { QuackWithWrongType = "Quack" };
-            var valueWrapper = DuckTyper.Wrap<DuckLikeClass, IDuck>(value);
+            var valueWrapper = DuckTyper.Wrap<IDuck>(value);
 
             Assert.NotNull(valueWrapper);
 

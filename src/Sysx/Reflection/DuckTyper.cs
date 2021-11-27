@@ -1,5 +1,6 @@
 ﻿using EnsureThat;
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -9,6 +10,8 @@ namespace Sysx.Reflection
 {
     public class DuckTyper
     {
+        private static readonly ConcurrentDictionary<(Type ValueType, Type WithInterfaceType), Func<object, object>> cache = new();
+
         internal static readonly ModuleBuilder DynamicModule;
         internal static readonly ConstructorInfo InvalidOperationExceptionCtor;
 
@@ -40,13 +43,23 @@ namespace Sysx.Reflection
                 });
         }
 
-        public static TWithInterface Wrap<TValue, TWithInterface>(TValue value) =>
-            DuckTyper<TValue, TWithInterface>.Wrap(value);
-    }
+        public static TWithInterface Wrap<TWithInterface>(object value)
+        {
+            EnsureArg.HasValue(value);
 
-    public static class ActivatorX<TValue>
-    {
-        public static TWithInterface Wrap<TWithInterface>(TValue value) =>
+            var wrapMethod = cache.GetOrAdd((value.GetType(), typeof(TWithInterface)), x =>
+            {
+                var duckTyperMethod = typeof(DuckTyper<,>)
+                    .MakeGenericType(x.ValueType, x.WithInterfaceType)
+                    .GetMethod(nameof(DuckTyper<object,object>.Wrap))!;
+
+                return value => duckTyperMethod.Invoke(null, new[] { value })!;
+            });
+
+            return (TWithInterface)wrapMethod(value);
+        }
+
+        public static TWithInterface Wrap<TValue, TWithInterface>(TValue value) =>
             DuckTyper<TValue, TWithInterface>.Wrap(value);
     }
 
