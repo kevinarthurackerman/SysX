@@ -9,12 +9,12 @@ namespace Sysx.Reflection
     /// <summary>
     /// Used to recursively load the dependencies of an assembly.
     /// </summary>
-    internal static class AssemblyX
+    public static class AssemblyX
     {
         /// <summary>
         /// Recursively loads the dependencies of an assembly.
         /// </summary>
-        internal static IEnumerable<Assembly> LoadDependencies(Assembly rootAssembly)
+        public static IEnumerable<Assembly> LoadDependencies(Assembly rootAssembly)
         {
             EnsureArg.IsNotNull(rootAssembly, nameof(rootAssembly));
 
