@@ -40,17 +40,17 @@ namespace Sysx.Reflection
                 });
         }
 
-        public static TAsInterface Wrap<TValue, TAsInterface>(TValue value) =>
-            DuckTyper<TValue, TAsInterface>.Wrap(value);
+        public static TWithInterface Wrap<TValue, TWithInterface>(TValue value) =>
+            DuckTyper<TValue, TWithInterface>.Wrap(value);
     }
 
     public static class ActivatorX<TValue>
     {
-        public static TAsInterface Wrap<TAsInterface>(TValue value) =>
-            DuckTyper<TValue, TAsInterface>.Wrap(value);
+        public static TWithInterface Wrap<TWithInterface>(TValue value) =>
+            DuckTyper<TValue, TWithInterface>.Wrap(value);
     }
 
-    public static class DuckTyper<TValue, TAsInterface>
+    public static class DuckTyper<TValue, TWithInterface>
     {
         private static readonly ConstructorInfo wrapperCtor;
 
@@ -63,7 +63,7 @@ namespace Sysx.Reflection
             CreateConstructor(wrapperType, innerValueField);
 
             var handledTypes = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method;
-            var interfaceMembers = typeof(TAsInterface)
+            var interfaceMembers = typeof(TWithInterface)
                 .GetMembers()
                 .Where(x => FlagsEnum.HasAny(x.MemberType, handledTypes))
                 // remove get_### and set_### methods used to access properties and fields
@@ -73,17 +73,17 @@ namespace Sysx.Reflection
             foreach (var interfaceMember in interfaceMembers)
                 HandleMember(wrapperType, innerValueField, interfaceMember);
 
-            wrapperType.AddInterfaceImplementation(typeof(TAsInterface));
+            wrapperType.AddInterfaceImplementation(typeof(TWithInterface));
 
             wrapperCtor = wrapperType.CreateType()!
                 .GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new [] { typeof(TValue) }, null)!;
         }
 
-        public static TAsInterface Wrap(TValue value)
+        public static TWithInterface Wrap(TValue value)
         {
             EnsureArg.HasValue(value);
 
-            return (TAsInterface)wrapperCtor.Invoke(new object[] { value })!;
+            return (TWithInterface)wrapperCtor.Invoke(new object[] { value })!;
         }
 
         private static TypeBuilder CreateType(ModuleBuilder moduleBuilder)
