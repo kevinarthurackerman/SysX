@@ -7,14 +7,14 @@ using Sysx.Enums;
 
 namespace Sysx.Reflection
 {
-    public class ActivatorX
+    public class DuckTyper
     {
         internal static readonly ModuleBuilder DynamicModule;
         internal static readonly ConstructorInfo InvalidOperationExceptionCtor;
 
-        static ActivatorX()
+        static DuckTyper()
         {
-            var assemblyName = new AssemblyName($"{nameof(ActivatorX)}_{Guid.NewGuid()}");
+            var assemblyName = new AssemblyName($"{nameof(DuckTyper)}_{Guid.NewGuid()}");
 
 #if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
             var dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
@@ -40,23 +40,23 @@ namespace Sysx.Reflection
                 });
         }
 
-        public static TAsInterface CreateInstanceAsInterface<TValue, TAsInterface>(TValue value) =>
-            ActivatorX<TValue, TAsInterface>.CreateInstanceAsInterface(value);
+        public static TAsInterface Wrap<TValue, TAsInterface>(TValue value) =>
+            DuckTyper<TValue, TAsInterface>.Wrap(value);
     }
 
     public static class ActivatorX<TValue>
     {
-        public static TAsInterface CreateInstanceAsInterface<TAsInterface>(TValue value) =>
-            ActivatorX<TValue, TAsInterface>.CreateInstanceAsInterface(value);
+        public static TAsInterface Wrap<TAsInterface>(TValue value) =>
+            DuckTyper<TValue, TAsInterface>.Wrap(value);
     }
 
-    public static class ActivatorX<TValue, TAsInterface>
+    public static class DuckTyper<TValue, TAsInterface>
     {
         private static readonly ConstructorInfo wrapperCtor;
 
-        static ActivatorX()
+        static DuckTyper()
         {
-            var wrapperType = CreateType(ActivatorX.DynamicModule);
+            var wrapperType = CreateType(DuckTyper.DynamicModule);
 
             var innerValueField = CreateValueField(wrapperType);
 
@@ -66,6 +66,7 @@ namespace Sysx.Reflection
             var interfaceMembers = typeof(TAsInterface)
                 .GetMembers()
                 .Where(x => FlagsEnum.HasAny(x.MemberType, handledTypes))
+                // remove get_### and set_### methods used to access properties and fields
                 .Where(x => x is not MethodInfo xMethod || !xMethod.IsSpecialName)
                 .ToArray();
 
@@ -78,7 +79,7 @@ namespace Sysx.Reflection
                 .GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new [] { typeof(TValue) }, null)!;
         }
 
-        public static TAsInterface CreateInstanceAsInterface(TValue value)
+        public static TAsInterface Wrap(TValue value)
         {
             EnsureArg.HasValue(value);
 
@@ -88,7 +89,7 @@ namespace Sysx.Reflection
         private static TypeBuilder CreateType(ModuleBuilder moduleBuilder)
         {
             return moduleBuilder.DefineType(
-                $"{typeof(ActivatorX).FullName}._generated.{typeof(TValue).FullName}",
+                $"{typeof(DuckTyper).FullName}._generated.{typeof(TValue).FullName}",
                 TypeAttributes.NotPublic |
                 TypeAttributes.Class |
                 TypeAttributes.AutoClass |
@@ -277,7 +278,6 @@ namespace Sysx.Reflection
                     HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
                 }
             }
-
         }
 
         private static void HandlePropertyGetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, MethodInfo innerValuePropertyGetter)
@@ -349,7 +349,7 @@ namespace Sysx.Reflection
 
             var ilGen = wrapperPropertyGetMethod.GetILGenerator();
             ilGen.Emit(OpCodes.Ldstr, $"The field or property {wrapperProperty.Name} does not exist or does not have a get_{wrapperProperty.Name} method that returns {wrapperProperty.PropertyType.Name} on the wrapped type {typeof(TValue).Name}");
-            ilGen.Emit(OpCodes.Newobj, ActivatorX.InvalidOperationExceptionCtor);
+            ilGen.Emit(OpCodes.Newobj, DuckTyper.InvalidOperationExceptionCtor);
             ilGen.Emit(OpCodes.Throw);
 
             wrapperProperty.SetGetMethod(wrapperPropertyGetMethod);
@@ -365,7 +365,7 @@ namespace Sysx.Reflection
 
             var ilGen = wrapperPropertySetMethod.GetILGenerator();
             ilGen.Emit(OpCodes.Ldstr, $"The field or property {wrapperProperty.Name} does not exist or does not have a set_{wrapperProperty.Name} method that returns {wrapperProperty.PropertyType.Name} on the wrapped type {typeof(TValue).Name}");
-            ilGen.Emit(OpCodes.Newobj, ActivatorX.InvalidOperationExceptionCtor);
+            ilGen.Emit(OpCodes.Newobj, DuckTyper.InvalidOperationExceptionCtor);
             ilGen.Emit(OpCodes.Throw);
 
             wrapperProperty.SetSetMethod(wrapperPropertySetMethod);
@@ -431,7 +431,7 @@ namespace Sysx.Reflection
 
             var ilGen = wrapperMethod.GetILGenerator();
             ilGen.Emit(OpCodes.Ldstr, $"The method {wrapperMethod.Name} does not exist or does not return {wrapperMethod.ReturnType.Name} on the wrapped type {typeof(TValue).Name}");
-            ilGen.Emit(OpCodes.Newobj, ActivatorX.InvalidOperationExceptionCtor);
+            ilGen.Emit(OpCodes.Newobj, DuckTyper.InvalidOperationExceptionCtor);
             ilGen.Emit(OpCodes.Throw);
         }
     }
