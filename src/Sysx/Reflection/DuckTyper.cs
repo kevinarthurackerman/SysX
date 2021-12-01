@@ -210,6 +210,8 @@ namespace Sysx.Reflection
             var invalidOperationExceptionType = typeof(InvalidOperationException).GetIdentifier();
             var argumentNullExceptionType = typeof(ArgumentNullException).GetIdentifier();
             var type = typeof(Type).GetIdentifier();
+            var array = typeof(Array).GetIdentifier();
+            var @object = typeof(object).GetIdentifier();
 
             var fullyMapped = true;
             var cachedMemberNumber = 0;
@@ -377,7 +379,7 @@ namespace Sysx.Reflection
 
                             staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertySetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetSetMethod(true);");
 
-                            publicMembers.AppendLine($@"        set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}, new object[] {{ value }});");
+                            publicMembers.AppendLine($@"        set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}, new {@object}[] {{ value }});");
                         }
                     }
                 }
@@ -475,24 +477,30 @@ namespace Sysx.Reflection
 
                         staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
 
-                        // todo: use null or Array.Empty<object>() insead of empty array when method has no args
                         publicMembers.AppendLine($@"    {interfaceMethodSignature}");
                         publicMembers.AppendLine($@"    {{");
-                        publicMembers.AppendLine($@"        var __parameters = new object[]");
-                        publicMembers.AppendLine($@"        {{");
-                        for (var i = 0; i < parameters.Length; i++)
+                        if (parameters.Any())
                         {
-                            if (parameters[i].IsOut)
+                            publicMembers.AppendLine($@"        var __parameters = new {@object}[]");
+                            publicMembers.AppendLine($@"        {{");
+                            for (var i = 0; i < parameters.Length; i++)
                             {
-                                publicMembers.Append($@"            default({parameters[i].ParameterType.GetIdentifier()})");
+                                if (parameters[i].IsOut)
+                                {
+                                    publicMembers.Append($@"            default({parameters[i].ParameterType.GetIdentifier()})");
+                                }
+                                else
+                                {
+                                    publicMembers.Append($@"            {parameters[i].Name}");
+                                }
+                                publicMembers.AppendLine(parameters[i] != parameters.Last() ? "," : string.Empty);
                             }
-                            else
-                            {
-                                publicMembers.Append($@"            {parameters[i].Name}");
-                            }
-                            publicMembers.AppendLine(parameters[i] != parameters.Last() ? "," : string.Empty);
+                            publicMembers.AppendLine($@"        }};");
                         }
-                        publicMembers.AppendLine($@"        }};");
+                        else
+                        {
+                            publicMembers.AppendLine($@"        var __parameters = {array}.{nameof(Array.Empty)}<{@object}>()");
+                        }
                         publicMembers.AppendLine($@"        var __result = ({interfaceMethodReturnType}){staticValueMethodInfo}.Invoke({innerValue}, __parameters);");
                         for (var i = 0; i < parameters.Length; i++)
                         {
