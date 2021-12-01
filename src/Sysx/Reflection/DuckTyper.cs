@@ -18,15 +18,16 @@ namespace Sysx.Reflection
         private static readonly ConcurrentDictionary<CacheKey, TryWrapMethod> _tryWrapCache = new();
 
         /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.Wrap(TValue, bool)" />
-        public static TWithInterface Wrap<TWithInterface>(object value) =>
+        public static TWithInterface Wrap<TWithInterface>(object? value) =>
             Wrap<TWithInterface>(value, includePrivateMembers: false);
 
         /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.Wrap(TValue, bool)" />
-        public static TWithInterface Wrap<TWithInterface>(object value, bool includePrivateMembers)
+        public static TWithInterface Wrap<TWithInterface>(object? value, bool includePrivateMembers)
         {
             EnsureArg.IsTrue(typeof(TWithInterface).IsInterface,
                 nameof(TWithInterface),
                 x => x.WithMessage($"{nameof(TWithInterface)} must be an interface type."));
+            EnsureArg.HasValue(value, nameof(value));
 
             var key = new CacheKey(value.GetType(), typeof(TWithInterface), includePrivateMembers);
             var duckTyper = _wrapCache.GetOrAdd(key,
@@ -43,19 +44,19 @@ namespace Sysx.Reflection
         }
 
         /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.TryWrap(TValue, out TWithInterface, bool)" />
-        public static bool TryWrap<TWithInterface>(object value, out TWithInterface? withInterface) =>
+        public static bool TryWrap<TWithInterface>(object? value, out TWithInterface? withInterface) =>
             TryWrap(value, out withInterface, includePrivateMembers: false);
 
         /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.TryWrap(TValue, out TWithInterface, bool)" />
-        public static bool TryWrap<TWithInterface>(object value, out TWithInterface? withInterface, bool includePrivateMembers)
+        public static bool TryWrap<TWithInterface>(object? value, out TWithInterface? withInterface, bool includePrivateMembers)
         {
-            if (!typeof(TWithInterface).IsInterface)
+            if (!typeof(TWithInterface).IsInterface && value != null)
             {
                 withInterface = default;
                 return false;
             }
 
-            var key = new CacheKey(value.GetType(), typeof(TWithInterface), includePrivateMembers);
+            var key = new CacheKey(value!.GetType(), typeof(TWithInterface), includePrivateMembers);
             var duckTyper = _tryWrapCache.GetOrAdd(key,
                 key =>
                 {
@@ -135,7 +136,10 @@ namespace Sysx.Reflection
         /// </summary>
         public static TWithInterface Wrap(TValue value, bool includePrivateMembers)
         {
-            EnsureArg.IsTrue(typeof(TWithInterface).IsInterface);
+            EnsureArg.IsTrue(typeof(TWithInterface).IsInterface,
+                nameof(TWithInterface),
+                x => x.WithMessage($"{nameof(TWithInterface)} must be an interface type."));
+            EnsureArg.HasValue(value, nameof(value));
 
             if (includePrivateMembers)
             {
@@ -156,7 +160,7 @@ namespace Sysx.Reflection
         /// </summary>
         public static bool TryWrap(TValue value, out TWithInterface? withInterface, bool includePrivateMembers)
         {
-            if (typeof(TWithInterface).IsInterface)
+            if (typeof(TWithInterface).IsInterface && value != null)
             {
                 if (includePrivateMembers)
                 {
