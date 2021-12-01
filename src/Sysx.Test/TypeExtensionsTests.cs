@@ -1,5 +1,6 @@
 ﻿namespace Sysx.Test
 {
+    using System;
     using Xunit;
 
     public class TypeExtensionsTests
@@ -34,6 +35,15 @@
             var result = typeof(System.String).GetIdentifier();
 
             Assert.Equal("string", result);
+        }
+
+
+        [Fact]
+        public void Should_Return_Identifier_For_Null()
+        {
+            var result = ((Type)null).GetIdentifier();
+
+            Assert.Equal("null", result);
         }
 
         public class TestParent

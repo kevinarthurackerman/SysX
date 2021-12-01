@@ -72,6 +72,7 @@ namespace Sysx
         /// </summary>
         public static string? GetAlias(this Type type)
         {
+            if (type == null) return "null";
             aliases.TryGetValue(type, out var alias);
             return alias;
         }
