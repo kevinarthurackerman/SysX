@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 
 namespace Sysx
 {
-    // todo: add tests
     public static class TypeExtensions
     {
         private static readonly IReadOnlyDictionary<Type, string> aliases = new ReadOnlyDictionary<Type, string>(new Dictionary<Type, string>()
