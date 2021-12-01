@@ -210,7 +210,6 @@ namespace Sysx.Reflection
             var fullyMapped = true;
 
             var staticPrivateFields = new StringBuilder();
-            var staticInitializers = new StringBuilder();
             var publicMembers = new StringBuilder();
 
             var innerValue = "innerValue";
@@ -302,9 +301,8 @@ namespace Sysx.Reflection
                     {
                         var staticValueFieldInfo = $@"{valueField}_FieldInfo";
 
-                        staticPrivateFields.AppendLine($@"    private static readonly {fieldInfo} {staticValueFieldInfo};");
+                        staticPrivateFields.AppendLine($@"    private static readonly {fieldInfo} {staticValueFieldInfo} = typeof({valueType}).GetField(""{valueField}"", {nonPublicInstanceBindingFlags});");
 
-                        staticInitializers.AppendLine($@"        {staticValueFieldInfo} = typeof({valueType}).GetField(""{valueField}"", {nonPublicInstanceBindingFlags});");
                         if (interfacePropertyHasGet)
                         {
                             publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValueFieldInfo}.GetValue({innerValue}!);");
@@ -350,9 +348,7 @@ namespace Sysx.Reflection
                         {
                             var staticValuePropertyGetMethodInfo = $@"get_{valueProperty}_MethodInfo";
 
-                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertyGetMethodInfo};");
-
-                            staticInitializers.AppendLine($@"        {staticValuePropertyGetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetGetMethod(true);");
+                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertyGetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetGetMethod(true);");
 
                             publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValuePropertyGetMethodInfo}.Invoke({innerValue}!, null);");
                         }
@@ -374,9 +370,7 @@ namespace Sysx.Reflection
                         {
                             var staticValuePropertySetMethodInfo = $@"Set_{valueProperty}_MethodInfo";
 
-                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertySetMethodInfo};");
-
-                            staticInitializers.AppendLine($@"        {staticValuePropertySetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetSetMethod(true);");
+                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertySetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetSetMethod(true);");
 
                             // todo: use pool of single value object arrays instead of newing one up
                             publicMembers.AppendLine($@"        set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}!, new object[] {{ value }});");
@@ -485,9 +479,7 @@ namespace Sysx.Reflection
                         {
                             var staticValueMethodInfo = $@"{interfaceMethod}_MethodInfo";
 
-                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValueMethodInfo};");
-
-                            staticInitializers.AppendLine($@"        {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
+                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
 
                             // todo: use null or Array.Empty<object>() insead of empty array when method has no args
                             publicMembers.AppendLine($@"    {interfaceMethodSignature} => ({interfaceMethodReturnType}){staticValueMethodInfo}.Invoke({innerValue}!, new object[] {{ {interfaceMethodParameterNameList} }});");
@@ -511,14 +503,6 @@ namespace Sysx.Reflection
             }
             codeBuilder.AppendLine($@"    private readonly {valueType} {innerValue};");
             codeBuilder.AppendLine();
-            if (staticInitializers.Length > 0)
-            {
-                codeBuilder.AppendLine($@"    static {wrapperType}()");
-                codeBuilder.AppendLine($@"    {{");
-                codeBuilder.Append(staticInitializers.ToString());
-                codeBuilder.AppendLine($@"    }}");
-                codeBuilder.AppendLine();
-            }
             codeBuilder.AppendLine($@"    public {wrapperType}({valueType} valueToWrap)");
             codeBuilder.AppendLine($@"    {{");
             codeBuilder.AppendLine($@"        {innerValue} = valueToWrap ?? throw new {argumentNullExceptionType}(nameof(valueToWrap));");
