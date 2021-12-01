@@ -4,39 +4,37 @@
 
     public class SimilarPrivateMethodSignatureTests
     {
-        //the below tests are not currently valid, but can be used once support is added for out parameters on private methods
-
         [Fact]
         public void Should_Distinguish_Similar_Methods()
         {
-            //var value = new Duck();
-            //var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value);
+            var value = new Duck();
+            var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value, true);
 
-            //var success1 = wrapper.TryQuack(1, out var result1);
+            var success1 = wrapper.TryQuack(1, out var result1);
 
-            //Assert.True(success1);
-            //Assert.Equal(1, result1);
+            Assert.True(success1);
+            Assert.Equal(1, result1);
 
-            //var success2 = wrapper.TryQuack((int?)2, out var result2);
+            var success2 = wrapper.TryQuack((int?)2, out var result2);
 
-            //Assert.True(success2);
-            //Assert.Equal(2, result2);
+            Assert.True(success2);
+            Assert.Equal(2, result2);
 
-            //var success3 = wrapper.TryQuack("Quack3", out var result3);
+            var success3 = wrapper.TryQuack("Quack3", out var result3);
 
-            //Assert.True(success3);
-            //Assert.Equal("Quack3", result3);
+            Assert.True(success3);
+            Assert.Equal("Quack3", result3);
 
-            //string? result4 = null;
-            //var success4 = wrapper.TryQuack("Quack4", result4);
+            string? result4 = null;
+            var success4 = wrapper.TryQuack("Quack4", result4);
 
-            //Assert.True(success4);
-            //Assert.Null(result4);
+            Assert.True(success4);
+            Assert.Null(result4);
 
-            //Assert.Equal(1, value.MethodOneCallCount);
-            //Assert.Equal(1, value.MethodTwoCallCount);
-            //Assert.Equal(1, value.MethodThreeCallCount);
-            //Assert.Equal(1, value.MethodFourCallCount);
+            Assert.Equal(1, value.MethodOneCallCount);
+            Assert.Equal(1, value.MethodTwoCallCount);
+            Assert.Equal(1, value.MethodThreeCallCount);
+            Assert.Equal(1, value.MethodFourCallCount);
         }
 
         public interface IDuck

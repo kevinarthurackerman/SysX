@@ -212,6 +212,7 @@ namespace Sysx.Reflection
             var type = typeof(Type).GetIdentifier();
 
             var fullyMapped = true;
+            var cachedMemberNumber = 0;
 
             var staticPrivateFields = new StringBuilder();
             var publicMembers = new StringBuilder();
@@ -240,6 +241,7 @@ namespace Sysx.Reflection
                 var interfacePropertyHasGet = interfaceProperty.GetGetMethod() != null;
                 var interfacePropertyHasSet = interfaceProperty.GetSetMethod() != null;
 
+                publicMembers.AppendLine();
                 publicMembers.AppendLine($@"    {interfacePropertySignature}");
                 publicMembers.AppendLine($@"    {{");
 
@@ -285,13 +287,13 @@ namespace Sysx.Reflection
                     {
                         if (interfacePropertyHasGet)
                         {
-                            publicMembers.AppendLine($@"        get => {innerValue}!.{valueField};");
+                            publicMembers.AppendLine($@"        get => {innerValue}.{valueField};");
                         }
                         if (interfacePropertyHasSet)
                         {
                             if (!valueFieldInfo.IsInitOnly)
                             {
-                                publicMembers.AppendLine($@"        set => {innerValue}!.{valueField} = value;");
+                                publicMembers.AppendLine($@"        set => {innerValue}.{valueField} = value;");
                             }
                             else
                             {
@@ -303,19 +305,19 @@ namespace Sysx.Reflection
                     }
                     else
                     {
-                        var staticValueFieldInfo = $@"{valueField}_FieldInfo";
+                        var staticValueFieldInfo = $@"{valueField}_FieldInfo_{cachedMemberNumber++}";
 
                         staticPrivateFields.AppendLine($@"    private static readonly {fieldInfo} {staticValueFieldInfo} = typeof({valueType}).GetField(""{valueField}"", {nonPublicInstanceBindingFlags});");
 
                         if (interfacePropertyHasGet)
                         {
-                            publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValueFieldInfo}.GetValue({innerValue}!);");
+                            publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValueFieldInfo}.GetValue({innerValue});");
                         }
                         if (interfacePropertyHasSet)
                         {
                             if (!valueFieldInfo.IsInitOnly)
                             {
-                                publicMembers.AppendLine($@"        set => {staticValueFieldInfo}.SetValue({innerValue}!, value);");
+                                publicMembers.AppendLine($@"        set => {staticValueFieldInfo}.SetValue({innerValue}, value);");
                             }
                             else
                             {
@@ -346,15 +348,15 @@ namespace Sysx.Reflection
                         }
                         else if (valuePropertyGet.IsPublic)
                         {
-                            publicMembers.AppendLine($@"        get => {innerValue}!.{valueProperty};");
+                            publicMembers.AppendLine($@"        get => {innerValue}.{valueProperty};");
                         }
                         else
                         {
-                            var staticValuePropertyGetMethodInfo = $@"get_{valueProperty}_MethodInfo";
+                            var staticValuePropertyGetMethodInfo = $@"get_{valueProperty}_MethodInfo_{cachedMemberNumber++}";
 
                             staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertyGetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetGetMethod(true);");
 
-                            publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValuePropertyGetMethodInfo}.Invoke({innerValue}!, null);");
+                            publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValuePropertyGetMethodInfo}.Invoke({innerValue}, null);");
                         }
                     }
 
@@ -372,12 +374,12 @@ namespace Sysx.Reflection
                         }
                         else
                         {
-                            var staticValuePropertySetMethodInfo = $@"Set_{valueProperty}_MethodInfo";
+                            var staticValuePropertySetMethodInfo = $@"Set_{valueProperty}_MethodInfo_{cachedMemberNumber++}";
 
                             staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertySetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetSetMethod(true);");
 
                             // todo: use pool of single value object arrays instead of newing one up
-                            publicMembers.AppendLine($@"        set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}!, new object[] {{ value }});");
+                            publicMembers.AppendLine($@"        set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}, new object[] {{ value }});");
                         }
                     }
                 }
@@ -402,7 +404,6 @@ namespace Sysx.Reflection
                 }
 
                 publicMembers.AppendLine($@"    }}");
-                publicMembers.AppendLine();
             }
 
             foreach (var interfaceMethodInfo in interfaceMethods)
@@ -427,7 +428,7 @@ namespace Sysx.Reflection
 
                 var valueMethodInfo = valueMethods.SingleOrDefault(x => x.MatchesSignature(interfaceMethodInfo));
 
-                var hasOutParameters = interfaceMethodInfo.GetParameters().Any(x => x.ParameterType.IsByRef);
+                publicMembers.AppendLine();
 
                 var matchCount = 0;
                 if (valueFieldInfo != null) matchCount++;
@@ -471,23 +472,39 @@ namespace Sysx.Reflection
                     }
                     else
                     {
-                        if (hasOutParameters)
+                        var staticValueMethodInfo = $@"{interfaceMethod}_MethodInfo_{cachedMemberNumber++}";
+                        var parameters = interfaceMethodInfo.GetParameters();
+
+                        staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
+
+                        // todo: use null or Array.Empty<object>() insead of empty array when method has no args
+                        publicMembers.AppendLine($@"    {interfaceMethodSignature}");
+                        publicMembers.AppendLine($@"    {{");
+                        publicMembers.AppendLine($@"        var __parameters = new object[]");
+                        publicMembers.AppendLine($@"        {{");
+                        for (var i = 0; i < parameters.Length; i++)
                         {
-                            // map to exception, out parameters not currently supported on private methods
-                            // todo: add support for out parameters on private methods
-                            fullyMapped = false;
-
-                            publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Cannot map method to {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} on wrapped value {valueType}, out parameters are not currently supported on private methods."");");
+                            if (parameters[i].IsOut)
+                            {
+                                publicMembers.Append($@"            default({parameters[i].ParameterType.GetIdentifier()})");
+                            }
+                            else
+                            {
+                                publicMembers.Append($@"            {parameters[i].Name}");
+                            }
+                            publicMembers.AppendLine(parameters[i] != parameters.Last() ? "," : string.Empty);
                         }
-                        else
+                        publicMembers.AppendLine($@"        }};");
+                        publicMembers.AppendLine($@"        var __result = ({interfaceMethodReturnType}){staticValueMethodInfo}.Invoke({innerValue}, __parameters);");
+                        for (var i = 0; i < parameters.Length; i++)
                         {
-                            var staticValueMethodInfo = $@"{interfaceMethod}_MethodInfo";
-
-                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
-
-                            // todo: use null or Array.Empty<object>() insead of empty array when method has no args
-                            publicMembers.AppendLine($@"    {interfaceMethodSignature} => ({interfaceMethodReturnType}){staticValueMethodInfo}.Invoke({innerValue}!, new object[] {{ {interfaceMethodParameterNameList} }});");
+                            if (parameters[i].IsOut)
+                            {
+                                publicMembers.AppendLine($@"        {parameters[i].Name} = ({parameters[i].ParameterType.GetIdentifier()})__parameters[{i}];");
+                            }
                         }
+                        publicMembers.AppendLine($@"        return __result;");
+                        publicMembers.AppendLine($@"    }}");
                     }
                 }
                 else
@@ -498,6 +515,7 @@ namespace Sysx.Reflection
             }
 
             var codeBuilder = new StringBuilder();
+            codeBuilder.AppendLine($@"#nullable disable");
             codeBuilder.AppendLine($@"internal class {wrapperType}: {interfaceType}");
             codeBuilder.AppendLine($@"{{");
             if (staticPrivateFields.Length > 0)
@@ -513,7 +531,6 @@ namespace Sysx.Reflection
             codeBuilder.AppendLine($@"    }}");
             if (publicMembers.Length > 0)
             {
-                codeBuilder.AppendLine();
                 codeBuilder.Append(publicMembers.ToString());
             }
             codeBuilder.AppendLine($@"}}");
