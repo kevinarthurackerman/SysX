@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnsureThat;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -70,7 +71,7 @@ namespace Sysx
         /// <summary>
         /// Gets the code alias for the given type.
         /// </summary>
-        public static string? GetAlias(this Type type)
+        public static string? GetAlias(this Type? type)
         {
             if (type == null) return "null";
             aliases.TryGetValue(type, out var alias);
@@ -81,7 +82,17 @@ namespace Sysx
         /// Get the identified for the given type. If the type has an alias that is returned,
         /// otherwise the fully qualified name will be returned.
         /// </summary>
-        public static string? GetIdentifier(this Type type) =>
-            GetAlias(type) ?? type.FullName?.Replace('+', '.');
+        public static string? GetIdentifier(this Type? type) =>
+            GetAlias(type) ?? type!.FullName?.Replace('+', '.');
+
+        /// <summary>
+        /// Returns whether or not the given type is nullable.
+        /// </summary>
+        public static bool IsNullable(this Type type)
+        {
+            EnsureArg.IsNotNull(type, nameof(type));
+
+            return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
+        }
     }
 }
