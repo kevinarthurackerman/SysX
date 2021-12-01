@@ -68,12 +68,19 @@ namespace Sysx
                 { typeof(char?).MakeByRefType(), "char?" }
             });
 
+        /// <summary>
+        /// Gets the code alias for the given type.
+        /// </summary>
         public static string? GetAlias(this Type type)
         {
             aliases.TryGetValue(type, out var alias);
             return alias;
         }
 
+        /// <summary>
+        /// Get the identified for the given type. If the type has an alias that is returned,
+        /// otherwise the fully qualified name will be returned.
+        /// </summary>
         public static string? GetIdentifier(this Type type) =>
             GetAlias(type) ?? type.FullName?.Replace('+', '.');
     }
