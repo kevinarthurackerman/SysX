@@ -11,14 +11,17 @@ using Sysx.Enums;
 
 namespace Sysx.Reflection
 {
+    /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}" />
     public static class DuckTyper
     {
         private static readonly ConcurrentDictionary<WrapKey, WrapMethod> _wrapCache = new();
         private static readonly ConcurrentDictionary<WrapKey, TryWrapMethod> _tryWrapCache = new();
 
+        /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.Wrap(TValue, bool)" />
         public static TWithInterface Wrap<TWithInterface>(object value) =>
             Wrap<TWithInterface>(value, includePrivateMembers: false);
 
+        /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.Wrap(TValue, bool)" />
         public static TWithInterface Wrap<TWithInterface>(object value, bool includePrivateMembers)
         {
             EnsureArg.IsTrue(typeof(TWithInterface).IsInterface,
@@ -39,9 +42,11 @@ namespace Sysx.Reflection
             return (TWithInterface)duckTyper(value);
         }
 
+        /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.TryWrap(TValue, out TWithInterface, bool)" />
         public static bool TryWrap<TWithInterface>(object value, out TWithInterface? withInterface) =>
             TryWrap(value, out withInterface, includePrivateMembers: false);
 
+        /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.TryWrap(TValue, out TWithInterface, bool)" />
         public static bool TryWrap<TWithInterface>(object value, out TWithInterface? withInterface, bool includePrivateMembers)
         {
             if (!typeof(TWithInterface).IsInterface)
@@ -79,6 +84,10 @@ namespace Sysx.Reflection
         private delegate bool TryWrapMethod(object value, out object? withInterface);
     }
 
+    /// <summary>
+    /// Wraps values with interfaces so that they can be used in a duck-typed way.
+    /// By including private members the interface wrapper can also be used to access the type as a "friended" class.
+    /// </summary>
     public static class DuckTyper<TValue, TWithInterface>
     {
         private static readonly Type? publicMemberWrapper;
@@ -115,9 +124,15 @@ namespace Sysx.Reflection
             publicAndPrivateMembersFullyWrapped = publicAndPrivateWrapperResult.FullyMapped;
         }
 
+        /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.Wrap(TValue, bool)" />
         public static TWithInterface Wrap(TValue value) =>
             Wrap(value, includePrivateMembers: false);
 
+        /// <summary>
+        /// Wraps the target value with an interface so that it can be used in a duck-typed way.
+        /// By including private members the interface wrapper can also be used to access the type as a "friended" class.
+        /// Members that cannot be mapped to the target value will result in an InvalidOperationException when called.
+        /// </summary>
         public static TWithInterface Wrap(TValue value, bool includePrivateMembers)
         {
             EnsureArg.IsTrue(typeof(TWithInterface).IsInterface);
@@ -130,9 +145,15 @@ namespace Sysx.Reflection
             return (TWithInterface)Activator.CreateInstance(publicMemberWrapper!, value)!;
         }
 
+        /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.TryWrap(TValue, out TWithInterface, bool)" />
         public static bool TryWrap(TValue value, out TWithInterface? withInterface) =>
             TryWrap(value, out withInterface, includePrivateMembers: false);
 
+        /// <summary>
+        /// Tries to wrap the target value with an interface so that it can be used in a duck-typed way.
+        /// By including private members the interface wrapper can also be used to access the type as a "friended" class.
+        /// Will only return true when all members of the target value can be wrapped by the interface.
+        /// </summary>
         public static bool TryWrap(TValue value, out TWithInterface? withInterface, bool includePrivateMembers)
         {
             if (typeof(TWithInterface).IsInterface)
