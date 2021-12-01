@@ -312,6 +312,7 @@ namespace Sysx.Reflection
                     var valuePropertyGet = valuePropertyInfo.GetGetMethod(includePrivateMembers);
                     var valuePropertySet = valuePropertyInfo.GetSetMethod(includePrivateMembers);
 
+                    // todo: cache PropertyInfo in variable in static constructor to reuse between setting getter and setter
                     if (interfacePropertyHasGet)
                     {
                         if (valuePropertyGet == null)
@@ -479,7 +480,6 @@ namespace Sysx.Reflection
 
                             staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValueMethodInfo};");
 
-                            // todo: add handling for any number of args
                             staticInitializers.AppendLine($@"        {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
 
                             // todo: use null or Array.Empty<object>() insead of empty array when method has no args
