@@ -8,7 +8,7 @@
 namespace Sysx.Hashing
 {
     /// <summary>
-    /// Generates strong hashcodes from supplied values on the class.
+    /// Generates strong hashcodes from supplied values.
     /// </summary>
     public static class HashCode
     {
@@ -16,19 +16,33 @@ namespace Sysx.Hashing
         /// <summary>
         /// Creates a hashcode from the supplied values.
         /// </summary>
-        public static int Combine<<#=List(genericArgs, i => "T" + i)#>>(<#=List(genericArgs, i => "T" + i + " item" + i)#>)
+        public static int Combine<<#=List(genericArgs, i => "T" + i)#>>(<#=List(genericArgs, i => "T" + i + " value" + i)#>)
         {
             unchecked
             {
                 int hash = 17;
 <#  for(var item = 1; item <= genericArgs; item++) {#>
-                hash = hash * 31 + item<#=item#>?.GetHashCode() ?? 0;
+                hash = hash * 31 + value<#=item#>?.GetHashCode() ?? 0;
 <#  }#>
                 return hash;
             }
         }
 <#  if(genericArgs != enumerations) WriteLine(string.Empty);#>
 <#}#>
+
+        /// <summary>
+        /// Creates a hashcode from the supplied values.
+        /// </summary>
+        public static int Combine(params object[] values)
+        {
+            unchecked
+            {
+                int hash = 17;
+                for(var i = 0; i < values.Length; i++)
+                    hash = hash * 31 + values[i]?.GetHashCode() ?? 0;
+                return hash;
+            }
+        }
     }
 }
 <#+
