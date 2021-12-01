@@ -1,542 +1,533 @@
 ﻿using EnsureThat;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Reflection;
-using System.Reflection.Emit;
+using System.Text;
 using Sysx.Enums;
 
 namespace Sysx.Reflection
 {
-    public class DuckTyper
+    public static class DuckTyper
     {
-        private static readonly ConcurrentDictionary<CacheKey, WrapMethod> wrapCache = new();
-        private static readonly ConcurrentDictionary<CacheKey, TryWrapMethod> tryWrapCache = new();
+        private static readonly ConcurrentDictionary<WrapKey, WrapMethod> _wrapCache = new();
+        private static readonly ConcurrentDictionary<WrapKey, TryWrapMethod> _tryWrapCache = new();
 
-        internal static readonly ModuleBuilder DynamicModule;
-        internal static readonly ConstructorInfo InvalidOperationExceptionCtor;
+        public static TWithInterface Wrap<TWithInterface>(object value) =>
+            Wrap<TWithInterface>(value, includePrivateMembers: false);
 
-        static DuckTyper()
+        public static TWithInterface Wrap<TWithInterface>(object value, bool includePrivateMembers)
         {
-            var assemblyName = new AssemblyName($"{nameof(DuckTyper)}_{Guid.NewGuid()}");
-            
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-            var dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-#endif
-#if NET48
-            var dynamicAssembly = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-#endif
-            var assembly = Assembly.GetEntryAssembly();
+            EnsureArg.IsTrue(typeof(TWithInterface).IsInterface,
+                nameof(TWithInterface),
+                x => x.WithMessage($"{nameof(TWithInterface)} must be an interface type."));
 
-            DynamicModule = dynamicAssembly.DefineDynamicModule("core");
-
-            InvalidOperationExceptionCtor = typeof(InvalidOperationException).GetConstructors()
-                .Single(x =>
+            var key = new WrapKey(value.GetType(), typeof(TWithInterface), includePrivateMembers);
+            var duckTyper = _wrapCache.GetOrAdd(key,
+                key =>
                 {
-                    if (!x.IsPublic) return false;
+                    var wrapMethod = typeof(DuckTyper<,>)
+                        .MakeGenericType(key.Value, key.WithInterface)
+                        .GetMethod(nameof(DuckTyper<object, object>.Wrap), new[] { key.Value, typeof(bool) })!;
 
-                    var parameters = x.GetParameters();
-
-                    if (parameters.Length != 1) return false;
-                    if (parameters[0].ParameterType != typeof(string)) return false;
-
-                    return true;
+                    return value => wrapMethod.Invoke(null, new[] { value, key.IncludePrivateMembers })!;
                 });
+
+            return (TWithInterface)duckTyper(value);
         }
 
-        public static TWithInterface Wrap<TWithInterface>(object value)
+        public static bool TryWrap<TWithInterface>(object value, out TWithInterface? withInterface) =>
+            TryWrap(value, out withInterface, includePrivateMembers: false);
+
+        public static bool TryWrap<TWithInterface>(object value, out TWithInterface? withInterface, bool includePrivateMembers)
         {
-            EnsureArg.HasValue(value);
-
-            var key = new CacheKey(value.GetType(), typeof(TWithInterface));
-
-            var wrapMethod = wrapCache.GetOrAdd(key, x =>
+            if (!typeof(TWithInterface).IsInterface)
             {
-                var wrapMethod = typeof(DuckTyper<,>)
-                    .MakeGenericType(x.ValueType, x.WithInterfaceType)
-                    .GetMethod(nameof(DuckTyper<object, object>.Wrap))!;
-
-                return value => wrapMethod.Invoke(null, new[] { value })!;
-            });
-
-            return (TWithInterface)wrapMethod(value);
-        }
-
-        public static bool TryWrap<TWithInterface>(object value, out TWithInterface? withInterface)
-        {
-            EnsureArg.HasValue(value);
-
-            var key = new CacheKey(value.GetType(), typeof(TWithInterface));
-
-            var wrapMethod = tryWrapCache.GetOrAdd(key, x =>
-            {
-                var tryWrapMethod = typeof(DuckTyper<,>)
-                    .MakeGenericType(x.ValueType, x.WithInterfaceType)
-                    .GetMethod(nameof(DuckTyper<object, object>.TryWrap))!;
-
-                return (object value, out object? withInterface) =>
-                {
-                    var parameters = new[] { value, null };
-                    var success = (bool)tryWrapMethod.Invoke(null, parameters)!;
-
-                    if (success)
-                    {
-                        withInterface = parameters[1];
-                        return true;
-                    }
-
-                    withInterface = default;
-                    return false;
-                };
-            });
-
-            if (wrapMethod(value, out var tryResult))
-            {
-                withInterface = (TWithInterface)tryResult!;
-                return true;
+                withInterface = default;
+                return false;
             }
 
-            withInterface = default;
-            return false;
+            var key = new WrapKey(value.GetType(), typeof(TWithInterface), includePrivateMembers);
+            var duckTyper = _tryWrapCache.GetOrAdd(key,
+                key =>
+                {
+                    var tryWrapMethod = typeof(DuckTyper<,>)
+                        .MakeGenericType(key.Value, key.WithInterface)
+                        .GetMethod(nameof(DuckTyper<object, object>.TryWrap),
+                            new[] { key.Value, key.WithInterface.MakeByRefType(), typeof(bool) })!;
+
+                    return (object value, out object? withInterface) =>
+                    {
+                        var parameters = new[] { value, null, key.IncludePrivateMembers };
+                        var success = (bool)tryWrapMethod.Invoke(null, parameters)!;
+                        withInterface = parameters[1];
+                        return success;
+                    };
+                });
+
+            var success = duckTyper(value, out var result);
+
+            withInterface = result == null ? default : (TWithInterface)result;
+            return success;
         }
 
-        public static TWithInterface Wrap<TValue, TWithInterface>(TValue value) =>
-            DuckTyper<TValue, TWithInterface>.Wrap(value);
-
-        private record struct CacheKey(Type ValueType, Type WithInterfaceType);
+        private record struct WrapKey(Type Value, Type WithInterface, bool IncludePrivateMembers);
         private delegate object WrapMethod(object value);
         private delegate bool TryWrapMethod(object value, out object? withInterface);
     }
 
     public static class DuckTyper<TValue, TWithInterface>
     {
-        private static readonly ConstructorInfo wrapperCtor;
+        private static readonly Type? publicMemberWrapper;
+        private static readonly bool? publicMembersFullyWrapped;
 
-        public static bool CompletelyMapped { get; }
+        private static readonly Type? publicAndPrivateMemberWrapper;
+        private static readonly bool? publicAndPrivateMembersFullyWrapped;
 
         static DuckTyper()
         {
-            var wrapperType = CreateType(DuckTyper.DynamicModule);
+            if (!typeof(TWithInterface).IsInterface) return;
 
-            var innerValueField = CreateValueField(wrapperType);
+            var scriptOptions = ScriptOptions.Default
+                .AddReferences(Assembly.GetAssembly(typeof(Type)))
+                .AddReferences(Assembly.GetAssembly(typeof(TValue)))
+                .AddReferences(Assembly.GetAssembly(typeof(TWithInterface)));
 
-            CreateConstructor(wrapperType, innerValueField);
+            var publicWrapperResult = GenerateWrapperCode(false);
 
-            var handledTypes = MemberTypes.Field | MemberTypes.Property | MemberTypes.Method;
-            var interfaceMembers = typeof(TWithInterface)
-                .GetMembers()
-                .Where(x => FlagsEnum.HasAny(x.MemberType, handledTypes))
-                // remove get_### and set_### methods used to access properties and fields
-                .Where(x => x is not MethodInfo xMethod || !xMethod.IsSpecialName)
-                .ToArray();
+            var publicWrapperScript = CSharpScript.Create(publicWrapperResult.Code, scriptOptions);
+            publicWrapperScript.Compile();
 
-            CompletelyMapped = true;
+            publicMemberWrapper = (Type)publicWrapperScript.RunAsync().Result.ReturnValue;
 
-            foreach (var interfaceMember in interfaceMembers)
-                CompletelyMapped &= HandleMember(wrapperType, innerValueField, interfaceMember);
+            publicMembersFullyWrapped = publicWrapperResult.FullyMapped;
 
-            wrapperType.AddInterfaceImplementation(typeof(TWithInterface));
+            var publicAndPrivateWrapperResult = GenerateWrapperCode(true);
 
-            wrapperCtor = wrapperType.CreateType()!
-                .GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new [] { typeof(TValue) }, null)!;
+            var publicAndPrivateWrapperScript = CSharpScript.Create(publicAndPrivateWrapperResult.Code, scriptOptions);
+            publicAndPrivateWrapperScript.Compile();
+
+            publicAndPrivateMemberWrapper = (Type)publicAndPrivateWrapperScript.RunAsync().Result.ReturnValue;
+
+            publicAndPrivateMembersFullyWrapped = publicAndPrivateWrapperResult.FullyMapped;
         }
 
-        public static TWithInterface Wrap(TValue value)
+        public static TWithInterface Wrap(TValue value) =>
+            Wrap(value, includePrivateMembers: false);
+
+        public static TWithInterface Wrap(TValue value, bool includePrivateMembers)
         {
-            EnsureArg.HasValue(value);
+            EnsureArg.IsTrue(typeof(TWithInterface).IsInterface);
 
-            return (TWithInterface)wrapperCtor.Invoke(new object[] { value })!;
-        }
-
-        public static bool TryWrap(TValue value, out TWithInterface? withInterface)
-        {
-            EnsureArg.HasValue(value);
-
-            if (CompletelyMapped)
+            if (includePrivateMembers)
             {
-                withInterface = (TWithInterface)wrapperCtor.Invoke(new object[] { value })!;
-                return true;
+                return (TWithInterface)Activator.CreateInstance(publicAndPrivateMemberWrapper!, value)!;
+            }
+
+            return (TWithInterface)Activator.CreateInstance(publicMemberWrapper!, value)!;
+        }
+
+        public static bool TryWrap(TValue value, out TWithInterface? withInterface) =>
+            TryWrap(value, out withInterface, includePrivateMembers: false);
+
+        public static bool TryWrap(TValue value, out TWithInterface? withInterface, bool includePrivateMembers)
+        {
+            if (typeof(TWithInterface).IsInterface)
+            {
+                if (includePrivateMembers)
+                {
+                    if (publicAndPrivateMembersFullyWrapped!.Value)
+                    {
+                        withInterface = (TWithInterface)Activator.CreateInstance(publicAndPrivateMemberWrapper!, value)!;
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (publicMembersFullyWrapped!.Value)
+                    {
+                        withInterface = (TWithInterface)Activator.CreateInstance(publicMemberWrapper!, value)!;
+                        return true;
+                    }
+                }
             }
 
             withInterface = default;
             return false;
         }
 
-        private static TypeBuilder CreateType(ModuleBuilder moduleBuilder)
+        private static GenerateWrapperCodeResult GenerateWrapperCode(bool includePrivateMembers)
         {
-            return moduleBuilder.DefineType(
-                $"{typeof(DuckTyper).FullName}._generated.{typeof(TValue).FullName}",
-                TypeAttributes.NotPublic |
-                TypeAttributes.Class |
-                TypeAttributes.AutoClass |
-                TypeAttributes.AnsiClass |
-                TypeAttributes.BeforeFieldInit |
-                TypeAttributes.AutoLayout,
-                null);
-        }
+            var valueMemberBindingFlags = FlagsEnum.Combine(BindingFlags.Public, BindingFlags.Instance);
+            if (includePrivateMembers) valueMemberBindingFlags = FlagsEnum.Add(valueMemberBindingFlags, BindingFlags.NonPublic);
 
-        private static FieldBuilder CreateValueField(TypeBuilder wrapperTypeBuilder)
-        {
-            return wrapperTypeBuilder.DefineField(
-                "innerValue",
-                typeof(TValue),
-                FieldAttributes.Private | FieldAttributes.InitOnly);
-        }
+            var valueFields = typeof(TValue).GetFields(valueMemberBindingFlags);
 
-        private static ConstructorBuilder CreateConstructor(TypeBuilder wrapperTypeBuilder, FieldBuilder innerValueFieldBuilder)
-        {
-            var constructor = wrapperTypeBuilder.DefineConstructor(
-                MethodAttributes.Private | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName | MethodAttributes.HideBySig,
-                CallingConventions.Standard | CallingConventions.HasThis,
-                new[] { typeof(TValue) });
+            var valueProperties = typeof(TValue).GetProperties(valueMemberBindingFlags)
+                .Where(x => includePrivateMembers || (x.GetGetMethod()?.IsPublic ?? false) || (x.GetSetMethod()?.IsPublic ?? false))
+                .ToArray();
 
-            var ilGen = constructor.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldarg_0);
-            ilGen.Emit(OpCodes.Call, typeof(object).GetConstructor(Type.EmptyTypes)!);
-            ilGen.Emit(OpCodes.Nop);
-            ilGen.Emit(OpCodes.Nop);
-            ilGen.Emit(OpCodes.Ldarg_0);
-            ilGen.Emit(OpCodes.Ldarg_1);
-            ilGen.Emit(OpCodes.Stfld, innerValueFieldBuilder);
-            ilGen.Emit(OpCodes.Ret);
+            var valueMethods = typeof(TValue).GetMethods(valueMemberBindingFlags);
 
-            return constructor;
-        }
+            var interfaceMemberBindingFlags = FlagsEnum.Combine(BindingFlags.Public, BindingFlags.Instance);
 
-        private static bool HandleMember(TypeBuilder wrapperType, FieldBuilder innerValue, MemberInfo interfaceMember)
-        {
-            var innerValueMember = typeof(TValue)
-                .GetMembers()
-                .SingleOrDefault(x => x.Name == interfaceMember.Name);
+            var interfaceProperties = typeof(TWithInterface).GetProperties(interfaceMemberBindingFlags);
+            var interfaceMethods = typeof(TWithInterface).GetMethods(interfaceMemberBindingFlags)
+                .Where(x => !x.IsSpecialName)
+                .ToArray();
 
-            if (interfaceMember is PropertyInfo interfaceProperty)
+            var interfaceType = typeof(TWithInterface).GetIdentifier();
+            var valueType = typeof(TValue).GetIdentifier();
+            var wrapperType = $"{typeof(TWithInterface).Name}_Wraping_{typeof(TValue).Name}_Public{(includePrivateMembers ? "_And_Private" : "")}_Members";
+            var invalidOperationExceptionType = typeof(InvalidOperationException).GetIdentifier();
+            var argumentNullExceptionType = typeof(ArgumentNullException).GetIdentifier();
+            var type = typeof(Type).GetIdentifier();
+
+            var fullyMapped = true;
+
+            var staticPrivateFields = new StringBuilder();
+            var staticInitializers = new StringBuilder();
+            var publicMembers = new StringBuilder();
+
+            var innerValue = "innerValue";
+            var fieldInfo = typeof(FieldInfo).GetIdentifier();
+            var methodInfo = typeof(MethodInfo).GetIdentifier();
+            var bindingFlags = typeof(BindingFlags).GetIdentifier();
+            var nonPublicInstanceBindingFlags = $"{bindingFlags}.{nameof(BindingFlags.NonPublic)} | {bindingFlags}.{nameof(BindingFlags.Instance)}";
+
+            foreach (var interfaceProperty in interfaceProperties)
             {
-                if (innerValueMember is FieldInfo innerValueField)
+                var interfacePropertyName = interfaceProperty.Name;
+                var interfacePropertyType = interfaceProperty.PropertyType.GetIdentifier();
+                var interfacePropertySignature = $"public {interfacePropertyType} {interfacePropertyName}";
+
+                var valueFieldInfo = valueFields.SingleOrDefault(x =>
+                    x.Name == interfaceProperty.Name && x.FieldType == interfaceProperty.PropertyType);
+
+                var valuePropertyInfo = valueProperties.SingleOrDefault(x =>
+                    x.Name == interfaceProperty.Name && x.PropertyType == interfaceProperty.PropertyType);
+
+                var valueMethodInfo = valueMethods.SingleOrDefault(x =>
+                    x.Name == interfaceProperty.Name && x.ReturnType == interfaceProperty.PropertyType);
+
+                var interfacePropertyHasGet = interfaceProperty.GetGetMethod() != null;
+                var interfacePropertyHasSet = interfaceProperty.GetSetMethod() != null;
+
+                publicMembers.AppendLine($@"    {interfacePropertySignature}");
+                publicMembers.AppendLine($@"    {{");
+
+                var matchCount = 0;
+                if (valueFieldInfo != null) matchCount++;
+                if (valuePropertyInfo != null) matchCount++;
+                if (valueMethodInfo != null) matchCount++;
+
+                if (matchCount == 0)
                 {
-                    if (interfaceProperty.PropertyType == innerValueField.FieldType)
+                    // map to exception, no mapping found
+                    fullyMapped = false;
+
+                    if (interfacePropertyHasGet)
                     {
-                        return HandleField(wrapperType, innerValue, interfaceProperty, innerValueField);
+                        publicMembers.AppendLine($@"        get => throw new {invalidOperationExceptionType}(""No accessible field or property {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
+                    }
+                    if (interfacePropertyHasSet)
+                    {
+                        publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""No accessible field or property {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
+                    }
+                }
+                else if (matchCount > 1)
+                {
+                    // map to exception, multiple mappings found
+                    fullyMapped = false;
+
+                    if (interfacePropertyHasGet)
+                    {
+                        publicMembers.AppendLine($@"        get => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
+                    }
+                    if (interfacePropertyHasSet)
+                    {
+                        publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
+                    }
+                }
+                else if (valueFieldInfo != null)
+                {
+                    // map to field
+                    var valueField = valueFieldInfo.Name;
+
+                    if (valueFieldInfo.IsPublic)
+                    {
+                        if (interfacePropertyHasGet)
+                        {
+                            publicMembers.AppendLine($@"        get => {innerValue}!.{valueField};");
+                        }
+                        if (interfacePropertyHasSet)
+                        {
+                            if (!valueFieldInfo.IsInitOnly)
+                            {
+                                publicMembers.AppendLine($@"        set => {innerValue}!.{valueField} = value;");
+                            }
+                            else
+                            {
+                                fullyMapped = false;
+
+                                publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""The field matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is init only."");");
+                            }
+                        }
                     }
                     else
                     {
-                        return HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
+                        var staticValueFieldInfo = $@"{valueField}_FieldInfo";
+
+                        staticPrivateFields.AppendLine($@"    private static readonly {fieldInfo} {staticValueFieldInfo};");
+
+                        staticInitializers.AppendLine($@"        {staticValueFieldInfo} = typeof({valueType}).GetField(""{valueField}"", {nonPublicInstanceBindingFlags});");
+                        if (interfacePropertyHasGet)
+                        {
+                            publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValueFieldInfo}.GetValue({innerValue}!);");
+                        }
+                        if (interfacePropertyHasSet)
+                        {
+                            if (!valueFieldInfo.IsInitOnly)
+                            {
+                                publicMembers.AppendLine($@"        set => {staticValueFieldInfo}.SetValue({innerValue}!, value);");
+                            }
+                            else
+                            {
+                                fullyMapped = false;
+
+                                publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""The field matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is init only."");");
+                            }
+                        }
+
                     }
                 }
-                else if (innerValueMember is PropertyInfo innerValueProperty)
+                else if (valuePropertyInfo != null)
                 {
-                    if (interfaceProperty.PropertyType == innerValueProperty.PropertyType)
+                    // map to property
+                    var valueProperty = valuePropertyInfo.Name;
+
+                    var valuePropertyGet = valuePropertyInfo.GetGetMethod(includePrivateMembers);
+                    var valuePropertySet = valuePropertyInfo.GetSetMethod(includePrivateMembers);
+
+                    if (interfacePropertyHasGet)
                     {
-                        return HandleProperty(wrapperType, innerValue, interfaceProperty, innerValueProperty);
+                        if (valuePropertyGet == null)
+                        {
+                            fullyMapped = false;
+
+                            publicMembers.AppendLine($@"        get => throw new {invalidOperationExceptionType}(""The property matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is has no accessible get method defined."");");
+                        }
+                        else if (valuePropertyGet.IsPublic)
+                        {
+                            publicMembers.AppendLine($@"        get => {innerValue}!.{valueProperty};");
+                        }
+                        else
+                        {
+                            var staticValuePropertyGetMethodInfo = $@"get_{valueProperty}_MethodInfo";
+
+                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertyGetMethodInfo};");
+
+                            staticInitializers.AppendLine($@"        {staticValuePropertyGetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetGetMethod(true);");
+
+                            publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValuePropertyGetMethodInfo}.Invoke({innerValue}!, null);");
+                        }
+                    }
+
+                    if (interfacePropertyHasSet)
+                    {
+                        if (valuePropertySet == null)
+                        {
+                            fullyMapped = false;
+
+                            publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""The property matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found wrapped value {valueType} is has no accessible set method defined."");");
+                        }
+                        else if (valuePropertySet.IsPublic)
+                        {
+                            publicMembers.AppendLine($@"        set => {innerValue}!.{valueProperty} = value;");
+                        }
+                        else
+                        {
+                            var staticValuePropertySetMethodInfo = $@"Set_{valueProperty}_MethodInfo";
+
+                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertySetMethodInfo};");
+
+                            staticInitializers.AppendLine($@"        {staticValuePropertySetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetSetMethod(true);");
+
+                            // todo: use pool of single value object arrays instead of newing one up
+                            publicMembers.AppendLine($@"        set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}!, new object[] {{ value }});");
+                        }
+                    }
+                }
+                else if (valueMethodInfo != null)
+                {
+                    // map to exception, invalid mapping to method
+                    fullyMapped = false;
+
+                    if (interfacePropertyHasGet)
+                    {
+                        publicMembers.AppendLine($@"        get => throw new {invalidOperationExceptionType}(""Cannot map method to {interfaceType}.{interfacePropertyName} => {interfacePropertyType} on wrapped value {valueType}, a method must map to a method."");");
+                    }
+                    if (interfacePropertyHasSet)
+                    {
+                        publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""Cannot map method to {interfaceType}.{interfacePropertyName} => {interfacePropertyType} on wrapped value {valueType}, a method must map to a method."");");
+                    }
+                }
+                else
+                {
+                    // this block should be unreachable
+                    throw new Exception("Else block was reached unexpectedly.");
+                }
+
+                publicMembers.AppendLine($@"    }}");
+                publicMembers.AppendLine();
+            }
+
+            foreach (var interfaceMethodInfo in interfaceMethods)
+            {
+                var interfaceMethod = interfaceMethodInfo.Name;
+                var interfaceMethodReturnType = interfaceMethodInfo.ReturnType.GetIdentifier();
+                var interfaceMethodParameterList = string.Join(", ",
+                    interfaceMethodInfo.GetParameters().Select(x => $"{(x.ParameterType.IsByRef ? "out " : string.Empty)}{x.ParameterType.GetIdentifier()} {x.Name}"));
+                var interfaceMethodParameterNameList = string.Join(", ",
+                    interfaceMethodInfo.GetParameters().Select(x => $"{(x.ParameterType.IsByRef ? "out " : string.Empty)}{x.Name}"));
+                var interfaceMethodParameterTypeList = string.Join(", ",
+                    interfaceMethodInfo.GetParameters().Select(x => $"{(x.ParameterType.IsByRef ? "out " : string.Empty)}{x.ParameterType.GetIdentifier()}"));
+                var interfaceMethodTypeIdentifiersList = string.Join(", ",
+                    interfaceMethodInfo.GetParameters().Select(x => $"typeof({x.ParameterType.GetIdentifier()}){(x.ParameterType.IsByRef ? ".MakeByRefType()" : string.Empty)}"));
+                var interfaceMethodSignature = $"public {interfaceMethodReturnType} {interfaceMethod}({interfaceMethodParameterList})";
+
+                var valueFieldInfo = valueFields.SingleOrDefault(x =>
+                    x.Name == interfaceMethodInfo.Name && x.FieldType == interfaceMethodInfo.ReturnType);
+
+                var valuePropertyInfo = valueProperties.SingleOrDefault(x =>
+                    x.Name == interfaceMethodInfo.Name && x.PropertyType == interfaceMethodInfo.ReturnType);
+
+                var valueMethodInfo = valueMethods.SingleOrDefault(x =>
+                {
+                    if (x.Name != interfaceMethodInfo.Name) return false;
+                    if (x.ReturnType != interfaceMethodInfo.ReturnType) return false;
+
+                    var valueMethodParameters = x.GetParameters();
+                    var interfaceMethodParameters = interfaceMethodInfo.GetParameters();
+
+                    if (valueMethodParameters.Length != interfaceMethodParameters.Length) return false;
+
+                    for (var i = 0; i < valueMethodParameters.Length; i++)
+                        if (valueMethodParameters[i].ParameterType != interfaceMethodParameters[i].ParameterType) return false;
+
+                    return true;
+                });
+
+                var hasOutParameters = interfaceMethodInfo.GetParameters().Any(x => x.ParameterType.IsByRef);
+
+                var matchCount = 0;
+                if (valueFieldInfo != null) matchCount++;
+                if (valuePropertyInfo != null) matchCount++;
+                if (valueMethodInfo != null) matchCount++;
+
+                if (matchCount == 0)
+                {
+                    // map to exception, no mapping found
+                    fullyMapped = false;
+
+                    publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""No accessible method {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} found on wrapped value {valueType}."");");
+                }
+                else if (matchCount > 1)
+                {
+                    // map to exception, multiple mappings found
+                    fullyMapped = false;
+
+                    publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} found on wrapped value {valueType}."");");
+                }
+                else if (valueFieldInfo != null)
+                {
+                    // map to exception, invalid mapping
+                    fullyMapped = false;
+
+                    publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Cannot map field to {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} on wrapped value {valueType}, a field must map to a property."");");
+                }
+                else if (valuePropertyInfo != null)
+                {
+                    // map to exception, invalid mapping
+                    fullyMapped = false;
+
+                    publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Cannot map property to {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} on wrapped value {valueType}, a property must map to a property."");");
+                }
+                else if (valueMethodInfo != null)
+                {
+                    // map to method
+                    if (valueMethodInfo.IsPublic)
+                    {
+                        publicMembers.AppendLine($@"    {interfaceMethodSignature} => innerValue.{interfaceMethod}({interfaceMethodParameterNameList});");
                     }
                     else
                     {
-                        return HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
+                        if (hasOutParameters)
+                        {
+                            // map to exception, out parameters not currently supported on private methods
+                            // todo: add support for out parameters on private methods
+                            fullyMapped = false;
+
+                            publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Cannot map method to {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} on wrapped value {valueType}, out parameters are not currently supported on private methods."");");
+                        }
+                        else
+                        {
+                            var staticValueMethodInfo = $@"{interfaceMethod}_MethodInfo";
+
+                            staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValueMethodInfo};");
+
+                            // todo: add handling for any number of args
+                            staticInitializers.AppendLine($@"        {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
+
+                            // todo: use null or Array.Empty<object>() insead of empty array when method has no args
+                            publicMembers.AppendLine($@"    {interfaceMethodSignature} => ({interfaceMethodReturnType}){staticValueMethodInfo}.Invoke({innerValue}!, new object[] {{ {interfaceMethodParameterNameList} }});");
+                        }
                     }
                 }
                 else
                 {
-                    return HandleMissingFieldOrProperty(wrapperType, innerValue, interfaceProperty);
+                    // this block should be unreachable
+                    throw new Exception("Else block was reached unexpectedly.");
                 }
             }
-            else if (interfaceMember is MethodInfo interfaceMethod)
+
+            var codeBuilder = new StringBuilder();
+            codeBuilder.AppendLine($@"internal class {wrapperType}: {interfaceType}");
+            codeBuilder.AppendLine($@"{{");
+            if (staticPrivateFields.Length > 0)
             {
-                if (innerValueMember is MethodInfo innerValueMethod)
-                {
-                    return HandleMethod(wrapperType, innerValue, interfaceMethod, innerValueMethod);
-                }
-                else
-                {
-                    return HandleMissingMethod(wrapperType, interfaceMethod);
-                }
+                codeBuilder.Append(staticPrivateFields.ToString());
+                codeBuilder.AppendLine();
             }
-
-            return false;
-        }
-
-        private static bool HandleField(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty, FieldInfo innerValueField)
-        {
-            var interfaceGetMethodInfo = interfaceProperty.GetGetMethod();
-            var interfaceSetMethodInfo = interfaceProperty.GetSetMethod();
-            var parameters = (interfaceGetMethodInfo ?? interfaceSetMethodInfo!).GetParameters();
-
-            var wrapperProperty = wrapperType.DefineProperty(
-                interfaceProperty.Name,
-                PropertyAttributes.None,
-                interfaceProperty.PropertyType,
-                parameters.Select(x => x.ParameterType).ToArray());
-
-            var mappedCompletely = true;
-
-            if (interfaceGetMethodInfo != null)
+            codeBuilder.AppendLine($@"    private readonly {valueType} {innerValue};");
+            codeBuilder.AppendLine();
+            if (staticInitializers.Length > 0)
             {
-                mappedCompletely &= HandleFieldGetter(wrapperType, innerValue, wrapperProperty, innerValueField);
+                codeBuilder.AppendLine($@"    static {wrapperType}()");
+                codeBuilder.AppendLine($@"    {{");
+                codeBuilder.Append(staticInitializers.ToString());
+                codeBuilder.AppendLine($@"    }}");
+                codeBuilder.AppendLine();
             }
-
-            if (interfaceSetMethodInfo != null)
+            codeBuilder.AppendLine($@"    public {wrapperType}({valueType} valueToWrap)");
+            codeBuilder.AppendLine($@"    {{");
+            codeBuilder.AppendLine($@"        {innerValue} = valueToWrap ?? throw new {argumentNullExceptionType}(nameof(valueToWrap));");
+            codeBuilder.AppendLine($@"    }}");
+            if (publicMembers.Length > 0)
             {
-                if (innerValueField.IsInitOnly)
-                {
-                    mappedCompletely &= HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
-                }
-                else
-                {
-                    mappedCompletely &= HandleFieldSetter(wrapperType, innerValue, wrapperProperty, innerValueField);
-                }
+                codeBuilder.AppendLine();
+                codeBuilder.Append(publicMembers.ToString());
             }
+            codeBuilder.AppendLine($@"}}");
+            codeBuilder.AppendLine();
+            codeBuilder.Append($@"return typeof({wrapperType});");
 
-            return mappedCompletely;
+            return new GenerateWrapperCodeResult(codeBuilder.ToString(), fullyMapped);
         }
 
-        private static bool HandleFieldGetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, FieldInfo innerValueField)
-        {
-            var wrapperPropertyGetMethod = wrapperType.DefineMethod(
-                $"get_{wrapperProperty.Name}",
-                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual,
-                wrapperProperty.PropertyType,
-                null);
-
-            var ilGen = wrapperPropertyGetMethod.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldarg_0);
-            ilGen.Emit(OpCodes.Ldfld, innerValue);
-            ilGen.Emit(OpCodes.Ldfld, innerValueField);
-            ilGen.Emit(OpCodes.Ret);
-
-            wrapperProperty.SetGetMethod(wrapperPropertyGetMethod);
-
-            return true;
-        }
-
-        private static bool HandleFieldSetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, FieldInfo innerValueField)
-        {
-            var wrapperPropertySetMethod = wrapperType.DefineMethod(
-                $"set_{wrapperProperty.Name}",
-                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual,
-                null,
-                new[] { wrapperProperty.PropertyType });
-
-            var ilGen = wrapperPropertySetMethod.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldarg_0);
-            ilGen.Emit(OpCodes.Ldfld, innerValue);
-            ilGen.Emit(OpCodes.Ldarg_1);
-            ilGen.Emit(OpCodes.Stfld, innerValueField);
-            ilGen.Emit(OpCodes.Ret);
-
-            wrapperProperty.SetSetMethod(wrapperPropertySetMethod);
-
-            return true;
-        }
-
-        private static bool HandleProperty(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty, PropertyInfo innerValueProperty)
-        {
-            var interfaceGetMethodInfo = interfaceProperty.GetGetMethod();
-            var interfaceSetMethodInfo = interfaceProperty.GetSetMethod();
-            var parameters = (interfaceGetMethodInfo ?? interfaceSetMethodInfo!).GetParameters();
-
-            var wrapperProperty = wrapperType.DefineProperty(
-                interfaceProperty.Name,
-                PropertyAttributes.None,
-                interfaceProperty.PropertyType,
-                parameters.Select(x => x.ParameterType).ToArray());
-
-            var innerValuePropertyGetter = innerValueProperty.GetGetMethod();
-            var innerValuePropertySetter = innerValueProperty.GetSetMethod();
-
-            var mappedCompletely = true;
-
-            if (interfaceGetMethodInfo != null)
-            {
-                if (innerValuePropertyGetter != null)
-                {
-                    mappedCompletely &= HandlePropertyGetter(wrapperType, innerValue, wrapperProperty, innerValuePropertyGetter);
-                }
-                else
-                {
-                    mappedCompletely &= HandleMissingFieldOrPropertyGetter(wrapperType, wrapperProperty);
-                }
-            }
-
-            if (interfaceSetMethodInfo != null)
-            {
-                if (innerValuePropertySetter != null)
-                {
-                    mappedCompletely &= HandlePropertySetter(wrapperType, innerValue, wrapperProperty, innerValuePropertySetter);
-                }
-                else
-                {
-                    mappedCompletely &= HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
-                }
-            }
-
-            return mappedCompletely;
-        }
-
-        private static bool HandlePropertyGetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, MethodInfo innerValuePropertyGetter)
-        {
-            var valuePropertyGetMethod = wrapperType.DefineMethod(
-                $"get_{wrapperProperty.Name}",
-                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual,
-                wrapperProperty.PropertyType,
-                null);
-
-            var callOpCode = typeof(TValue).IsValueType ? OpCodes.Call : OpCodes.Callvirt;
-
-            var ilGen = valuePropertyGetMethod.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldarg_0);
-            ilGen.Emit(OpCodes.Ldfld, innerValue);
-            ilGen.Emit(callOpCode, innerValuePropertyGetter);
-            ilGen.Emit(OpCodes.Ret);
-
-            wrapperProperty.SetGetMethod(valuePropertyGetMethod);
-
-            return true;
-        }
-
-        private static bool HandlePropertySetter(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyBuilder wrapperProperty, MethodInfo innerValuePropertySetter)
-        {
-            var valuePropertySetMethod = wrapperType.DefineMethod(
-                $"set_{wrapperProperty.Name}",
-                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual,
-                null,
-                new[] { wrapperProperty.PropertyType });
-
-            var callOpCode = typeof(TValue).IsValueType ? OpCodes.Call : OpCodes.Callvirt;
-
-            var ilGen = valuePropertySetMethod.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldarg_0);
-            ilGen.Emit(OpCodes.Ldfld, innerValue);
-            ilGen.Emit(OpCodes.Ldarg_1);
-            ilGen.Emit(callOpCode, innerValuePropertySetter);
-            ilGen.Emit(OpCodes.Nop);
-            ilGen.Emit(OpCodes.Ret);
-
-            wrapperProperty.SetSetMethod(valuePropertySetMethod);
-
-            return true;
-        }
-
-        private static bool HandleMissingFieldOrProperty(TypeBuilder wrapperType, FieldBuilder innerValue, PropertyInfo interfaceProperty)
-        {
-            var interfaceGetMethodInfo = interfaceProperty.GetGetMethod();
-            var interfaceSetMethodInfo = interfaceProperty.GetSetMethod();
-            var parameters = (interfaceGetMethodInfo ?? interfaceSetMethodInfo!).GetParameters();
-
-            var wrapperProperty = wrapperType.DefineProperty(
-                interfaceProperty.Name,
-                PropertyAttributes.None,
-                interfaceProperty.PropertyType,
-                parameters.Select(x => x.ParameterType).ToArray());
-
-            if (interfaceGetMethodInfo != null)
-                HandleMissingFieldOrPropertyGetter(wrapperType, wrapperProperty);
-
-            if (interfaceSetMethodInfo != null)
-                HandleMissingFieldOrPropertySetter(wrapperType, wrapperProperty);
-
-            return false;
-        }
-
-        private static bool HandleMissingFieldOrPropertyGetter(TypeBuilder wrapperType, PropertyBuilder wrapperProperty)
-        {
-            var wrapperPropertyGetMethod = wrapperType.DefineMethod(
-                $"get_{wrapperProperty.Name}",
-                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual,
-                wrapperProperty.PropertyType,
-                null);
-
-            var ilGen = wrapperPropertyGetMethod.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldstr, $"The field or property {wrapperProperty.Name} does not exist or does not have a get_{wrapperProperty.Name} method that returns {wrapperProperty.PropertyType.Name} on the wrapped type {typeof(TValue).Name}");
-            ilGen.Emit(OpCodes.Newobj, DuckTyper.InvalidOperationExceptionCtor);
-            ilGen.Emit(OpCodes.Throw);
-
-            wrapperProperty.SetGetMethod(wrapperPropertyGetMethod);
-
-            return false;
-        }
-
-        private static bool HandleMissingFieldOrPropertySetter(TypeBuilder wrapperType, PropertyBuilder wrapperProperty)
-        {
-            var wrapperPropertySetMethod = wrapperType.DefineMethod(
-                $"set_{wrapperProperty.Name}",
-                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual,
-                null,
-                new[] { wrapperProperty.PropertyType });
-
-            var ilGen = wrapperPropertySetMethod.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldstr, $"The field or property {wrapperProperty.Name} does not exist or does not have a set_{wrapperProperty.Name} method that returns {wrapperProperty.PropertyType.Name} on the wrapped type {typeof(TValue).Name}");
-            ilGen.Emit(OpCodes.Newobj, DuckTyper.InvalidOperationExceptionCtor);
-            ilGen.Emit(OpCodes.Throw);
-
-            wrapperProperty.SetSetMethod(wrapperPropertySetMethod);
-
-            return false;
-        }
-
-        private static bool HandleMethod(TypeBuilder wrapperType, FieldBuilder innerValue, MethodInfo interfaceMethod, MethodInfo innerValueMethod)
-        {
-            var parameters = interfaceMethod.GetParameters();
-
-            var wrapperProperty = wrapperType.DefineMethod(
-                interfaceMethod.Name,
-                MethodAttributes.Public | MethodAttributes.Virtual,
-                interfaceMethod.ReturnType,
-                parameters.Select(x => x.ParameterType).ToArray());
-
-            var ilGen = wrapperProperty.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldarg_0);
-            ilGen.Emit(OpCodes.Ldfld, innerValue);
-
-            var callOpCode = typeof(TValue).IsValueType ? OpCodes.Call : OpCodes.Callvirt;
-
-            if (parameters.Any())
-            {
-                if(interfaceMethod.ReturnType == null)
-                {
-                    ilGen.Emit(OpCodes.Ldarg_1);
-                    ilGen.Emit(callOpCode, innerValueMethod);
-                    ilGen.Emit(OpCodes.Nop);
-                    ilGen.Emit(OpCodes.Ret);
-                }
-                else
-                {
-                    ilGen.Emit(OpCodes.Ldarg_1);
-                    ilGen.Emit(callOpCode, innerValueMethod);
-                    ilGen.Emit(OpCodes.Ret);
-                }
-            }
-            else
-            {
-                if (interfaceMethod.ReturnType == null)
-                {
-                    ilGen.Emit(callOpCode, innerValueMethod);
-                    ilGen.Emit(OpCodes.Nop);
-                    ilGen.Emit(OpCodes.Ret);
-                }
-                else
-                {
-                    ilGen.Emit(callOpCode, innerValueMethod);
-                    ilGen.Emit(OpCodes.Ret);
-                }
-            }
-
-            return true;
-        }
-
-        private static bool HandleMissingMethod(TypeBuilder wrapperType, MethodInfo interfaceMethod)
-        {
-            var parameters = interfaceMethod.GetParameters();
-
-            var wrapperMethod = wrapperType.DefineMethod(
-                interfaceMethod.Name,
-                MethodAttributes.Public | MethodAttributes.Virtual,
-                interfaceMethod.ReturnType,
-                parameters.Select(x => x.ParameterType).ToArray());
-
-            var ilGen = wrapperMethod.GetILGenerator();
-            ilGen.Emit(OpCodes.Ldstr, $"The method {wrapperMethod.Name} does not exist or does not return {wrapperMethod.ReturnType.Name} on the wrapped type {typeof(TValue).Name}");
-            ilGen.Emit(OpCodes.Newobj, DuckTyper.InvalidOperationExceptionCtor);
-            ilGen.Emit(OpCodes.Throw);
-
-            return false;
-        }
+        private record struct GenerateWrapperCodeResult(string Code, bool FullyMapped);
     }
 }
