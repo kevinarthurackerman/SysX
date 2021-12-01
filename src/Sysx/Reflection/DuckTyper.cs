@@ -14,8 +14,8 @@ namespace Sysx.Reflection
     /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}" />
     public static class DuckTyper
     {
-        private static readonly ConcurrentDictionary<WrapKey, WrapMethod> _wrapCache = new();
-        private static readonly ConcurrentDictionary<WrapKey, TryWrapMethod> _tryWrapCache = new();
+        private static readonly ConcurrentDictionary<CacheKey, WrapMethod> _wrapCache = new();
+        private static readonly ConcurrentDictionary<CacheKey, TryWrapMethod> _tryWrapCache = new();
 
         /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}.Wrap(TValue, bool)" />
         public static TWithInterface Wrap<TWithInterface>(object value) =>
@@ -28,7 +28,7 @@ namespace Sysx.Reflection
                 nameof(TWithInterface),
                 x => x.WithMessage($"{nameof(TWithInterface)} must be an interface type."));
 
-            var key = new WrapKey(value.GetType(), typeof(TWithInterface), includePrivateMembers);
+            var key = new CacheKey(value.GetType(), typeof(TWithInterface), includePrivateMembers);
             var duckTyper = _wrapCache.GetOrAdd(key,
                 key =>
                 {
@@ -55,7 +55,7 @@ namespace Sysx.Reflection
                 return false;
             }
 
-            var key = new WrapKey(value.GetType(), typeof(TWithInterface), includePrivateMembers);
+            var key = new CacheKey(value.GetType(), typeof(TWithInterface), includePrivateMembers);
             var duckTyper = _tryWrapCache.GetOrAdd(key,
                 key =>
                 {
@@ -79,7 +79,7 @@ namespace Sysx.Reflection
             return success;
         }
 
-        private record struct WrapKey(Type Value, Type WithInterface, bool IncludePrivateMembers);
+        private record struct CacheKey(Type Value, Type WithInterface, bool IncludePrivateMembers);
         private delegate object WrapMethod(object value);
         private delegate bool TryWrapMethod(object value, out object? withInterface);
     }
