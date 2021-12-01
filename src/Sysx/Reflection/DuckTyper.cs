@@ -427,21 +427,7 @@ namespace Sysx.Reflection
                 var valuePropertyInfo = valueProperties.SingleOrDefault(x =>
                     x.Name == interfaceMethodInfo.Name && x.PropertyType == interfaceMethodInfo.ReturnType);
 
-                var valueMethodInfo = valueMethods.SingleOrDefault(x =>
-                {
-                    if (x.Name != interfaceMethodInfo.Name) return false;
-                    if (x.ReturnType != interfaceMethodInfo.ReturnType) return false;
-
-                    var valueMethodParameters = x.GetParameters();
-                    var interfaceMethodParameters = interfaceMethodInfo.GetParameters();
-
-                    if (valueMethodParameters.Length != interfaceMethodParameters.Length) return false;
-
-                    for (var i = 0; i < valueMethodParameters.Length; i++)
-                        if (valueMethodParameters[i].ParameterType != interfaceMethodParameters[i].ParameterType) return false;
-
-                    return true;
-                });
+                var valueMethodInfo = valueMethods.SingleOrDefault(x => x.MatchesSignature(interfaceMethodInfo));
 
                 var hasOutParameters = interfaceMethodInfo.GetParameters().Any(x => x.ParameterType.IsByRef);
 
