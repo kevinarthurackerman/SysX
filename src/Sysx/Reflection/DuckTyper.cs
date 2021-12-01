@@ -337,7 +337,6 @@ namespace Sysx.Reflection
                     var valuePropertyGet = valuePropertyInfo.GetGetMethod(includePrivateMembers);
                     var valuePropertySet = valuePropertyInfo.GetSetMethod(includePrivateMembers);
 
-                    // todo: cache PropertyInfo in variable in static constructor to reuse between setting getter and setter
                     if (interfacePropertyHasGet)
                     {
                         if (valuePropertyGet == null)
@@ -378,7 +377,6 @@ namespace Sysx.Reflection
 
                             staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertySetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetSetMethod(true);");
 
-                            // todo: use pool of single value object arrays instead of newing one up
                             publicMembers.AppendLine($@"        set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}, new object[] {{ value }});");
                         }
                     }
