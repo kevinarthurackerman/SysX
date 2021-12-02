@@ -22,7 +22,7 @@ namespace Sysx
 
         [Conditional(CompilationSymbol)]
         public static void That(bool condition,
-            Func<Options, string>? message = null,
+            Func<Context, string>? message = null,
             [CallerFilePath] string? callerFilePath = null,
             [CallerLineNumber] int? callerLineNumber = null,
             [CallerMemberName] string? callerMemberName = null,
@@ -31,21 +31,21 @@ namespace Sysx
 #if ASSERTIONS
             if (!condition)
             {
-                var options = new Options(callerFilePath, callerLineNumber, callerMemberName, conditionArgumentExpression);
+                var options = new Context(callerFilePath, callerLineNumber, callerMemberName, conditionArgumentExpression);
                 message ??= x => $"Condition '{conditionArgumentExpression}' failed at {callerFilePath} line {callerLineNumber}: {callerMemberName}";
                 throw new ContractException(message(options));
             }
 #endif
         }
 
-        public class Options
+        public class Context
         {
             public string? FilePath { get; }
             public int? LineNumber { get; }
             public string? MemberName { get; }
             public string? ConditionArgumentExpression { get; }
 
-            internal Options(string? filePath, int? lineNumber, string? memberName, string? conditionArgumentExpression)
+            internal Context(string? filePath, int? lineNumber, string? memberName, string? conditionArgumentExpression)
             {
                 FilePath = filePath;
                 LineNumber = lineNumber;
