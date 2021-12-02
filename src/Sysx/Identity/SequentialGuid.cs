@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data.SqlTypes;
+#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
 using System.Runtime.InteropServices;
+#endif
 
 namespace Sysx.Identity
 {
@@ -15,7 +17,6 @@ namespace Sysx.Identity
 		/// <summary>
 		/// Produces a semi-sequentially ordered SQL GUID.
 		/// </summary>
-		/// <returns></returns>
 		public static SqlGuid Next()
 		{
 			Span<byte> guidArray = stackalloc byte[16];
@@ -34,31 +35,18 @@ namespace Sysx.Identity
 			Span<byte> msecsSpan = stackalloc byte[8];
 			MemoryMarshal.Write(msecsSpan, ref msecs);
 
-			// Reverse the bytes to match SQL Servers ordering 
-			daysSpan.Reverse();
-			msecsSpan.Reverse();
-
-			// Copy the bytes into the guid
-			guidArray[^6] = daysSpan[^2];
-			guidArray[^5] = daysSpan[^1];
-			guidArray[^4] = msecsSpan[^4];
-			guidArray[^3] = msecsSpan[^3];
-			guidArray[^2] = msecsSpan[^2];
-			guidArray[^1] = msecsSpan[^1];
-
-			var a = MemoryMarshal.Read<int>(guidArray[0..4]);
-			var b = MemoryMarshal.Read<short>(guidArray[4..6]);
-			var c = MemoryMarshal.Read<short>(guidArray[6..8]);
-			var d = guidArray[8];
-			var e = guidArray[9];
-			var f = guidArray[10];
-			var g = guidArray[11];
-			var h = guidArray[12];
-			var i = guidArray[13];
-			var j = guidArray[14];
-			var k = guidArray[15];
-
-			return new SqlGuid(a, b, c, d, e, f, g, h, i, j, k);
+			return new SqlGuid(
+				MemoryMarshal.Read<int>(guidArray[0..4]),
+				MemoryMarshal.Read<short>(guidArray[4..6]),
+				MemoryMarshal.Read<short>(guidArray[6..8]),
+				guidArray[8],
+				guidArray[9],
+				daysSpan[1],
+				daysSpan[0],
+				msecsSpan[3],
+				msecsSpan[2],
+				msecsSpan[1],
+				msecsSpan[0]);
 		}
 #endif
 
@@ -66,7 +54,6 @@ namespace Sysx.Identity
 		/// <summary>
 		/// Produces a semi-sequentially ordered SQL GUID.
 		/// </summary>
-		/// <returns></returns>
 		public static SqlGuid Next()
 		{
 			var guidArray = Guid.NewGuid().ToByteArray();
