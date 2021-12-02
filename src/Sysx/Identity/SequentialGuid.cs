@@ -67,16 +67,19 @@ namespace Sysx.Identity
 			// Convert to byte arrays
 			var daysArray = BitConverter.GetBytes(days.Days);
 			var msecsArray = BitConverter.GetBytes((long)msecs.TotalMilliseconds);
-
-			// Reverse the bytes to match SQL Servers ordering 
-			Array.Reverse(daysArray);
-			Array.Reverse(msecsArray);
-
-			// Copy the bytes into the guid 
-			Array.Copy(daysArray, daysArray.Length - 2, guidArray, guidArray.Length - 6, 2);
-			Array.Copy(msecsArray, msecsArray.Length - 4, guidArray, guidArray.Length - 4, 4);
-
-			return new SqlGuid(guidArray);
+			
+			return new SqlGuid(
+				BitConverter.ToInt32(guidArray, 0),
+				BitConverter.ToInt16(guidArray, 4),
+				BitConverter.ToInt16(guidArray, 6),
+				guidArray[8],
+				guidArray[9],
+				daysArray[1],
+				daysArray[0],
+				msecsArray[3],
+				msecsArray[2],
+				msecsArray[1],
+				msecsArray[0]);
 		}
 #endif
 	}
