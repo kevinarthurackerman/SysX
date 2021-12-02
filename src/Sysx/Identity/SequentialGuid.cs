@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnsureThat;
+using System;
 using System.Data.SqlTypes;
 #if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
 using System.Runtime.InteropServices;
@@ -13,17 +14,34 @@ namespace Sysx.Identity
     {
 		private static readonly long baseDateTicks = new DateTime(1900, 1, 1).Ticks;
 
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+		private static readonly Options defaultOptions = new();
+
+		/// <inheritdoc cref="SequentialGuid.Next(Options)"/>
+		public static SqlGuid Next() => Next(defaultOptions);
+
+		/// <inheritdoc cref="SequentialGuid.Next(Options)"/>
+		public static SqlGuid Next(Action<Options> configure)
+		{
+			var options = new Options();
+			configure(options);
+			return Next(options);
+		}
+
 		/// <summary>
 		/// Produces a semi-sequentially ordered SQL GUID.
 		/// </summary>
-		public static SqlGuid Next()
+		public static SqlGuid Next(Options configure)
 		{
+			EnsureArg.IsNotNull(configure.GetNow, $"{nameof(configure)}.{nameof(configure.GetNow)}");
+			EnsureArg.IsNotNull(configure.GetBaseGuid, $"{nameof(configure)}.{nameof(configure.GetBaseGuid)}");
+
+			var guid = configure.GetBaseGuid();
+			var now = configure.GetNow();
+
+#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
 			Span<byte> guidArray = stackalloc byte[16];
-			Guid.NewGuid().TryWriteBytes(guidArray);
-
-			var now = DateTime.UtcNow;
-
+			guid.TryWriteBytes(guidArray);
+			
 			// Get the days and milliseconds which will be used to build the byte string 
 			var days = new TimeSpan(now.Ticks - baseDateTicks).Days;
 			var msecs = (long)now.TimeOfDay.TotalMilliseconds;
@@ -47,18 +65,9 @@ namespace Sysx.Identity
 				msecsSpan[2],
 				msecsSpan[1],
 				msecsSpan[0]);
-		}
 #endif
-
 #if NET48
-		/// <summary>
-		/// Produces a semi-sequentially ordered SQL GUID.
-		/// </summary>
-		public static SqlGuid Next()
-		{
-			var guidArray = Guid.NewGuid().ToByteArray();
-
-			var now = DateTime.UtcNow;
+			var guidArray = guid.ToByteArray();
 			
 			// Get the days and milliseconds which will be used to build the byte string 
 			var days = new TimeSpan(now.Ticks - baseDateTicks);
@@ -80,7 +89,17 @@ namespace Sysx.Identity
 				msecsArray[2],
 				msecsArray[1],
 				msecsArray[0]);
-		}
 #endif
+		}
+
+		public struct Options
+        {
+			private static readonly Func<DateTime>  defaultGetNow = () => DateTime.UtcNow;
+			private static readonly Func<Guid> defaultGetBaseGuid = () => Guid.NewGuid();
+
+			public Func<DateTime> GetNow { get; set; } = defaultGetNow;
+			public Func<Guid> GetBaseGuid { get; set; } = defaultGetBaseGuid;
+
+		}
 	}
 }
