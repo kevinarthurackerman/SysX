@@ -24,7 +24,7 @@
             Assert.NotNull(wrapper);
 
             Assert.Equal("Quack", value.Quack);
-            Assert.Equal("Quack", wrapper.Quack);
+            Assert.Equal("Quack", wrapper!.Quack);
         }
 
         public interface IDuck

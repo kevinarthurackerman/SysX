@@ -14,7 +14,7 @@ namespace Sysx.Test.Collections.Generic
 
             var testEnumerable = Enumerable.Range(0, 1)
                 .Select(x => calledCount += 1)
-                .Memoize();
+                .Memoize()!;
 
             Assert.Equal(0, calledCount);
 
