@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 #if NET5_0 || NETCOREAPP3_1
 using System.Collections.Immutable;
 #endif
@@ -20,6 +21,7 @@ namespace Sysx.Collections.Generic
         {
             if (enumerable == null) return null;
             if (enumerable is T[] array) return array;
+            if (!enumerable.Any()) return Array.Empty<T>();
 #if NET5_0 || NETCOREAPP3_1
             if (enumerable is ImmutableArray<T> immutableArray) return immutableArray;
             if (enumerable is IImmutableList<T> immutableList) return immutableList;
