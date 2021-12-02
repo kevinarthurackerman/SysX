@@ -42,138 +42,132 @@
             new OperatorInfo(nameof(Expression.RightShift), "x>>y"),
         };
 #>
-using System;
-using System.Linq.Expressions;
-using EnsureThat;
-using Sysx.Linq.Expressions;
+namespace Sysx;
 
-namespace Sysx
+/// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
+public static class Operator
 {
-    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
-    public static class Operator
-    {
-        /// <inheritdoc cref="Operator{TValue}.Zero" />
-        public static TValue Zero<TValue>() => Operator<TValue>.Zero;
+    /// <inheritdoc cref="Operator{TValue}.Zero" />
+    public static TValue Zero<TValue>() => Operator<TValue>.Zero;
 
-        /// <inheritdoc cref="Operator{TValue}.HasValue(TValue)" />
-        public static bool HasValue<TValue>(TValue value) => Operator<TValue>.HasValue(value);
+    /// <inheritdoc cref="Operator{TValue}.HasValue(TValue)" />
+    public static bool HasValue<TValue>(TValue value) => Operator<TValue>.HasValue(value);
 
 <#foreach(var op in unaryOperators) {#>
-        /// <inheritdoc cref="Operator{TValue, TResult}.<#=op.Name#>(TValue)" />
-        public static TValue <#=op.Name#><TValue>(TValue value) => Operator<TValue, TValue>.<#=op.Name#>(value);
+    /// <inheritdoc cref="Operator{TValue, TResult}.<#=op.Name#>(TValue)" />
+    public static TValue <#=op.Name#><TValue>(TValue value) => Operator<TValue, TValue>.<#=op.Name#>(value);
 
-        /// <inheritdoc cref="Operator{TValue, TResult}.<#=op.Name#>(TValue)" />
-        public static TResult <#=op.Name#><TValue, TResult>(TValue value) => Operator<TValue, TResult>.<#=op.Name#>(value);
+    /// <inheritdoc cref="Operator{TValue, TResult}.<#=op.Name#>(TValue)" />
+    public static TResult <#=op.Name#><TValue, TResult>(TValue value) => Operator<TValue, TResult>.<#=op.Name#>(value);
 <#  if(op != unaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
 
 <#foreach(var op in binaryOperators) {#>
-        /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.<#=op.Name#>(TLeft, TRight)" />
-        public static TValue <#=op.Name#><TValue>(TValue left, TValue right) => Operator<TValue, TValue, TValue>.<#=op.Name#>(left, right);
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.<#=op.Name#>(TLeft, TRight)" />
+    public static TValue <#=op.Name#><TValue>(TValue left, TValue right) => Operator<TValue, TValue, TValue>.<#=op.Name#>(left, right);
 
-        /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.<#=op.Name#>(TLeft, TRight)" />
-        public static TResult <#=op.Name#><TLeft, TRight, TResult>(TLeft left, TRight right) => Operator<TLeft, TRight, TResult>.<#=op.Name#>(left, right);
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.<#=op.Name#>(TLeft, TRight)" />
+    public static TResult <#=op.Name#><TLeft, TRight, TResult>(TLeft left, TRight right) => Operator<TLeft, TRight, TResult>.<#=op.Name#>(left, right);
 <#  if(op != binaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
-    }
+}
 
-    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
-    public static class Operator<TValue>
-    {
-        private static INullOp<TValue> NullOp { get; }
+/// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
+public static class Operator<TValue>
+{
+    private static INullOp<TValue> NullOp { get; }
 
-        /// <summary>
-        /// Returns the zero value for value-types (even full Nullable&lt;TValue&gt;) - or null for reference types
-        /// </summary>
-        public static TValue Zero { get; }
+    /// <summary>
+    /// Returns the zero value for value-types (even full Nullable&lt;TValue&gt;) - or null for reference types
+    /// </summary>
+    public static TValue Zero { get; }
 
-        /// <summary>
-        /// Indicates if the supplied value is non-null,
-        /// for reference-types or Nullable&lt;TValue&gt;
-        /// </summary>
-        /// <returns>True for non-null values, else false</returns>
-        public static bool HasValue(TValue value) => NullOp.HasValue(value);
+    /// <summary>
+    /// Indicates if the supplied value is non-null,
+    /// for reference-types or Nullable&lt;TValue&gt;
+    /// </summary>
+    /// <returns>True for non-null values, else false</returns>
+    public static bool HasValue(TValue value) => NullOp.HasValue(value);
 
 <#foreach(var op in unaryOperators) {#>
-        /// <inheritdoc cref="Operator{TValue, TResult}.<#=op.Name#>(TValue)" />
-        public static TValue <#=op.Name#>(TValue value) => Operator<TValue, TValue>.<#=op.Name#>(value);
+    /// <inheritdoc cref="Operator{TValue, TResult}.<#=op.Name#>(TValue)" />
+    public static TValue <#=op.Name#>(TValue value) => Operator<TValue, TValue>.<#=op.Name#>(value);
 <#  if(op != unaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
 
 <#foreach(var op in binaryOperators) {#>
-        /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.<#=op.Name#>(TLeft, TRight)" />
-        public static TValue <#=op.Name#>(TValue left, TValue right) => Operator<TValue, TValue, TValue>.<#=op.Name#>(left, right);
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.<#=op.Name#>(TLeft, TRight)" />
+    public static TValue <#=op.Name#>(TValue left, TValue right) => Operator<TValue, TValue, TValue>.<#=op.Name#>(left, right);
 <#  if(op != binaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
 
-        static Operator()
+    static Operator()
+    {
+        if (typeof(TValue).IsValueType && typeof(TValue).IsGenericType && (typeof(TValue).GetGenericTypeDefinition() == typeof(Nullable<>)))
         {
-            if (typeof(TValue).IsValueType && typeof(TValue).IsGenericType && (typeof(TValue).GetGenericTypeDefinition() == typeof(Nullable<>)))
+            // get the *inner* zero (not a null Nullable<TValue>, but default(TValue))
+            Type nullType = (typeof(TValue).GetGenericArguments()[0] ?? throw new NullReferenceException());
+            Zero = (TValue)Activator.CreateInstance(nullType)!;
+            NullOp = (INullOp<TValue>)Activator.CreateInstance(typeof(StructNullOp<>).MakeGenericType(nullType))!;
+        }
+        else
+        {
+            Zero = default!;
+            if (typeof(TValue).IsValueType)
             {
-                // get the *inner* zero (not a null Nullable<TValue>, but default(TValue))
-                Type nullType = (typeof(TValue).GetGenericArguments()[0] ?? throw new NullReferenceException());
-                Zero = (TValue)Activator.CreateInstance(nullType)!;
-                NullOp = (INullOp<TValue>)Activator.CreateInstance(typeof(StructNullOp<>).MakeGenericType(nullType))!;
+                NullOp = (INullOp<TValue>)Activator.CreateInstance(typeof(StructNullOp<>).MakeGenericType(typeof(TValue)))!;
             }
             else
             {
-                Zero = default!;
-                if (typeof(TValue).IsValueType)
-                {
-                    NullOp = (INullOp<TValue>)Activator.CreateInstance(typeof(StructNullOp<>).MakeGenericType(typeof(TValue)))!;
-                }
-                else
-                {
-                    NullOp = (INullOp<TValue>)Activator.CreateInstance(typeof(ClassNullOp<>).MakeGenericType(typeof(TValue)))!;
-                }
+                NullOp = (INullOp<TValue>)Activator.CreateInstance(typeof(ClassNullOp<>).MakeGenericType(typeof(TValue)))!;
             }
         }
     }
+}
 
-    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
-    public static class Operator<TValue, TResult>
-    {
+/// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
+public static class Operator<TValue, TResult>
+{
 <#foreach(var op in unaryOperators) {#>
-        private static readonly Func<TValue, TResult> <#=CamelCase(op.Name)#> = ExpressionX.Function<TValue, TResult>(Expression.<#=op.Name#>, "<#=op.Name#>");
+    private static readonly Func<TValue, TResult> <#=CamelCase(op.Name)#> = ExpressionX.Function<TValue, TResult>(Expression.<#=op.Name#>, "<#=op.Name#>");
 <#}#>
 
 <#foreach(var op in unaryOperators) {#>
-        /// <summary>
-        /// Executes the unary <#=op.Name#> operator (<#=op.Symbol#>)
-        /// </summary>
-        public static TResult <#=op.Name#>(TValue value)
-        {
-            EnsureArg.HasValue(value, nameof(value));
+    /// <summary>
+    /// Executes the unary <#=op.Name#> operator (<#=op.Symbol#>)
+    /// </summary>
+    public static TResult <#=op.Name#>(TValue value)
+    {
+        EnsureArg.HasValue(value, nameof(value));
 
-            return <#=CamelCase(op.Name)#>(value);
-        }
+        return <#=CamelCase(op.Name)#>(value);
+    }
 <#  if(op != unaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
-    }
+}
 
-    /// <summary>
-    /// Provides methods for executing operations on any valid type
-    /// </summary>
-    public static class Operator<TLeft, TRight, TResult>
-    {
+/// <summary>
+/// Provides methods for executing operations on any valid type
+/// </summary>
+public static class Operator<TLeft, TRight, TResult>
+{
 <#foreach(var op in binaryOperators) {#>
-        private static readonly Func<TLeft, TRight, TResult> <#=CamelCase(op.Name)#> = ExpressionX.Function<TLeft, TRight, TResult>(Expression.<#=op.Name#>, "<#=op.Name#>");
+    private static readonly Func<TLeft, TRight, TResult> <#=CamelCase(op.Name)#> = ExpressionX.Function<TLeft, TRight, TResult>(Expression.<#=op.Name#>, "<#=op.Name#>");
 <#}#>
 
 <#foreach(var op in binaryOperators) {#>
-        /// <summary>
-        /// Executes the binary <#=op.Name#> operator (<#=op.Symbol#>)
-        /// </summary>
-        public static TResult <#=op.Name#>(TLeft left, TRight right)
-        {
-            EnsureArg.HasValue(left, nameof(left));
-            EnsureArg.HasValue(right, nameof(right));
+    /// <summary>
+    /// Executes the binary <#=op.Name#> operator (<#=op.Symbol#>)
+    /// </summary>
+    public static TResult <#=op.Name#>(TLeft left, TRight right)
+    {
+        EnsureArg.HasValue(left, nameof(left));
+        EnsureArg.HasValue(right, nameof(right));
 
-            return <#=CamelCase(op.Name)#>(left, right);
-        }
+        return <#=CamelCase(op.Name)#>(left, right);
+    }
 <#  if(op != binaryOperators.Last()) WriteLine(string.Empty);#>
 <#}#>
-    }
 }
 <#+
 private string CamelCase(string value)
