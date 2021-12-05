@@ -34,12 +34,14 @@
             new OperatorInfo(nameof(Expression.MultiplyChecked), "checked(x*y)"),
             new OperatorInfo(nameof(Expression.Divide), "x/y"),
             new OperatorInfo(nameof(Expression.Modulo), "x%y"),
+            new OperatorInfo(nameof(Expression.Power), "x^y"),
             new OperatorInfo(nameof(Expression.Add), "x+y"),
             new OperatorInfo(nameof(Expression.AddChecked), "checked(x+y)"),
             new OperatorInfo(nameof(Expression.Subtract), "x-y"),
             new OperatorInfo(nameof(Expression.SubtractChecked), "x-y"),
             new OperatorInfo(nameof(Expression.LeftShift), "x<<y"),
             new OperatorInfo(nameof(Expression.RightShift), "x>>y"),
+            new OperatorInfo(nameof(Expression.Coalesce), "x??y"),
         };
 #>
 namespace Sysx;

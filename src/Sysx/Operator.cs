@@ -153,6 +153,12 @@ public static class Operator
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Modulo(TLeft, TRight)" />
     public static TResult Modulo<TLeft, TRight, TResult>(TLeft left, TRight right) => Operator<TLeft, TRight, TResult>.Modulo(left, right);
 
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Power(TLeft, TRight)" />
+    public static TValue Power<TValue>(TValue left, TValue right) => Operator<TValue, TValue, TValue>.Power(left, right);
+
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Power(TLeft, TRight)" />
+    public static TResult Power<TLeft, TRight, TResult>(TLeft left, TRight right) => Operator<TLeft, TRight, TResult>.Power(left, right);
+
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Add(TLeft, TRight)" />
     public static TValue Add<TValue>(TValue left, TValue right) => Operator<TValue, TValue, TValue>.Add(left, right);
 
@@ -188,6 +194,12 @@ public static class Operator
 
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.RightShift(TLeft, TRight)" />
     public static TResult RightShift<TLeft, TRight, TResult>(TLeft left, TRight right) => Operator<TLeft, TRight, TResult>.RightShift(left, right);
+
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Coalesce(TLeft, TRight)" />
+    public static TValue Coalesce<TValue>(TValue left, TValue right) => Operator<TValue, TValue, TValue>.Coalesce(left, right);
+
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Coalesce(TLeft, TRight)" />
+    public static TResult Coalesce<TLeft, TRight, TResult>(TLeft left, TRight right) => Operator<TLeft, TRight, TResult>.Coalesce(left, right);
 }
 
 /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
@@ -279,6 +291,9 @@ public static class Operator<TValue>
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Modulo(TLeft, TRight)" />
     public static TValue Modulo(TValue left, TValue right) => Operator<TValue, TValue, TValue>.Modulo(left, right);
 
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Power(TLeft, TRight)" />
+    public static TValue Power(TValue left, TValue right) => Operator<TValue, TValue, TValue>.Power(left, right);
+
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Add(TLeft, TRight)" />
     public static TValue Add(TValue left, TValue right) => Operator<TValue, TValue, TValue>.Add(left, right);
 
@@ -296,6 +311,9 @@ public static class Operator<TValue>
 
     /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.RightShift(TLeft, TRight)" />
     public static TValue RightShift(TValue left, TValue right) => Operator<TValue, TValue, TValue>.RightShift(left, right);
+
+    /// <inheritdoc cref="Operator{TLeft, TRight, TResult}.Coalesce(TLeft, TRight)" />
+    public static TValue Coalesce(TValue left, TValue right) => Operator<TValue, TValue, TValue>.Coalesce(left, right);
 
     static Operator()
     {
@@ -425,12 +443,14 @@ public static class Operator<TLeft, TRight, TResult>
     private static readonly Func<TLeft, TRight, TResult> multiplyChecked = ExpressionX.Function<TLeft, TRight, TResult>(Expression.MultiplyChecked, "MultiplyChecked");
     private static readonly Func<TLeft, TRight, TResult> divide = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Divide, "Divide");
     private static readonly Func<TLeft, TRight, TResult> modulo = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Modulo, "Modulo");
+    private static readonly Func<TLeft, TRight, TResult> power = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Power, "Power");
     private static readonly Func<TLeft, TRight, TResult> add = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Add, "Add");
     private static readonly Func<TLeft, TRight, TResult> addChecked = ExpressionX.Function<TLeft, TRight, TResult>(Expression.AddChecked, "AddChecked");
     private static readonly Func<TLeft, TRight, TResult> subtract = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Subtract, "Subtract");
     private static readonly Func<TLeft, TRight, TResult> subtractChecked = ExpressionX.Function<TLeft, TRight, TResult>(Expression.SubtractChecked, "SubtractChecked");
     private static readonly Func<TLeft, TRight, TResult> leftShift = ExpressionX.Function<TLeft, TRight, TResult>(Expression.LeftShift, "LeftShift");
     private static readonly Func<TLeft, TRight, TResult> rightShift = ExpressionX.Function<TLeft, TRight, TResult>(Expression.RightShift, "RightShift");
+    private static readonly Func<TLeft, TRight, TResult> coalesce = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Coalesce, "Coalesce");
 
     /// <summary>
     /// Executes the binary And operator (x&y)
@@ -620,6 +640,17 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
+    /// Executes the binary Power operator (x^y)
+    /// </summary>
+    public static TResult Power(TLeft left, TRight right)
+    {
+        EnsureArg.HasValue(left, nameof(left));
+        EnsureArg.HasValue(right, nameof(right));
+
+        return power(left, right);
+    }
+
+    /// <summary>
     /// Executes the binary Add operator (x+y)
     /// </summary>
     public static TResult Add(TLeft left, TRight right)
@@ -683,5 +714,16 @@ public static class Operator<TLeft, TRight, TResult>
         EnsureArg.HasValue(right, nameof(right));
 
         return rightShift(left, right);
+    }
+
+    /// <summary>
+    /// Executes the binary Coalesce operator (x??y)
+    /// </summary>
+    public static TResult Coalesce(TLeft left, TRight right)
+    {
+        EnsureArg.HasValue(left, nameof(left));
+        EnsureArg.HasValue(right, nameof(right));
+
+        return coalesce(left, right);
     }
 }
