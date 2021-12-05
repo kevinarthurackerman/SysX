@@ -4,9 +4,10 @@
 /// Base class for implementing type safe class enums.
 /// </summary>
 [DebuggerDisplay("{Value}: {DisplayName}")]
-public abstract class BaseEnumClass<TEnum, TValue> : IComparable<TEnum>, IEquatable<TEnum>
+public abstract class BaseEnumClass<TEnum, TValue>
+    : IComparable<TEnum>, IEquatable<TEnum>, IComparable
     where TEnum : BaseEnumClass<TEnum, TValue>
-    where TValue : IComparable
+    where TValue : IComparable<TValue>, IEquatable<TValue>, IComparable
 {
     private static readonly object initLock = new { };
     private static bool isInitialized = false;
@@ -79,6 +80,9 @@ public abstract class BaseEnumClass<TEnum, TValue> : IComparable<TEnum>, IEquata
 
     public int CompareTo(TEnum? other) =>
         Value.CompareTo(other is default(TEnum) ? default : other.Value);
+
+    public int CompareTo(object? other) =>
+        Value.CompareTo(other is default(TEnum) ? default : other);
 
     public override sealed string ToString() => DisplayName;
 
