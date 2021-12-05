@@ -35,23 +35,16 @@ public abstract class BaseEnumClass<TEnum, TValue>
         {
             if (isInitialized) return;
 
-            var fields = typeof(TEnum)
+            var enums = typeof(TEnum)
                 .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .Where(info => typeof(TEnum).IsAssignableFrom(info.FieldType))
-                .Select(info => info.GetValue(null));
-
-            var properties = typeof(TEnum)
-                .GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                .Where(info => typeof(TEnum).IsAssignableFrom(info.PropertyType))
-                .Select(info => info.GetValue(null));
-
-            all = fields.Concat(properties)
+                .Select(info => info.GetValue(null))
                 .Cast<TEnum>()
                 .OrderBy(x => x.Value)
                 .ToArray();
 
-            lookupUpValue = all.ToDictionary(x => x.Value);
-            lookupUpDisplayName = all.ToDictionary(x => x.DisplayName);
+            lookupUpValue = enums.ToDictionary(x => x.Value);
+            lookupUpDisplayName = enums.ToDictionary(x => x.DisplayName);
 
             isInitialized = true;
         }
