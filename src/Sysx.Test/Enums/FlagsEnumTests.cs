@@ -6,7 +6,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Work_On_Small_Enums()
     {
-        var actual = FlagsEnum.Has(SmallEnum.A | SmallEnum.B, SmallEnum.A);
+        var actual = (SmallEnum.A | SmallEnum.B).Has(SmallEnum.A);
 
         Assert.True(actual);
     }
@@ -14,7 +14,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Check_If_Has()
     {
-        var actual = FlagsEnum.Has(TestEnum.A | TestEnum.B, TestEnum.A);
+        var actual = (TestEnum.A | TestEnum.B).Has(TestEnum.A);
 
         Assert.True(actual);
     }
@@ -22,7 +22,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Check_If_Not_Has()
     {
-        var actual = FlagsEnum.Has(TestEnum.A | TestEnum.B, TestEnum.C);
+        var actual = (TestEnum.A | TestEnum.B).Has(TestEnum.C);
 
         Assert.False(actual);
     }
@@ -30,7 +30,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Check_If_Has_Any()
     {
-        var actual = FlagsEnum.HasAny(TestEnum.A | TestEnum.B, TestEnum.A | TestEnum.C);
+        var actual = (TestEnum.A | TestEnum.B).HasAny(TestEnum.A | TestEnum.C);
 
         Assert.True(actual);
     }
@@ -38,7 +38,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Check_If_Not_Has_Any()
     {
-        var actual = FlagsEnum.HasAny(TestEnum.A | TestEnum.B, TestEnum.C | TestEnum.D);
+        var actual = (TestEnum.A | TestEnum.B).HasAny(TestEnum.C | TestEnum.D);
 
         Assert.False(actual);
     }
@@ -46,38 +46,38 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Add()
     {
-        var actual = FlagsEnum.Add(TestEnum.A | TestEnum.B, TestEnum.C);
+        var actual = (TestEnum.A | TestEnum.B).Add(TestEnum.C);
 
-        Assert.True(FlagsEnum.Has(actual, TestEnum.A));
-        Assert.True(FlagsEnum.Has(actual, TestEnum.B));
-        Assert.True(FlagsEnum.Has(actual, TestEnum.C));
+        Assert.True(actual.Has(TestEnum.A));
+        Assert.True(actual.Has(TestEnum.B));
+        Assert.True(actual.Has(TestEnum.C));
     }
 
     [Fact]
     public void Should_Add_Idempotent()
     {
-        var actual = FlagsEnum.Add(TestEnum.A | TestEnum.B, TestEnum.B);
+        var actual = (TestEnum.A | TestEnum.B).Add( TestEnum.B);
 
-        Assert.True(FlagsEnum.Has(actual, TestEnum.A));
-        Assert.True(FlagsEnum.Has(actual, TestEnum.B));
+        Assert.True(actual.Has(TestEnum.A));
+        Assert.True(actual.Has(TestEnum.B));
     }
 
     [Fact]
     public void Should_Remove()
     {
-        var actual = FlagsEnum.Remove(TestEnum.A | TestEnum.B, TestEnum.B);
+        var actual = (TestEnum.A | TestEnum.B).Remove(TestEnum.B);
 
-        Assert.True(FlagsEnum.Has(actual, TestEnum.A));
-        Assert.False(FlagsEnum.Has(actual, TestEnum.B));
+        Assert.True(actual.Has(TestEnum.A));
+        Assert.False(actual.Has(TestEnum.B));
     }
 
     [Fact]
     public void Should_Remove_Idempotent()
     {
-        var actual = FlagsEnum.Remove(TestEnum.A, TestEnum.B);
+        var actual = TestEnum.A.Remove(TestEnum.B);
 
-        Assert.True(FlagsEnum.Has(actual, TestEnum.A));
-        Assert.False(FlagsEnum.Has(actual, TestEnum.B));
+        Assert.True(actual.Has(TestEnum.A));
+        Assert.False(actual.Has(TestEnum.B));
     }
 
     [Fact]
@@ -85,10 +85,10 @@ public class FlagsEnumTests
     {
         var zero = FlagsEnum.None<TestEnum>();
 
-        Assert.False(FlagsEnum.Has(zero, TestEnum.A));
-        Assert.False(FlagsEnum.Has(zero, TestEnum.B));
-        Assert.False(FlagsEnum.Has(zero, TestEnum.C));
-        Assert.False(FlagsEnum.Has(zero, TestEnum.D));
+        Assert.False(zero.Has(TestEnum.A));
+        Assert.False(zero.Has(TestEnum.B));
+        Assert.False(zero.Has(TestEnum.C));
+        Assert.False(zero.Has(TestEnum.D));
     }
 
     [Fact]
@@ -96,10 +96,10 @@ public class FlagsEnumTests
     {
         var all = FlagsEnum.All<TestEnum>();
 
-        Assert.True(FlagsEnum.Has(all, TestEnum.A));
-        Assert.True(FlagsEnum.Has(all, TestEnum.B));
-        Assert.True(FlagsEnum.Has(all, TestEnum.C));
-        Assert.True(FlagsEnum.Has(all, TestEnum.D));
+        Assert.True(all.Has(TestEnum.A));
+        Assert.True(all.Has(TestEnum.B));
+        Assert.True(all.Has(TestEnum.C));
+        Assert.True(all.Has(TestEnum.D));
     }
 
     [Fact]
@@ -107,11 +107,11 @@ public class FlagsEnumTests
     {
         var value = TestEnum.A | TestEnum.B;
 
-        var result = FlagsEnum.Expand(value).ToArray();
+        var result = value.Expand().ToArray();
 
         Assert.True(result.Length == 2);
-        Assert.True(FlagsEnum.Has(result[0], TestEnum.A));
-        Assert.True(FlagsEnum.Has(result[1], TestEnum.B));
+        Assert.True(result[0].Has(TestEnum.A));
+        Assert.True(result[1].Has(TestEnum.B));
     }
 
     [Fact]
@@ -119,10 +119,10 @@ public class FlagsEnumTests
     {
         var value = FlagsEnum.Combine(TestEnum.A, TestEnum.B);
 
-        Assert.True(FlagsEnum.Has(value, TestEnum.A));
-        Assert.True(FlagsEnum.Has(value, TestEnum.B));
-        Assert.False(FlagsEnum.Has(value, TestEnum.C));
-        Assert.False(FlagsEnum.Has(value, TestEnum.D));
+        Assert.True(value.Has(TestEnum.A));
+        Assert.True(value.Has(TestEnum.B));
+        Assert.False(value.Has(TestEnum.C));
+        Assert.False(value.Has(TestEnum.D));
     }
 
     private enum TestEnum

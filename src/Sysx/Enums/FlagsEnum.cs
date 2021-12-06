@@ -13,22 +13,22 @@ public static class FlagsEnum
     public static TEnum All<TEnum>() => FlagsEnum<TEnum>.All;
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.Expand"/>
-    public static IEnumerable<TEnum> Expand<TEnum>(TEnum value) => FlagsEnum<TEnum>.Expand(value);
+    public static IEnumerable<TEnum> Expand<TEnum>(this TEnum value) => FlagsEnum<TEnum>.Expand(value);
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.Combine"/>
     public static TEnum Combine<TEnum>(params TEnum[] values) => FlagsEnum<TEnum>.Combine(values);
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.Has"/>
-    public static bool Has<TEnum>(TEnum current, TEnum flag) => FlagsEnum<TEnum>.Has(current, flag);
+    public static bool Has<TEnum>(this TEnum current, TEnum flag) => FlagsEnum<TEnum>.Has(current, flag);
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.HasAny"/>
-    public static bool HasAny<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.HasAny(current, flags);
+    public static bool HasAny<TEnum>(this TEnum current, TEnum flags) => FlagsEnum<TEnum>.HasAny(current, flags);
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.Add"/>
-    public static TEnum Add<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.Add(current, flags);
+    public static TEnum Add<TEnum>(this TEnum current, TEnum flags) => FlagsEnum<TEnum>.Add(current, flags);
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.Remove"/>
-    public static TEnum Remove<TEnum>(TEnum current, TEnum flags) => FlagsEnum<TEnum>.Remove(current, flags);
+    public static TEnum Remove<TEnum>(this TEnum current, TEnum flags) => FlagsEnum<TEnum>.Remove(current, flags);
 }
 
 /// <summary>
