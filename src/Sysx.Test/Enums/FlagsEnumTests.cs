@@ -6,7 +6,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Work_On_Small_Enums()
     {
-        var actual = (SmallEnum.A | SmallEnum.B).Has(SmallEnum.A);
+        var actual = (SmallEnum.A | SmallEnum.B).HasAll(SmallEnum.A);
 
         Assert.True(actual);
     }
@@ -14,7 +14,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Check_If_Has()
     {
-        var actual = (TestEnum.A | TestEnum.B).Has(TestEnum.A);
+        var actual = (TestEnum.A | TestEnum.B).HasAll(TestEnum.A);
 
         Assert.True(actual);
     }
@@ -22,7 +22,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Check_If_Not_Has()
     {
-        var actual = (TestEnum.A | TestEnum.B).Has(TestEnum.C);
+        var actual = (TestEnum.A | TestEnum.B).HasAll(TestEnum.C);
 
         Assert.False(actual);
     }
@@ -48,9 +48,9 @@ public class FlagsEnumTests
     {
         var actual = (TestEnum.A | TestEnum.B).Add(TestEnum.C);
 
-        Assert.True(actual.Has(TestEnum.A));
-        Assert.True(actual.Has(TestEnum.B));
-        Assert.True(actual.Has(TestEnum.C));
+        Assert.True(actual.HasAll(TestEnum.A));
+        Assert.True(actual.HasAll(TestEnum.B));
+        Assert.True(actual.HasAll(TestEnum.C));
     }
 
     [Fact]
@@ -58,8 +58,8 @@ public class FlagsEnumTests
     {
         var actual = (TestEnum.A | TestEnum.B).Add( TestEnum.B);
 
-        Assert.True(actual.Has(TestEnum.A));
-        Assert.True(actual.Has(TestEnum.B));
+        Assert.True(actual.HasAll(TestEnum.A));
+        Assert.True(actual.HasAll(TestEnum.B));
     }
 
     [Fact]
@@ -67,8 +67,8 @@ public class FlagsEnumTests
     {
         var actual = (TestEnum.A | TestEnum.B).Remove(TestEnum.B);
 
-        Assert.True(actual.Has(TestEnum.A));
-        Assert.False(actual.Has(TestEnum.B));
+        Assert.True(actual.HasAll(TestEnum.A));
+        Assert.False(actual.HasAll(TestEnum.B));
     }
 
     [Fact]
@@ -76,8 +76,8 @@ public class FlagsEnumTests
     {
         var actual = TestEnum.A.Remove(TestEnum.B);
 
-        Assert.True(actual.Has(TestEnum.A));
-        Assert.False(actual.Has(TestEnum.B));
+        Assert.True(actual.HasAll(TestEnum.A));
+        Assert.False(actual.HasAll(TestEnum.B));
     }
 
     [Fact]
@@ -85,10 +85,10 @@ public class FlagsEnumTests
     {
         var zero = FlagsEnum.None<TestEnum>();
 
-        Assert.False(zero.Has(TestEnum.A));
-        Assert.False(zero.Has(TestEnum.B));
-        Assert.False(zero.Has(TestEnum.C));
-        Assert.False(zero.Has(TestEnum.D));
+        Assert.False(zero.HasAll(TestEnum.A));
+        Assert.False(zero.HasAll(TestEnum.B));
+        Assert.False(zero.HasAll(TestEnum.C));
+        Assert.False(zero.HasAll(TestEnum.D));
     }
 
     [Fact]
@@ -96,10 +96,10 @@ public class FlagsEnumTests
     {
         var all = FlagsEnum.All<TestEnum>();
 
-        Assert.True(all.Has(TestEnum.A));
-        Assert.True(all.Has(TestEnum.B));
-        Assert.True(all.Has(TestEnum.C));
-        Assert.True(all.Has(TestEnum.D));
+        Assert.True(all.HasAll(TestEnum.A));
+        Assert.True(all.HasAll(TestEnum.B));
+        Assert.True(all.HasAll(TestEnum.C));
+        Assert.True(all.HasAll(TestEnum.D));
     }
 
     [Fact]
@@ -110,8 +110,8 @@ public class FlagsEnumTests
         var result = value.Expand().ToArray();
 
         Assert.True(result.Length == 2);
-        Assert.True(result[0].Has(TestEnum.A));
-        Assert.True(result[1].Has(TestEnum.B));
+        Assert.True(result[0].HasAll(TestEnum.A));
+        Assert.True(result[1].HasAll(TestEnum.B));
     }
 
     [Fact]
@@ -119,10 +119,10 @@ public class FlagsEnumTests
     {
         var value = FlagsEnum.Combine(TestEnum.A, TestEnum.B);
 
-        Assert.True(value.Has(TestEnum.A));
-        Assert.True(value.Has(TestEnum.B));
-        Assert.False(value.Has(TestEnum.C));
-        Assert.False(value.Has(TestEnum.D));
+        Assert.True(value.HasAll(TestEnum.A));
+        Assert.True(value.HasAll(TestEnum.B));
+        Assert.False(value.HasAll(TestEnum.C));
+        Assert.False(value.HasAll(TestEnum.D));
     }
 
     private enum TestEnum

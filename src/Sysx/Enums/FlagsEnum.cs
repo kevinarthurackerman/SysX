@@ -4,39 +4,64 @@
 public static class FlagsEnum
 {
     /// <inheritdoc cref="FlagsEnum{TEnum}.None"/>
-    public static TEnum None<TEnum>() => FlagsEnum<TEnum>.None;
+    public static TEnum None<TEnum>() where TEnum : Enum =>
+        FlagsEnum<TEnum>.None;
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.Values"/>
-    public static IEnumerable<TEnum> Values<TEnum>() => FlagsEnum<TEnum>.Values;
+    public static IEnumerable<TEnum> Values<TEnum>() where TEnum : Enum =>
+        FlagsEnum<TEnum>.Values;
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.All"/>
-    public static TEnum All<TEnum>() => FlagsEnum<TEnum>.All;
+    public static TEnum All<TEnum>() where TEnum : Enum =>
+        FlagsEnum<TEnum>.All;
 
-    /// <inheritdoc cref="FlagsEnum{TEnum}.Expand"/>
-    public static IEnumerable<TEnum> Expand<TEnum>(this TEnum value) => FlagsEnum<TEnum>.Expand(value);
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Expand(TEnum)"/>
+    public static IEnumerable<TEnum> Expand<TEnum>(this TEnum value) where TEnum : Enum =>
+        FlagsEnum<TEnum>.Expand(value);
 
-    /// <inheritdoc cref="FlagsEnum{TEnum}.Combine"/>
-    public static TEnum Combine<TEnum>(params TEnum[] values) => FlagsEnum<TEnum>.Combine(values);
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Combine(TEnum[])"/>
+    public static TEnum Combine<TEnum>(params TEnum[] values) where TEnum : Enum =>
+        FlagsEnum<TEnum>.Combine(values);
 
-    /// <inheritdoc cref="FlagsEnum{TEnum}.Has"/>
-    public static bool Has<TEnum>(this TEnum current, TEnum flag) => FlagsEnum<TEnum>.Has(current, flag);
+    /// <inheritdoc cref="FlagsEnum{TEnum}.HasAll(TEnum, TEnum)"/>
+    public static bool HasAll<TEnum>(this TEnum current, params TEnum[] flags) where TEnum : Enum =>
+        FlagsEnum<TEnum>.HasAll(current, flags);
 
-    /// <inheritdoc cref="FlagsEnum{TEnum}.HasAny"/>
-    public static bool HasAny<TEnum>(this TEnum current, TEnum flags) => FlagsEnum<TEnum>.HasAny(current, flags);
+    /// <inheritdoc cref="FlagsEnum{TEnum}.HasAll(TEnum, TEnum)"/>
+    public static bool HasAll<TEnum>(this TEnum current, TEnum flags) where TEnum : Enum =>
+        FlagsEnum<TEnum>.HasAll(current, flags);
 
-    /// <inheritdoc cref="FlagsEnum{TEnum}.Add"/>
-    public static TEnum Add<TEnum>(this TEnum current, TEnum flags) => FlagsEnum<TEnum>.Add(current, flags);
+    /// <inheritdoc cref="FlagsEnum{TEnum}.HasAny(TEnum, TEnum)"/>
+    public static bool HasAny<TEnum>(this TEnum current, params TEnum[] flags) where TEnum : Enum =>
+        FlagsEnum<TEnum>.HasAny(current, flags);
 
-    /// <inheritdoc cref="FlagsEnum{TEnum}.Remove"/>
-    public static TEnum Remove<TEnum>(this TEnum current, TEnum flags) => FlagsEnum<TEnum>.Remove(current, flags);
+    /// <inheritdoc cref="FlagsEnum{TEnum}.HasAny(TEnum, TEnum)"/>
+    public static bool HasAny<TEnum>(this TEnum current, TEnum flags) where TEnum : Enum =>
+        FlagsEnum<TEnum>.HasAny(current, flags);
+
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Add(TEnum, TEnum)"/>
+    public static TEnum Add<TEnum>(this TEnum current, params TEnum[] flags) where TEnum : Enum =>
+        FlagsEnum<TEnum>.Add(current, flags);
+
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Add(TEnum, TEnum)"/>
+    public static TEnum Add<TEnum>(this TEnum current, TEnum flags) where TEnum : Enum =>
+        FlagsEnum<TEnum>.Add(current, flags);
+
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Remove(TEnum, TEnum)"/>
+    public static TEnum Remove<TEnum>(this TEnum current, params TEnum[] flags) where TEnum : Enum =>
+        FlagsEnum<TEnum>.Remove(current, flags);
+
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Remove(TEnum, TEnum)"/>
+    public static TEnum Remove<TEnum>(this TEnum current, TEnum flags) where TEnum : Enum =>
+        FlagsEnum<TEnum>.Remove(current, flags);
 }
 
 /// <summary>
 /// Provides operations for manipulating flags enums
 /// </summary>
-public static class FlagsEnum<TEnum>
+public static class FlagsEnum<TEnum> where TEnum : Enum
 {
-    private static readonly Func<TEnum, TEnum, bool> has =
+    private static readonly Func<TEnum, TEnum, bool> hasAll =
         ExpressionX.Function<TEnum, TEnum, bool>((current, flag) =>
         {
             // current & flag == flag
@@ -46,7 +71,7 @@ public static class FlagsEnum<TEnum>
             var and = Expression.And(currentConv, flagConv);
             var equal = Expression.Equal(and, flagConv);
             return equal;
-        }, nameof(FlagsEnum<TEnum>.Has));
+        }, nameof(FlagsEnum<TEnum>.HasAll));
 
     private static readonly Func<TEnum, TEnum, bool> hasAny =
         ExpressionX.Function<TEnum, TEnum, bool>((current, flag) =>
@@ -99,9 +124,7 @@ public static class FlagsEnum<TEnum>
     /// <summary>
     /// A value representing all values of the flag being set.
     /// </summary>
-    public static TEnum All { get; } = Enum.GetValues(typeof(TEnum))
-        .Cast<TEnum>()
-        .Aggregate(None, (l, r) => Add(l, r));
+    public static TEnum All { get; } = CombineSkipCheck(Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToArray());
 
     /// <summary>
     /// Expands the flag value to a list of defined flags.
@@ -110,7 +133,7 @@ public static class FlagsEnum<TEnum>
     {
         EnsureArg.HasValue(value, nameof(value));
 
-        return Values.Where(x => Has(value, x)).ToArray();
+        return Values.Where(x => HasAll(value, x)).ToArray();
     }
 
     /// <summary>
@@ -120,19 +143,27 @@ public static class FlagsEnum<TEnum>
     {
         EnsureArg.IsNotNull(values, nameof(values));
 
-        return values.Aggregate(None, (left, right) => Add(left, right));
+        return CombineSkipCheck(values);
     }
+
+    /// <inheritdoc cref="FlagsEnum{TEnum}.HasAll(TEnum, TEnum)"/>
+    public static bool HasAll(TEnum current, params TEnum[] flags) =>
+        HasAll(current, CombineSkipCheck(flags));
 
     /// <summary>
-    /// Checks if the current flag value contains a specific flag.
+    /// Checks if the current flag value contains all of the flags.
     /// </summary>
-    public static bool Has(TEnum current, TEnum flag)
+    public static bool HasAll(TEnum current, TEnum flags)
     {
         EnsureArg.HasValue(current, nameof(current));
-        EnsureArg.HasValue(flag, nameof(flag));
+        EnsureArg.HasValue(flags, nameof(flags));
 
-        return has(current, flag);
+        return hasAll(current, flags);
     }
+
+    /// <inheritdoc cref="FlagsEnum{TEnum}.HasAny(TEnum, TEnum)"/>
+    public static bool HasAny(TEnum current, params TEnum[] flags) =>
+        HasAny(current, CombineSkipCheck(flags));
 
     /// <summary>
     /// Checks if the current flag value contains any of the flags.
@@ -145,6 +176,10 @@ public static class FlagsEnum<TEnum>
         return hasAny(current, flags);
     }
 
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Add(TEnum, TEnum)"/>
+    public static TEnum Add(TEnum current, params TEnum[] flags) =>
+        Add(current, CombineSkipCheck(flags));
+
     /// <summary>
     /// Adds the flags value to the current flag.
     /// </summary>
@@ -156,6 +191,10 @@ public static class FlagsEnum<TEnum>
         return add(current, flags);
     }
 
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Remove(TEnum, TEnum)"/>
+    public static TEnum Remove(TEnum current, params TEnum[] flags) =>
+        Remove(current, CombineSkipCheck(flags));
+
     /// <summary>
     /// Removes the flags value from the current flag.
     /// </summary>
@@ -166,4 +205,14 @@ public static class FlagsEnum<TEnum>
 
         return remove(current, flags);
     }
+
+    private static TEnum CombineSkipCheck(params TEnum[] values)
+    {
+        var combinedFlag = None;
+
+        for(var i = 0; i < values.Length; i++)
+            combinedFlag = add(combinedFlag, values[i]);
+
+        return combinedFlag;
     }
+}
