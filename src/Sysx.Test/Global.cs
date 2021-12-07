@@ -5,7 +5,7 @@ global using System.Linq.Dynamic.Core;
 global using System.Runtime.CompilerServices;
 global using Sysx.Collections.Generic;
 global using Sysx.Enums;
-global using Sysx.Identity;
+global using Sysx.Identifiers;
 global using Sysx.Linq;
 global using Sysx.Reflection;
 global using Xunit;

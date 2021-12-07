@@ -1,6 +1,4 @@
-﻿using System.Buffers;
-
-namespace Sysx.Identity;
+﻿namespace Sysx.Identifiers;
 
 public struct SequentialGuidOptions
 {

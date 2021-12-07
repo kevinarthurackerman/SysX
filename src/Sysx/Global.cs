@@ -2,6 +2,7 @@
 global using Microsoft.CodeAnalysis.CSharp.Scripting;
 global using Microsoft.CodeAnalysis.Scripting;
 global using System;
+global using System.Buffers;
 global using System.Collections;
 global using System.Collections.Concurrent;
 global using System.Collections.Generic;

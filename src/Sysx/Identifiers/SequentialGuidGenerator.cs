@@ -1,4 +1,4 @@
-﻿namespace Sysx.Identity;
+﻿namespace Sysx.Identifiers;
 
 internal static class SequentialGuidGenerator
 {

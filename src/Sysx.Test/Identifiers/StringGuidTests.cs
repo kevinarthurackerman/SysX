@@ -1,7 +1,7 @@
-﻿namespace Sysx.Test.Identity;
+﻿namespace Sysx.Test.Identifiers;
 using Assert = Xunit.Assert;
 
-public class BinaryGuidTests
+public class StringGuidTests
 {
     [Fact]
     public void Should_Order_Sequentially_Over_Short_Time()
@@ -18,12 +18,12 @@ public class BinaryGuidTests
         };
 
         var guids = Enumerable.Range(0, 1000)
-            .Select(x => BinaryGuid.NewSequentialGuid(options))
+            .Select(x => StringGuid.NewSequentialGuid(options))
             .ToArray();
 
         var ordered = guids.OrderBy(x => x).ToArray();
 
-        for(var i = 0; i < guids.Length; i++)
+        for (var i = 0; i < guids.Length; i++)
             Assert.Equal(guids[i], ordered[i]);
     }
 
@@ -42,7 +42,7 @@ public class BinaryGuidTests
         };
 
         var guids = Enumerable.Range(0, 1000)
-            .Select(x => BinaryGuid.NewSequentialGuid(options))
+            .Select(x => StringGuid.NewSequentialGuid(options))
             .ToArray();
 
         var ordered = guids.OrderBy(x => x).ToArray();
@@ -55,7 +55,7 @@ public class BinaryGuidTests
     public void Should_Generate_Unique_Values()
     {
         var guids = Enumerable.Range(0, 1000)
-            .Select(_ => BinaryGuid.NewSequentialGuid())
+            .Select(_ => StringGuid.NewSequentialGuid())
             .ToArray();
 
         var uniqueGuids = guids.Distinct().ToArray();

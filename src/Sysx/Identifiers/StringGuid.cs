@@ -1,4 +1,4 @@
-﻿namespace Sysx.Identity;
+﻿namespace Sysx.Identifiers;
 
 /// <summary>
 /// This type is a thin wrapper over Guid to create semi-sequential values by overriding the comparison methods to use string sort order.
