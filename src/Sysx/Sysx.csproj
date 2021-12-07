@@ -56,10 +56,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Operator.cs">
-      <DesignTime>True</DesignTime>
-    </Compile>
-  </ItemGroup>
-
 </Project>
