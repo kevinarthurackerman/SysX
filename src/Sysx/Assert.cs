@@ -64,7 +64,7 @@ public static class Assert
     /// <exception cref="ContractException"></exception>
     [Conditional(CompilationSymbol)]
     public static void That(bool condition,
-        Func<Options, string>? message = null,
+        Func<Context, string>? message = null,
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int? callerLineNumber = null,
         [CallerMemberName] string? callerMemberName = null,
@@ -73,20 +73,20 @@ public static class Assert
 #if ASSERTIONS
         if (!condition)
         {
-            var options = new Options(callerFilePath, callerLineNumber, callerMemberName);
+            var options = new Context(callerFilePath, callerLineNumber, callerMemberName);
             message ??= x => $"Condition failed at {callerFilePath} line {callerLineNumber}: {callerMemberName}";
             throw new ContractException(message(options));
         }
 #endif
     }
 
-    public class Options
+    public class Context
     {
         public string? FilePath { get; }
         public int? LineNumber { get; }
         public string? MemberName { get; }
 
-        internal Options(string? filePath, int? lineNumber, string? memberName)
+        internal Context(string? filePath, int? lineNumber, string? memberName)
         {
             FilePath = filePath;
             LineNumber = lineNumber;
