@@ -22,6 +22,7 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using System.Threading;
 global using System.Threading.Tasks;
+global using Sysx.EnsureThat;
 global using Sysx.Enums;
 global using Sysx.Linq;
 global using Sysx.Linq.Expressions;

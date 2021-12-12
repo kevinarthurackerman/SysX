@@ -10,7 +10,7 @@ public class TestTimeMachine : IDisposable
 
     private readonly List<Delay> delays = new();
 
-    private bool isDisposed;
+    private bool disposed;
 
     public DateTime Now { get; private set; }
 
@@ -47,6 +47,7 @@ public class TestTimeMachine : IDisposable
     /// </summary>
     public Task CreateDelay(DateTime completesAt, TimeSpan timeToWaitForOtherWork)
     {
+        Ensure.That(this).IsNotDisposed(disposed);
         EnsureArg.IsGte(completesAt, Now);
 
         var completionSource = new TaskCompletionSource<object?>();
@@ -65,6 +66,7 @@ public class TestTimeMachine : IDisposable
     /// <param name="now"></param>
     public void SetNow(DateTime now)
     {
+        Ensure.That(this).IsNotDisposed(disposed);
         EnsureArg.IsGte(now, Now);
         
         while (true)
@@ -104,9 +106,9 @@ public class TestTimeMachine : IDisposable
 
     public void Dispose()
     {
-        if (isDisposed) return;
+        if (disposed) return;
 
-        isDisposed = true;
+        disposed = true;
 
         foreach (var delay in delays)
             delay.CompletionSource.SetCanceled();
