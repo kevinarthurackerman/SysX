@@ -15,7 +15,7 @@ public static class EnumerableX
 
         var descendantsChecked = new HashSet<T>();
         var descendantsToCheck = new List<T>();
-        var childrenBeingChecked = childSelector(root);
+        var childrenBeingChecked = (IEnumerable<T>)childSelector(root).ToArray();
         var depth = 0;
         while (childrenBeingChecked.Any() && depth++ < maxDepth)
         {
@@ -23,7 +23,7 @@ public static class EnumerableX
             {
                 if (!descendantsChecked.Add(childBeingChecked)) continue;
 
-                var children = childSelector(childBeingChecked);
+                var children = childSelector(childBeingChecked).ToArray();
 
                 descendantsToCheck.AddRange(children);
 
