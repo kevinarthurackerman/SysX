@@ -1,4 +1,4 @@
-﻿namespace Sysx.Test.Math;
+﻿namespace Sysx.Test.Enums;
 using Assert = Xunit.Assert;
 
 public class FlagsEnumTests
@@ -56,7 +56,7 @@ public class FlagsEnumTests
     [Fact]
     public void Should_Add_Idempotent()
     {
-        var actual = (TestEnum.A | TestEnum.B).Add( TestEnum.B);
+        var actual = (TestEnum.A | TestEnum.B).Add(TestEnum.B);
 
         Assert.True(actual.HasAll(TestEnum.A));
         Assert.True(actual.HasAll(TestEnum.B));
