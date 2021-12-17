@@ -28,6 +28,18 @@
     <ProjectReference Include="..\Sysx\Sysx.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'netcoreapp3.1'" >
+    <Reference Include="Sysx.Test.TestChild">
+      <HintPath>..\TestProjects\Sysx.Test.TestChild\bin\Debug\$(TargetFramework)\Sysx.Test.TestChild.dll</HintPath>
+    </Reference>
+    <Reference Include="Sysx.Test.TestGrandchild">
+      <HintPath>..\TestProjects\Sysx.Test.TestGrandchild\bin\Debug\$(TargetFramework)\Sysx.Test.TestGrandchild.dll</HintPath>
+    </Reference>
+    <Reference Include="Sysx.Test.TestParent">
+      <HintPath>..\TestProjects\Sysx.Test.TestParent\bin\Debug\$(TargetFramework)\Sysx.Test.TestParent.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
