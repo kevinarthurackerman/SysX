@@ -67,15 +67,13 @@ public static class AssemblyX
             {
                 return Assembly.LoadFile(assemblyPath);
             }
-
-            //return options.AssemblyLoadContext!.LoadFromAssemblyPath(assemblyPath);
         }
     }
 
     public record struct LoadOptions
     {
         public static readonly AssemblyDependencyResolver FrameworkDependencyResolver =
-            new AssemblyDependencyResolver(typeof(object).Assembly.Location);
+            new (typeof(object).Assembly.Location);
 
         public static readonly AssemblyDependencyResolver CurrentDomainAssemblyDependencyResolver =
             new (AppDomain.CurrentDomain.BaseDirectory);
