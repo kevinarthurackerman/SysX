@@ -23,6 +23,10 @@ public static class FlagsEnum
     public static TEnum Combine<TEnum>(params TEnum[] values) where TEnum : Enum =>
         FlagsEnum<TEnum>.Combine(values);
 
+    /// <inheritdoc cref="FlagsEnum{TEnum}.Has(TEnum, TEnum)"/>
+    public static bool Has<TEnum>(this TEnum current, TEnum flag) where TEnum : Enum =>
+        FlagsEnum<TEnum>.Has(current, flag);
+
     /// <inheritdoc cref="FlagsEnum{TEnum}.HasAll(TEnum, TEnum)"/>
     public static bool HasAll<TEnum>(this TEnum current, params TEnum[] flags) where TEnum : Enum =>
         FlagsEnum<TEnum>.HasAll(current, flags);
@@ -144,6 +148,21 @@ public static class FlagsEnum<TEnum> where TEnum : Enum
         EnsureArg.IsNotNull(values, nameof(values));
 
         return CombineSkipCheck(values);
+    }
+
+    /// <summary>
+    /// Checks if the current flag value contains the flag.
+    /// </summary>
+    public static bool Has(TEnum current, TEnum flag)
+    {
+        EnsureArg.HasValue(current, nameof(current));
+        EnsureArg.HasValue(flag, nameof(flag));
+
+        var flagValues = Expand(flag).ToArray();
+
+        EnsureArg.SizeIs(flagValues, 1, nameof(flag), x => x.WithMessage($"{nameof(flag)} must contain one and only one flag value."));
+
+        return hasAny(current, flag);
     }
 
     /// <inheritdoc cref="FlagsEnum{TEnum}.HasAll(TEnum, TEnum)"/>
