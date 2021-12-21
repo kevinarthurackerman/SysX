@@ -8,40 +8,44 @@
 /// </summary>
 public class Debounce
 {
+    private static readonly DebounceOptions defaultOptions = DebounceOptions.Default;
+
     private readonly object @lock = new();
-    private readonly Func<DateTime> getNow;
-    private readonly Func<TimeSpan, Task> createDelay;
-    private readonly Action? defaultExecute;
-    private readonly TimeSpan? defaultDelay;
+    private readonly DebounceOptions options;
     private Action? nextExecute;
     private DateTime nextInvoke = DateTime.MinValue;
     private Task? delayTask;
 
-    public Debounce(Func<DateTime> getNow, Func<TimeSpan, Task> createDelay) :
-        this(getNow, createDelay, null, null) { }
+    public Debounce() : this(defaultOptions) { }
 
-    public Debounce(Func<DateTime> getNow, Func<TimeSpan, Task> createDelay, TimeSpan defaultDelay) :
-        this(getNow, createDelay, null, defaultDelay) { }
-
-    public Debounce(Func<DateTime> getNow, Func<TimeSpan, Task> createDelay, Action defaultExecute) :
-        this(getNow, createDelay, defaultExecute, null) { }
-
-    public Debounce(Func<DateTime> getNow, Func<TimeSpan,Task> createDelay, Action? defaultExecute, TimeSpan? defaultDelay)
+    public Debounce(in DebounceOptions options)
     {
-        this.getNow = getNow;
-        this.createDelay = createDelay;
-        this.defaultExecute = defaultExecute;
-        this.defaultDelay = defaultDelay;
+        options.Validate();
+
+        var createDelayInner = options.CreateDelay;
+
+        this.options = new DebounceOptions
+        {
+            GetNow = options.GetNow,
+            CreateDelay = delay =>
+            {
+                var delayTask = createDelayInner(delay);
+                EnsureArg.IsNotNull(delayTask, nameof(delayTask));
+                return delayTask;
+            },
+            DefaultExecute = options.DefaultExecute,
+            DefaultDelay = options.DefaultDelay
+        };
     }
 
     /// <inheritdoc cref="Invoke(Action?, TimeSpan?)" />
-    public void Invoke() => Invoke(defaultExecute, defaultDelay);
+    public void Invoke() => Invoke(options.DefaultExecute, options.DefaultDelay);
 
     /// <inheritdoc cref="Invoke(Action?, TimeSpan?)" />
-    public void Invoke(TimeSpan delay) => Invoke(defaultExecute, delay);
+    public void Invoke(TimeSpan delay) => Invoke(options.DefaultExecute, delay);
 
     /// <inheritdoc cref="Invoke(Action?, TimeSpan?)" />
-    public void Invoke(Action execute) => Invoke(execute, defaultDelay);
+    public void Invoke(Action execute) => Invoke(execute, options.DefaultDelay);
 
     /// <summary>
     /// Invokes the Debounce, beginning or resetting the timeout until the execute action will be called.
@@ -50,13 +54,13 @@ public class Debounce
     /// </summary>
     public void Invoke(Action? execute, TimeSpan? delay)
     {
-        execute ??= defaultExecute ?? throw new InvalidOperationException($"Must provide {nameof(execute)} at the {nameof(Invoke)} call site or {nameof(defaultExecute)} when constructing {nameof(Debounce)}.");
-        delay ??= defaultDelay ?? throw new InvalidOperationException($"Must provide {nameof(delay)} at the {nameof(Invoke)} call site or {nameof(defaultDelay)} when constructing {nameof(Debounce)}.");
+        execute ??= options.DefaultExecute ?? throw new InvalidOperationException($"Must provide {nameof(execute)} at the {nameof(Invoke)} call site or {nameof(options.DefaultExecute)} when constructing {nameof(Debounce)}.");
+        delay ??= options.DefaultDelay ?? throw new InvalidOperationException($"Must provide {nameof(delay)} at the {nameof(Invoke)} call site or {nameof(options.DefaultDelay)} when constructing {nameof(Debounce)}.");
 
         lock (@lock)
         {
             nextExecute = execute;
-            var newNextInvoke = getNow().Add(delay.Value);
+            var newNextInvoke = options.GetNow().Add(delay.Value);
 
             if (newNextInvoke > nextInvoke)
             {
@@ -78,11 +82,11 @@ public class Debounce
 
                 do
                 {
-                    await createDelay(delay).ConfigureAwait(false);
+                    await options.CreateDelay(delay).ConfigureAwait(false);
 
                     lock (@lock)
                     {
-                        var now = getNow();
+                        var now = options.GetNow();
                         if (nextInvoke <= now)
                         {
                             doExecute = nextExecute;
@@ -99,5 +103,27 @@ public class Debounce
                 // handle exceptions?
                 doExecute.Invoke();
             });
+    }
+
+    public record struct DebounceOptions
+    {
+        public static DebounceOptions Default => new()
+        {
+            GetNow = () => DateTime.UtcNow,
+            CreateDelay = delay => Task.Delay(delay),
+            DefaultExecute = null,
+            DefaultDelay = null
+        };
+
+        public Func<DateTime> GetNow { get; set; }
+        public Func<TimeSpan,Task> CreateDelay { get; set; }
+        public Action? DefaultExecute { get; set; }
+        public TimeSpan? DefaultDelay { get; set; }
+
+        public void Validate()
+        {
+            EnsureArg.IsNotNull(GetNow, nameof(GetNow));
+            EnsureArg.IsNotNull(CreateDelay, nameof(CreateDelay));
+        }
     }
 }

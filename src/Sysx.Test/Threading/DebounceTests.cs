@@ -7,7 +7,8 @@ public class DebounceTests
     public void Should_Debounce()
     {
         using var testTimeMachine = new TestTimeMachine();
-        var debounce = new Debounce(() => testTimeMachine.Now, delay => testTimeMachine.CreateDelay(delay));
+        var options = Debounce.DebounceOptions.Default with { GetNow = () => testTimeMachine.Now, CreateDelay = delay => testTimeMachine.CreateDelay(delay) };
+        var debounce = new Debounce(options);
 
         var executedCount = 0;
         var executeAction = () => { executedCount++; };
@@ -33,7 +34,8 @@ public class DebounceTests
     public void Should_Debounce_Once()
     {
         using var testTimeMachine = new TestTimeMachine();
-        var debounce = new Debounce(() => testTimeMachine.Now, delay => testTimeMachine.CreateDelay(delay));
+        var options = Debounce.DebounceOptions.Default with { GetNow = () => testTimeMachine.Now, CreateDelay = delay => testTimeMachine.CreateDelay(delay) };
+        var debounce = new Debounce(options);
 
         var executedCount = 0;
         var executeAction = () => { executedCount++; };
@@ -56,7 +58,8 @@ public class DebounceTests
     public void Should_Debounce_Again()
     {
         using var testTimeMachine = new TestTimeMachine();
-        var debounce = new Debounce(() => testTimeMachine.Now, delay => testTimeMachine.CreateDelay(delay));
+        var options = Debounce.DebounceOptions.Default with { GetNow = () => testTimeMachine.Now, CreateDelay = delay => testTimeMachine.CreateDelay(delay) };
+        var debounce = new Debounce(options);
 
         var executedCount = 0;
         var executeAction = () => { executedCount++; };
@@ -82,14 +85,16 @@ public class DebounceTests
     public void Should_Debounce_With_Constructor_Arguments()
     {
         var executedCount = 0;
-        var executeAction = () => { executedCount++; };
 
         using var testTimeMachine = new TestTimeMachine();
-        var debounce = new Debounce(
-            () => testTimeMachine.Now,
-            delay => testTimeMachine.CreateDelay(delay),
-            executeAction,
-            TimeSpan.FromMilliseconds(10));
+        var options = Debounce.DebounceOptions.Default with 
+        { 
+            GetNow = () => testTimeMachine.Now, 
+            CreateDelay = delay => testTimeMachine.CreateDelay(delay),
+            DefaultExecute = () => { executedCount++; },
+            DefaultDelay = TimeSpan.FromMilliseconds(10)
+        };
+        var debounce = new Debounce(options);
 
         debounce.Invoke();
 
