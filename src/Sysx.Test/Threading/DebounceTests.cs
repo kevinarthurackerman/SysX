@@ -8,7 +8,7 @@ public class DebounceTests
     {
         using var testTimeMachine = new TestTimeMachine();
         var options = Debounce.DebounceOptions.Default with { GetNow = () => testTimeMachine.Now, CreateDelay = delay => testTimeMachine.CreateDelay(delay) };
-        var debounce = new Debounce(options);
+        var debounce = new Debounce(in options);
 
         var executedCount = 0;
         var executeAction = () => { executedCount++; };
@@ -35,7 +35,7 @@ public class DebounceTests
     {
         using var testTimeMachine = new TestTimeMachine();
         var options = Debounce.DebounceOptions.Default with { GetNow = () => testTimeMachine.Now, CreateDelay = delay => testTimeMachine.CreateDelay(delay) };
-        var debounce = new Debounce(options);
+        var debounce = new Debounce(in options);
 
         var executedCount = 0;
         var executeAction = () => { executedCount++; };
@@ -59,7 +59,7 @@ public class DebounceTests
     {
         using var testTimeMachine = new TestTimeMachine();
         var options = Debounce.DebounceOptions.Default with { GetNow = () => testTimeMachine.Now, CreateDelay = delay => testTimeMachine.CreateDelay(delay) };
-        var debounce = new Debounce(options);
+        var debounce = new Debounce(in options);
 
         var executedCount = 0;
         var executeAction = () => { executedCount++; };
@@ -94,7 +94,7 @@ public class DebounceTests
             DefaultExecute = () => { executedCount++; },
             DefaultDelay = TimeSpan.FromMilliseconds(10)
         };
-        var debounce = new Debounce(options);
+        var debounce = new Debounce(in options);
 
         debounce.Invoke();
 
