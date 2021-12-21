@@ -20,7 +20,7 @@
     <VersionPrefix>$(VersionPrefix)</VersionPrefix>
     <VersionSuffix>$(VersionSuffix)</VersionSuffix>
     <RepositoryType>git</RepositoryType>
-    <Title>Sysx</Title>
+    <Title>$(MSBuildProjectName)</Title>
     <Authors>sysx,kevin.arthur.ackerman</Authors>
     <Description>General utilities library</Description>
     <PackageProjectUrl>https://github.com/kevinarthurackerman/Sysx</PackageProjectUrl>
