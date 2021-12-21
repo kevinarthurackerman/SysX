@@ -19,10 +19,10 @@ public static class AssemblyX
     }
 
 #elif NET5_0 || NETCOREAPP3_1
-    private static readonly LoadOptions DefaultLoadOptions = LoadOptions.Default;
+    private static readonly LoadOptions defaultLoadOptions = LoadOptions.Default;
 
     /// <inheritdoc cref="Load(LoadOptions)"/>
-    public static IEnumerable<Assembly> Load() => Load(in DefaultLoadOptions);
+    public static IEnumerable<Assembly> Load() => Load(in defaultLoadOptions);
 
     /// <summary>
     /// Recursively loads the dependencies of an assembly.
