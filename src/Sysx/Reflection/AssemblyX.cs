@@ -1,9 +1,5 @@
 ﻿namespace Sysx.Reflection;
 
-#if NET5_0 || NETCOREAPP3_1
-using System.Runtime.Loader;
-#endif
-
 /// <summary>
 /// Used to recursively load the dependencies of an assembly.
 /// </summary>
@@ -19,7 +15,7 @@ public static class AssemblyX
 
         EnsureArg.IsNotNull(rootAssembly);
 
-        return rootAssembly.Descendants(x => x.GetReferencedAssemblies().Select(y => Assembly.Load(y)));
+        return EnumerableX.Descendants(rootAssembly, x => x.GetReferencedAssemblies().Select(y => Assembly.Load(y)));
     }
 
 #elif NET5_0 || NETCOREAPP3_1
@@ -44,7 +40,7 @@ public static class AssemblyX
         
         var copyOptions = options;
 
-        return rootAssembly.Descendants(
+        return EnumerableX.Descendants(rootAssembly,
             x => x.GetReferencedAssemblies().Select(assemblyName => ResolveAssembly(assemblyName, copyOptions)),
             includeRoot: options.IncludeRootAssembly,
             maxDepth: maxDepth

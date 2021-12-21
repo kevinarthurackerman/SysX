@@ -26,3 +26,6 @@ global using Sysx.EnsureThat;
 global using Sysx.Enums;
 global using Sysx.Linq;
 global using Sysx.Linq.Expressions;
+#if NET5_0 || NETCOREAPP3_1
+global using System.Runtime.Loader;
+#endif

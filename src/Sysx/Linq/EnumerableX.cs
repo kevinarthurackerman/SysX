@@ -5,7 +5,7 @@ public static class EnumerableX
     /// <summary>
     /// Returns the descendants of the root nearest to furthest, breadth first.
     /// </summary>
-    public static IEnumerable<T> Descendants<T>(this T root, Func<T, IEnumerable<T>> childSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
+    public static IEnumerable<T> Descendants<T>(T root, Func<T, IEnumerable<T>> childSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
     {
         EnsureArg.HasValue(root, nameof(root));
         EnsureArg.IsNotNull(childSelector, nameof(childSelector));
@@ -38,7 +38,7 @@ public static class EnumerableX
     /// <summary>
     /// Returns the ancestors of the root nearest to furthest.
     /// </summary>
-    public static IEnumerable<T> Ancestors<T>(this T root, Func<T, T?> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
+    public static IEnumerable<T> Ancestors<T>(T root, Func<T, T?> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
     {
         EnsureArg.HasValue(root, nameof(root));
         EnsureArg.IsNotNull(ancestorSelector, nameof(ancestorSelector));
