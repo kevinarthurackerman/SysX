@@ -34,7 +34,7 @@ public static class Assert
 #endif
     }
 
-    public class Context
+    public readonly record struct Context
     {
         public string? FilePath { get; }
         public int? LineNumber { get; }
