@@ -1,6 +1,5 @@
-﻿namespace Sysx.Test.Reflection.AssemblyX;
+﻿namespace Sysx.Test.Reflection;
 using Assert = Xunit.Assert;
-using AssemblyX = Sysx.Reflection.AssemblyX;
 
 public class AssemblyXTests
 {
