@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sysx.Test.TestChild", "Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sysx.Test.TestGrandchild", "TestProjects\Sysx.Test.TestGrandchild\Sysx.Test.TestGrandchild.csproj", "{0D372239-10EF-44D3-9249-CD26184C6395}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sysx.EntityFramework", "Sysx.EntityFramework\Sysx.EntityFramework.csproj", "{0772A2F0-9551-4562-AB5B-59E81D84FAD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sysx.EntityFramework.Test", "Sysx.EntityFramework.Test\Sysx.EntityFramework.Test.csproj", "{6782EFB2-8EC8-4556-8AEE-E041297E9755}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{0D372239-10EF-44D3-9249-CD26184C6395}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D372239-10EF-44D3-9249-CD26184C6395}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D372239-10EF-44D3-9249-CD26184C6395}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0772A2F0-9551-4562-AB5B-59E81D84FAD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0772A2F0-9551-4562-AB5B-59E81D84FAD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0772A2F0-9551-4562-AB5B-59E81D84FAD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0772A2F0-9551-4562-AB5B-59E81D84FAD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6782EFB2-8EC8-4556-8AEE-E041297E9755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6782EFB2-8EC8-4556-8AEE-E041297E9755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6782EFB2-8EC8-4556-8AEE-E041297E9755}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6782EFB2-8EC8-4556-8AEE-E041297E9755}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
