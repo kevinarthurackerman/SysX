@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <TargetFrameworks>net5.0</TargetFrameworks>
-    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
-  <ItemGroup>
+  <Import Project="..\..\..\Common\General.targets" />
+
+  <ItemGroup Label="Project References">
     <ProjectReference Include="..\TestGrandchild\TestGrandchild.csproj" />
   </ItemGroup>
 

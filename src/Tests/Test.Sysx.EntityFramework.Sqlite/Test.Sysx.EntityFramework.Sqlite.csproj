@@ -2,29 +2,14 @@
 
   <PropertyGroup>
     <TargetFrameworks>net5.0</TargetFrameworks>
-    <LangVersion>10.0</LangVersion>
-    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DefineConstants>ASSERTIONS</DefineConstants>
-  </PropertyGroup>
+  <Import Project="..\..\Common\General.targets" />
+  <Import Project="..\..\Common\Assertions.targets" />
+  <Import Project="..\..\Common\XUnit.targets" />
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="3.1.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
+  <ItemGroup Label="Project References">
     <ProjectReference Include="..\..\Sysx.EntityFramework.Sqlite\Sysx.EntityFramework.Sqlite.csproj" />
   </ItemGroup>
 

@@ -29,7 +29,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80D82C41
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{B38181B6-7DE5-47F5-B154-3D7048999903}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Examples.csproj", "{1D3EEF6B-8582-41D6-A946-45CB81604E50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples", "Examples\Examples.csproj", "{1D3EEF6B-8582-41D6-A946-45CB81604E50}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{E37F8A1F-55EB-4DC9-8110-DED170267CCF}"
+	ProjectSection(SolutionItems) = preProject
+		Common\Assertions.targets = Common\Assertions.targets
+		Common\General.targets = Common\General.targets
+		Common\NugetPack.targets = Common\NugetPack.targets
+		Common\TextTemplating.targets = Common\TextTemplating.targets
+		Common\XUnit.targets = Common\XUnit.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
