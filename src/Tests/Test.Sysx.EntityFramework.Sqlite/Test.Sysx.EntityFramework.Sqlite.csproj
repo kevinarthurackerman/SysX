@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sysx.EntityFramework.SqlServer\Sysx.EntityFramework.SqlServer.csproj" />
+    <ProjectReference Include="..\..\Sysx.EntityFramework.Sqlite\Sysx.EntityFramework.Sqlite.csproj" />
   </ItemGroup>
 
 </Project>

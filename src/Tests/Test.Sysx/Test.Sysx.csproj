@@ -25,18 +25,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sysx\Sysx.csproj" />
+    <ProjectReference Include="..\..\Sysx\Sysx.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'netcoreapp3.1'" >
-    <Reference Include="Sysx.Test.TestChild">
-      <HintPath>..\TestProjects\Sysx.Test.TestChild\bin\Debug\$(TargetFramework)\Sysx.Test.TestChild.dll</HintPath>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'netcoreapp3.1'">
+    <Reference Include="TestParent">
+      <HintPath>..\TestData\TestParent\bin\Debug\$(TargetFramework)\TestParent.dll</HintPath>
     </Reference>
-    <Reference Include="Sysx.Test.TestGrandchild">
-      <HintPath>..\TestProjects\Sysx.Test.TestGrandchild\bin\Debug\$(TargetFramework)\Sysx.Test.TestGrandchild.dll</HintPath>
+    <Reference Include="TestChild">
+      <HintPath>..\TestData\TestChild\bin\Debug\$(TargetFramework)\TestChild.dll</HintPath>
     </Reference>
-    <Reference Include="Sysx.Test.TestParent">
-      <HintPath>..\TestProjects\Sysx.Test.TestParent\bin\Debug\$(TargetFramework)\Sysx.Test.TestParent.dll</HintPath>
+    <Reference Include="TestGrandchild">
+      <HintPath>..\TestData\TestGrandchild\bin\Debug\$(TargetFramework)\TestGrandchild.dll</HintPath>
     </Reference>
   </ItemGroup>
 
