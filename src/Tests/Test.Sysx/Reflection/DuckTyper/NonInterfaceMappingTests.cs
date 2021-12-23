@@ -16,7 +16,7 @@ public class NonInterfaceMappingTests
 
 #if NET48
         var expectedExceptionMessage = "TWithInterface must be an interface type.\r\nParameter name: TWithInterface";
-#elif NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#elif NET5_0 || NETSTANDARD2_1
         var expectedExceptionMessage = "TWithInterface must be an interface type. (Parameter 'TWithInterface')";
 #endif
 

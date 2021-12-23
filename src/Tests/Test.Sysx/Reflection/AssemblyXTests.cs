@@ -3,7 +3,7 @@ using Assert = Xunit.Assert;
 
 public class AssemblyXTests
 {
-#if NET5_0 || NETCOREAPP3_1
+#if NET5_0
     [Fact]
     public void Should_Load()
     {
