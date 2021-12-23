@@ -1,0 +1,10 @@
+﻿global using Microsoft.Data.SqlClient;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+global using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+global using System;
+global using System.Collections.Concurrent;
+global using System.IO;
+global using System.Threading;
+global using Sysx.EntityFramework.Identifiers.Converters;
+global using Sysx.Identifiers;
