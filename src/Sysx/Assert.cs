@@ -4,6 +4,8 @@ public static class Assert
 {
     public const string CompilationSymbol = "ASSERTIONS";
 
+    public readonly record struct Context(string? FilePath, int? LineNumber, string? MemberName, string? Expression);
+
 #if NET5_0 || NETCOREAPP3_1
     /// <summary>
     ///  Specifies a contract that must be met and throws an exception if violated
@@ -17,7 +19,8 @@ public static class Assert
     /// <exception cref="ContractException"></exception>
 
     [Conditional(CompilationSymbol)]
-    public static void That(bool condition,
+    public static void That(
+        bool condition,
         Func<Context, string>? message = null,
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int? callerLineNumber = null,
@@ -28,26 +31,10 @@ public static class Assert
         if (!condition)
         {
             var options = new Context(callerFilePath, callerLineNumber, callerMemberName, conditionArgumentExpression);
-            message ??= x => $"Condition '{conditionArgumentExpression}' failed at {callerFilePath} line {callerLineNumber}: {callerMemberName}";
+            message ??= context => $"Condition '{context.Expression}' failed at {context.FilePath} line {context.LineNumber}: {context.MemberName}";
             throw new ContractException(message(options));
         }
 #endif
-    }
-
-    public readonly record struct Context
-    {
-        public string? FilePath { get; }
-        public int? LineNumber { get; }
-        public string? MemberName { get; }
-        public string? ConditionArgumentExpression { get; }
-
-        internal Context(string? filePath, int? lineNumber, string? memberName, string? conditionArgumentExpression)
-        {
-            FilePath = filePath;
-            LineNumber = lineNumber;
-            MemberName = memberName;
-            ConditionArgumentExpression = conditionArgumentExpression;
-        }
     }
 #endif
 
@@ -63,7 +50,8 @@ public static class Assert
     /// <param name="conditionArgumentExpression">This argument is not supported in net4.8 or netstandard2.1</param>
     /// <exception cref="ContractException"></exception>
     [Conditional(CompilationSymbol)]
-    public static void That(bool condition,
+    public static void That(
+        bool condition,
         Func<Context, string>? message = null,
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int? callerLineNumber = null,
@@ -73,25 +61,11 @@ public static class Assert
 #if ASSERTIONS
         if (!condition)
         {
-            var options = new Context(callerFilePath, callerLineNumber, callerMemberName);
-            message ??= x => $"Condition failed at {callerFilePath} line {callerLineNumber}: {callerMemberName}";
+            var options = new Context(callerFilePath, callerLineNumber, callerMemberName, null);
+            message ??= context => $"Condition failed at {context.FilePath} line {context.LineNumber}: {context.MemberName}";
             throw new ContractException(message(options));
         }
 #endif
-    }
-
-    public class Context
-    {
-        public string? FilePath { get; }
-        public int? LineNumber { get; }
-        public string? MemberName { get; }
-
-        internal Context(string? filePath, int? lineNumber, string? memberName)
-        {
-            FilePath = filePath;
-            LineNumber = lineNumber;
-            MemberName = memberName;
-        }
     }
 #endif
 }
