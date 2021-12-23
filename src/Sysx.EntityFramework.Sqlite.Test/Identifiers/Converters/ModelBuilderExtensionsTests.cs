@@ -1,30 +1,10 @@
-﻿namespace Sysx.EntityFramework.Test.Identifiers;
+﻿namespace Sysx.EntityFramework.Test.Identifiers.Converters;
 using Assert = Xunit.Assert;
 
 public class ModelBuilderExtensionsTests
 {
     [Fact]
-    public async Task Should_Configure_Guid_Column_Types_On_SqlServer()
-    {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>();
-
-        var connection = dbContext.Database.GetDbConnection();
-
-        await connection.OpenAsync();
-
-        using var command = connection.CreateCommand();
-        command.CommandText = "SELECT [Guid], [BinaryGuid], [StringGuid], [SqlServerGuid] FROM [GuidProperties]";
-
-        using var reader = command.ExecuteReader();
-
-        Assert.Equal("uniqueidentifier", reader.GetDataTypeName(0));
-        Assert.Equal("binary", reader.GetDataTypeName(1));
-        Assert.Equal("char", reader.GetDataTypeName(2));
-        Assert.Equal("uniqueidentifier", reader.GetDataTypeName(3));
-    }
-
-    [Fact]
-    public async Task Should_Configure_Guid_Column_Types_On_Sqlite()
+    public async Task Should_Configure_Guid_Column_Types()
     {
         using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
 
