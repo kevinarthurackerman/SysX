@@ -1,6 +1,4 @@
-﻿namespace Sysx;
-
-public  class OptionsExample
+﻿public  class OptionsExample
 {
     private static readonly SomeMethodOptions defaultOptions = SomeMethodOptions.Default;
 
