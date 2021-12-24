@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.1</TargetFrameworks>
+  </PropertyGroup>
+
+  <Import Project="..\Common\General.targets" />
+  <Import Project="..\Common\Assertions.targets" />
+  <Import Project="..\Common\NugetPack.targets" />
+
+  <ItemGroup Label="Nuget Packages">
+    <PackageReference Include="System.Text.Json" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Project References">
+    <ProjectReference Include="..\Sysx\Sysx.csproj" />
+  </ItemGroup>
+
+</Project>

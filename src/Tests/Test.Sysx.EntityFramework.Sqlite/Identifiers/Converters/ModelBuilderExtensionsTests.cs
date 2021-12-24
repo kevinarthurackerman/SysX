@@ -37,7 +37,7 @@ public class ModelBuilderExtensionsTests
                 .ToTable("GuidProperties")
                 .HasKey(x => x.Guid);
 
-            modelBuilder.RegisterGuidConversions();
+            modelBuilder.RegisterSequentialGuidConversions();
         }
     }
 

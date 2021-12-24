@@ -2,7 +2,7 @@
 
 public static class ModelBuilderExtensions
 {
-    public static ModelBuilder RegisterGuidConversions(this ModelBuilder modelBuilder) =>
+    public static ModelBuilder RegisterSequentialGuidConversions(this ModelBuilder modelBuilder) =>
         modelBuilder.RegisterBinaryGuidConversions()
             .RegisterStringGuidConversions()
             .RegisterSqlServerGuidConversions();

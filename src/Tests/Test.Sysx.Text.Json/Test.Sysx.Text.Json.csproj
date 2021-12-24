@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <Import Project="..\..\Common\General.targets" />
+  <Import Project="..\..\Common\Assertions.targets" />
+  <Import Project="..\..\Common\XUnit.targets" />
+
+  <ItemGroup Label="Project References">
+    <ProjectReference Include="..\..\Sysx.Text.Json\Sysx.Text.Json.csproj" />
+  </ItemGroup>
+
+</Project>
