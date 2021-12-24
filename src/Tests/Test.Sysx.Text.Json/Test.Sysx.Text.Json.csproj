@@ -3,9 +3,10 @@
   <PropertyGroup>
     <TargetFrameworks>net5.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Import Project="..\..\Common\General.targets" />
   <Import Project="..\..\Common\Assertions.targets" />
   <Import Project="..\..\Common\XUnit.targets" />
 
