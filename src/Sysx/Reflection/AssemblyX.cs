@@ -72,7 +72,7 @@ public static class AssemblyX
             new (typeof(object).Assembly.Location);
 
         public static readonly AssemblyDependencyResolver CurrentDomainAssemblyDependencyResolver =
-            new (AppDomain.CurrentDomain.BaseDirectory);
+            new (AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory ?? AppDomain.CurrentDomain.SetupInformation.ApplicationBase!);
 
         public static LoadOptions Default => new()
         {

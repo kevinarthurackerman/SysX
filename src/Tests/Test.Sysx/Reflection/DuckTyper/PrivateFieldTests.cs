@@ -64,7 +64,13 @@ public class PrivateFieldTests
 
     public class Duck
     {
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable IDE0032 // Add readonly modifier
+#pragma warning disable CS0649 // Add readonly modifier
         private string? Quack;
+#pragma warning restore IDE0044 // Add readonly modifier
+#pragma warning restore IDE0032 // Add readonly modifier
+#pragma warning restore CS0649 // Add readonly modifier
 
         public string? GetQuack => Quack;
     }

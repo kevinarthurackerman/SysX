@@ -128,7 +128,7 @@ public class TestTimeMachine : IDisposable
         return base.GetHashCode();
     }
 
-    public override string ToString()
+    public override string? ToString()
     {
         Ensure.That(this).IsNotDisposed(disposed);
 

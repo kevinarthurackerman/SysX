@@ -73,8 +73,17 @@ public abstract class BaseEnumClass<TEnum, TValue>
 
     public string DisplayName { get; }
 
-    public int CompareTo(TEnum? other) =>
-        Value.CompareTo(other is default(TEnum) ? default : other.Value);
+    public int CompareTo(TEnum? other)
+    {
+        if (other == null || other.Value == null)
+        {
+            if (Value == null) return 0;
+
+            return 1;
+        }
+
+        return Value.CompareTo(other.Value);
+    }
 
     public int CompareTo(object? other) =>
         Value.CompareTo(other is default(TEnum) ? default : other);
@@ -83,17 +92,17 @@ public abstract class BaseEnumClass<TEnum, TValue>
 
     public override bool Equals(object? obj) => Equals(obj as TEnum);
 
-    public bool Equals(TEnum? other) => !(other is default(TEnum)) && ValueEquals(other.Value);
+    public bool Equals(TEnum? other) => other is not default(TEnum) && ValueEquals(other.Value);
 
     public override int GetHashCode() => Value.GetHashCode();
 
-    public static bool operator ==(BaseEnumClass<TEnum, TValue> left, BaseEnumClass<TEnum, TValue> right) =>
+    public static bool operator ==(BaseEnumClass<TEnum, TValue>? left, BaseEnumClass<TEnum, TValue>? right) =>
         Equals(left, right);
 
-    public static bool operator !=(BaseEnumClass<TEnum, TValue> left, BaseEnumClass<TEnum, TValue> right) =>
+    public static bool operator !=(BaseEnumClass<TEnum, TValue>? left, BaseEnumClass<TEnum, TValue>? right) =>
         !Equals(left, right);
 
-    public static TEnum ParseValue(TValue value)
+    public static TEnum ParseValue(TValue? value)
     {
         EnsureArg.HasValue(value, nameof(value));
 
@@ -107,7 +116,7 @@ public abstract class BaseEnumClass<TEnum, TValue>
         return enumValue;
     }
 
-    public static bool TryParseValue(TValue value, out TEnum? enumValue)
+    public static bool TryParseValue(TValue? value, out TEnum? enumValue)
     {
         EnsureArg.HasValue(value, nameof(value));
 
@@ -115,7 +124,7 @@ public abstract class BaseEnumClass<TEnum, TValue>
         return lookupUpValue!.TryGetValue(value, out enumValue);
     }
 
-    public static TEnum Parse(string displayName)
+    public static TEnum Parse(string? displayName)
     {
         EnsureArg.IsNotNullOrWhiteSpace(displayName, nameof(displayName));
 
@@ -129,7 +138,7 @@ public abstract class BaseEnumClass<TEnum, TValue>
         return enumValue;
     }
 
-    public static bool TryParse(string displayName, out TEnum? enumValue)
+    public static bool TryParse(string? displayName, out TEnum? enumValue)
     {
         EnsureArg.IsNotNullOrWhiteSpace(displayName, nameof(displayName));
 
@@ -138,7 +147,7 @@ public abstract class BaseEnumClass<TEnum, TValue>
         return lookupUpDisplayName!.TryGetValue(displayName, out enumValue);
     }
 
-    protected virtual bool ValueEquals(TValue value)
+    protected virtual bool ValueEquals(TValue? value)
     {
         EnsureArg.HasValue(value, nameof(value));
 
