@@ -13,14 +13,29 @@ public class ModelBuilderExtensionsTests
         await connection.OpenAsync();
 
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT [Guid], [BinaryGuid], [StringGuid], [SqlServerGuid] FROM [GuidProperties]";
+        command.CommandText = $@"
+SELECT
+    [{nameof(GuidPropertiesModel.Guid)}],
+    [{nameof(GuidPropertiesModel.BinaryGuid)}],
+    [{nameof(GuidPropertiesModel.StringGuid)}],
+    [{nameof(GuidPropertiesModel.SqlServerGuid)}],
+    [{nameof(GuidPropertiesModel.NullableGuid)}],
+    [{nameof(GuidPropertiesModel.NullableBinaryGuid)}],
+    [{nameof(GuidPropertiesModel.NullableStringGuid)}],
+    [{nameof(GuidPropertiesModel.NullableSqlServerGuid)}]
+FROM [GuidProperties]";
 
         using var reader = command.ExecuteReader();
 
-        Assert.Equal("TEXT", reader.GetDataTypeName(0));
-        Assert.Equal("BLOB", reader.GetDataTypeName(1));
-        Assert.Equal("TEXT", reader.GetDataTypeName(2));
-        Assert.Equal("TEXT", reader.GetDataTypeName(3));
+        var ordinal = 0;
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
     }
 
     public class TestDbContext : DbContext
@@ -47,5 +62,9 @@ public class ModelBuilderExtensionsTests
         public BinaryGuid BinaryGuid { get; set; }
         public StringGuid StringGuid { get; set; }
         public SqlServerGuid SqlServerGuid { get; set; }
+        public Guid? NullableGuid { get; set; }
+        public BinaryGuid? NullableBinaryGuid { get; set; }
+        public StringGuid? NullableStringGuid { get; set; }
+        public SqlServerGuid? NullableSqlServerGuid { get; set; }
     }
 }
