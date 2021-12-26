@@ -7,7 +7,7 @@ public class StringGuidJsonConverterTests
     public void Should_Persist()
     {
         var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuidJsonConverters();
+        options.Converters.AddSequentialGuids();
 
         var value = StringGuid.NewGuid();
 
@@ -24,7 +24,7 @@ public class StringGuidJsonConverterTests
     public void Should_Persist_Nullable()
     {
         var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuidJsonConverters();
+        options.Converters.AddSequentialGuids();
 
         var value = (StringGuid?)StringGuid.NewGuid();
 
@@ -41,7 +41,7 @@ public class StringGuidJsonConverterTests
     public void Should_Persist_Null()
     {
         var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuidJsonConverters();
+        options.Converters.AddSequentialGuids();
 
         var value = (StringGuid?)null;
 

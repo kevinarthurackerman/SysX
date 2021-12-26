@@ -7,7 +7,7 @@ public class SqlServerGuidJsonConverterTests
     public void Should_Persist()
     {
         var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuidJsonConverters();
+        options.Converters.AddSequentialGuids();
 
         var value = SqlServerGuid.NewGuid();
 
@@ -24,7 +24,7 @@ public class SqlServerGuidJsonConverterTests
     public void Should_Persist_Nullable()
     {
         var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuidJsonConverters();
+        options.Converters.AddSequentialGuids();
 
         var value = (SqlServerGuid?)SqlServerGuid.NewGuid();
 
@@ -41,7 +41,7 @@ public class SqlServerGuidJsonConverterTests
     public void Should_Persist_Null()
     {
         var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuidJsonConverters();
+        options.Converters.AddSequentialGuids();
 
         var value = (SqlServerGuid?)null;
 
