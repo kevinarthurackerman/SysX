@@ -2,6 +2,10 @@
 
 public class SqlServerGuidJsonConverter : JsonConverter<SqlServerGuid>
 {
+    public static readonly SqlServerGuidJsonConverter Instance = new();
+
+    private SqlServerGuidJsonConverter() { }
+
     public override SqlServerGuid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var converter = (JsonConverter<Guid>)options.GetConverter(typeof(Guid));

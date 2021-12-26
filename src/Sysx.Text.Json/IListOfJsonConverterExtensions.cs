@@ -1,8 +1,8 @@
-﻿namespace Sysx.Text.Json.Serialization;
+﻿namespace Sysx.Text.Json;
 
 public static class IListOfJsonConverterExtensions
 {
-    public static void AddSequentialGuidJsonConverters(this IList<JsonConverter> jsonConverters)
+    public static void AddSequentialGuids(this IList<JsonConverter> jsonConverters)
     {
         jsonConverters.AddBinaryGuidJsonConverter();
         jsonConverters.AddSqlServerGuidJsonConverter();
@@ -10,11 +10,11 @@ public static class IListOfJsonConverterExtensions
     }
 
     public static void AddBinaryGuidJsonConverter(this IList<JsonConverter> jsonConverters) =>
-        jsonConverters.Add(new BinaryGuidJsonConverter());
+        jsonConverters.Add(BinaryGuidJsonConverter.Instance);
 
     public static void AddSqlServerGuidJsonConverter(this IList<JsonConverter> jsonConverters) =>
-        jsonConverters.Add(new SqlServerGuidJsonConverter());
+        jsonConverters.Add(SqlServerGuidJsonConverter.Instance);
 
     public static void AddStringGuidJsonConverter(this IList<JsonConverter> jsonConverters) =>
-        jsonConverters.Add(new StringGuidJsonConverter());
+        jsonConverters.Add(StringGuidJsonConverter.Instance);
 }

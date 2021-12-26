@@ -2,6 +2,10 @@
 
 public class StringGuidJsonConverter : JsonConverter<StringGuid>
 {
+    public static readonly StringGuidJsonConverter Instance = new();
+
+    private StringGuidJsonConverter() { }
+
     public override StringGuid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var converter = (JsonConverter<Guid>)options.GetConverter(typeof(Guid));

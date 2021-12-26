@@ -2,6 +2,10 @@
 
 public class BinaryGuidJsonConverter : JsonConverter<BinaryGuid>
 {
+    public static readonly BinaryGuidJsonConverter Instance = new ();
+
+    private BinaryGuidJsonConverter() { }
+
     public override BinaryGuid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var converter = (JsonConverter<Guid>)options.GetConverter(typeof(Guid));
