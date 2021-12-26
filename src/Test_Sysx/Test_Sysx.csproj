@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;net48</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <Import Project="..\Assertions.targets" />
+  <Import Project="..\XUnit.targets" />
+
+  <ItemGroup Label="Project References">
+    <ProjectReference Include="..\Sysx\Sysx.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <Reference Include="TestParent">
+      <HintPath>..\Test_Sysx._Parent\bin\Debug\$(TargetFramework)\Test_Sysx._Parent.dll</HintPath>
+    </Reference>
+    <Reference Include="TestChild">
+      <HintPath>..\Test_Sysx._Child\bin\Debug\$(TargetFramework)\Test_Sysx._Child.dll</HintPath>
+    </Reference>
+    <Reference Include="TestGrandchild">
+      <HintPath>..\Test_Sysx._Grandchild\bin\Debug\$(TargetFramework)\Test_Sysx._Grandchild.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

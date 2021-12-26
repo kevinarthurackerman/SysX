@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Import Project="..\Common\Assertions.targets" />
-  <Import Project="..\Common\NugetPack.targets" />
+  <Import Project="..\Assertions.targets" />
+  <Import Project="..\NugetPack.targets" />
 
   <ItemGroup Label="Nuget Packages">
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.13" />

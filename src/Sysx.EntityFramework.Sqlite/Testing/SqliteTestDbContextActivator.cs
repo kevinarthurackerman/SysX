@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Testing;
+﻿namespace Sysx.EntityFramework.Sqlite.Testing;
 
 public sealed class SqliteTestDbContextActivator : BaseTestDbContextActivator
 {

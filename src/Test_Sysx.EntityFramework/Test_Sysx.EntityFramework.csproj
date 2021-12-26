@@ -1,17 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <Import Project="..\Assertions.targets" />
-  <Import Project="..\NugetPack.targets" />
-
-  <ItemGroup Label="Nuget Packages">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.13" />
-  </ItemGroup>
+  <Import Project="..\XUnit.targets" />
 
   <ItemGroup Label="Project References">
     <ProjectReference Include="..\Sysx.EntityFramework\Sysx.EntityFramework.csproj" />

@@ -5,37 +5,33 @@ VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sysx", "Sysx\Sysx.csproj", "{14A99093-0953-4C0F-B021-224F622B4C8F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Sysx", "Tests\Test.Sysx\Test.Sysx.csproj", "{D77E9301-B2D0-4D59-BAC6-6E49B685DF85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx", "Test_Sysx\Test_Sysx.csproj", "{D77E9301-B2D0-4D59-BAC6-6E49B685DF85}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sysx.EntityFramework", "Sysx.EntityFramework\Sysx.EntityFramework.csproj", "{0772A2F0-9551-4562-AB5B-59E81D84FAD0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Sysx.EntityFramework", "Tests\Test.Sysx.EntityFramework\Test.Sysx.EntityFramework.csproj", "{A069A483-9838-4AB2-B267-03E374E37784}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx.EntityFramework", "Test_Sysx.EntityFramework\Test_Sysx.EntityFramework.csproj", "{A069A483-9838-4AB2-B267-03E374E37784}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sysx.EntityFramework.SqlServer", "Sysx.EntityFramework.SqlServer\Sysx.EntityFramework.SqlServer.csproj", "{E58EEACF-5FF4-4BFA-9DE0-644943FA1C64}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Sysx.EntityFramework.SqlServer", "Tests\Test.Sysx.EntityFramework.SqlServer\Test.Sysx.EntityFramework.SqlServer.csproj", "{26F6CA45-653C-474A-8BA1-C9707FED6E4C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx.EntityFramework.SqlServer", "Test_Sysx.EntityFramework.SqlServer\Test_Sysx.EntityFramework.SqlServer.csproj", "{26F6CA45-653C-474A-8BA1-C9707FED6E4C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sysx.EntityFramework.Sqlite", "Sysx.EntityFramework.Sqlite\Sysx.EntityFramework.Sqlite.csproj", "{48C54808-2BA7-4B54-BA67-5717E445A8BC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Sysx.EntityFramework.Sqlite", "Tests\Test.Sysx.EntityFramework.Sqlite\Test.Sysx.EntityFramework.Sqlite.csproj", "{603ED2E8-D927-4D00-979C-C3EDEDC90D84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx.EntityFramework.Sqlite", "Test_Sysx.EntityFramework.Sqlite\Test_Sysx.EntityFramework.Sqlite.csproj", "{603ED2E8-D927-4D00-979C-C3EDEDC90D84}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sysx.Text.Json", "Sysx.Text.Json\Sysx.Text.Json.csproj", "{5A0B0A33-6262-4601-A328-C1E4FA035A71}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Sysx.Text.Json", "Tests\Test.Sysx.Text.Json\Test.Sysx.Text.Json.csproj", "{74103951-2801-4FDC-BC99-3B1449C0D4B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx.Text.Json", "Test_Sysx.Text.Json\Test_Sysx.Text.Json.csproj", "{74103951-2801-4FDC-BC99-3B1449C0D4B5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestParent", "Tests\TestData\TestParent\TestParent.csproj", "{C6DE4C38-36C5-4601-ABB9-F4D86062867E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx._Parent", "Test_Sysx._Parent\Test_Sysx._Parent.csproj", "{C6DE4C38-36C5-4601-ABB9-F4D86062867E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestChild", "Tests\TestData\TestChild\TestChild.csproj", "{A3776B1E-974B-412B-9885-4DBE5D8327DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx._Child", "Test_Sysx._Child\Test_Sysx._Child.csproj", "{A3776B1E-974B-412B-9885-4DBE5D8327DD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestGrandchild", "Tests\TestData\TestGrandchild\TestGrandchild.csproj", "{0D372239-10EF-44D3-9249-CD26184C6395}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80D82C41-AC0D-4CB4-BBFD-F21533788ACC}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{B38181B6-7DE5-47F5-B154-3D7048999903}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx._Grandchild", "Test_Sysx._Grandchild\Test_Sysx._Grandchild.csproj", "{0D372239-10EF-44D3-9249-CD26184C6395}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples", "Examples\Examples.csproj", "{1D3EEF6B-8582-41D6-A946-45CB81604E50}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{E37F8A1F-55EB-4DC9-8110-DED170267CCF}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F4657F5B-90DC-4F65-AD75-F56073660DDA}"
 	ProjectSection(SolutionItems) = preProject
 		Common\Assertions.targets = Common\Assertions.targets
 		Common\NugetPack.targets = Common\NugetPack.targets
@@ -108,17 +104,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{D77E9301-B2D0-4D59-BAC6-6E49B685DF85} = {80D82C41-AC0D-4CB4-BBFD-F21533788ACC}
-		{A069A483-9838-4AB2-B267-03E374E37784} = {80D82C41-AC0D-4CB4-BBFD-F21533788ACC}
-		{26F6CA45-653C-474A-8BA1-C9707FED6E4C} = {80D82C41-AC0D-4CB4-BBFD-F21533788ACC}
-		{603ED2E8-D927-4D00-979C-C3EDEDC90D84} = {80D82C41-AC0D-4CB4-BBFD-F21533788ACC}
-		{74103951-2801-4FDC-BC99-3B1449C0D4B5} = {80D82C41-AC0D-4CB4-BBFD-F21533788ACC}
-		{C6DE4C38-36C5-4601-ABB9-F4D86062867E} = {B38181B6-7DE5-47F5-B154-3D7048999903}
-		{A3776B1E-974B-412B-9885-4DBE5D8327DD} = {B38181B6-7DE5-47F5-B154-3D7048999903}
-		{0D372239-10EF-44D3-9249-CD26184C6395} = {B38181B6-7DE5-47F5-B154-3D7048999903}
-		{B38181B6-7DE5-47F5-B154-3D7048999903} = {80D82C41-AC0D-4CB4-BBFD-F21533788ACC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6D556B0F-2ED4-4681-A575-F7955D525698}

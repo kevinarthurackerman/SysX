@@ -6,9 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Import Project="..\Common\Assertions.targets" />
-  <Import Project="..\Common\NugetPack.targets" />
-  <Import Project="..\Common\TextTemplating.targets" />
+  <Import Project="..\Assertions.targets" />
+  <Import Project="..\NugetPack.targets" />
+  <Import Project="..\TextTemplating.targets" />
   
   <ItemGroup Label="Nuget Packages">
     <PackageReference Include="Ensure.That" Version="10.1.0" />
