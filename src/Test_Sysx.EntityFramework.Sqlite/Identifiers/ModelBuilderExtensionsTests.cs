@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.EntityFramework.SqlServer.Identifiers.Converters;
+﻿namespace Test_Sysx.EntityFramework.Sqlite.Identifiers;
 using Assert = Assert;
 
 public class ModelBuilderExtensionsTests
@@ -6,7 +6,7 @@ public class ModelBuilderExtensionsTests
     [Fact]
     public async Task Should_Configure_Guid_Column_Types()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
 
         var connection = dbContext.Database.GetDbConnection();
 
@@ -28,14 +28,14 @@ FROM [GuidProperties]";
         using var reader = command.ExecuteReader();
 
         var ordinal = 0;
-        Assert.Equal("uniqueidentifier", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("binary", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("char", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("uniqueidentifier", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("uniqueidentifier", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("binary", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("char", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("uniqueidentifier", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
     }
 
     public class TestDbContext : DbContext

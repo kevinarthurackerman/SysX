@@ -37,20 +37,20 @@ public class IdentifierTests
     }
 
     [Fact]
-    public async Task Should_Persist_Empty_Guid_Values()
+    public async Task Should_Persist_Default_Guid_Values()
     {
         using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
 
         var testObject = new GuidPropertiesModel
         {
             Guid = Guid.NewGuid(),
-            BinaryGuid = new(),
-            StringGuid = new(),
-            SqlServerGuid = new(),
-            NullableGuid = null,
-            NullableBinaryGuid = null,
-            NullableStringGuid = null,
-            NullableSqlServerGuid = null
+            BinaryGuid = default,
+            StringGuid = default,
+            SqlServerGuid = default,
+            NullableGuid = default,
+            NullableBinaryGuid = default,
+            NullableStringGuid = default,
+            NullableSqlServerGuid = default
         };
 
         dbContext.Add(testObject);
