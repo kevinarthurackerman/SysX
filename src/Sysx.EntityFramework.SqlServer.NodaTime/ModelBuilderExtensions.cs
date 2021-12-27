@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.NodaTime;
+﻿namespace Sysx.EntityFramework.SqlServer.NodaTime;
 
 public static class ModelBuilderExtensions
 {

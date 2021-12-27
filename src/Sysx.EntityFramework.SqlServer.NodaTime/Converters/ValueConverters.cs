@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.NodaTime.Converters;
+﻿namespace Sysx.EntityFramework.SqlServer.NodaTime.Converters;
 
 internal static class ValueConverters
 {

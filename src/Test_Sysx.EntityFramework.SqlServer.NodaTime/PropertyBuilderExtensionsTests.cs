@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.EntityFramework.SqlServer.Identifiers;
+﻿namespace Test_Sysx.EntityFramework.SqlServer.NodaTime;
 using Assert = Assert;
 
 public class PropertyBuilderExtensionsTests
