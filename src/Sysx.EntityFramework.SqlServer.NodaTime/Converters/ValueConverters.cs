@@ -21,7 +21,7 @@ internal static class ValueConverters
         new ValueConverter<_NodaTime.OffsetDateTime, DateTimeOffset>(x => x.ToDateTimeOffset(), x => _NodaTime.OffsetDateTime.FromDateTimeOffset(x));
 
     internal static ValueConverter Offset =
-        new ValueConverter<_NodaTime.Offset, TimeSpan>(x => TimeSpan.FromTicks(x.Ticks), x => _NodaTime.Offset.FromTicks(x.Ticks));
+        new ValueConverter<_NodaTime.Offset, int>(x => x.Seconds, x => _NodaTime.Offset.FromSeconds(x));
 
     internal static ValueConverter ZonedDateTime =
         new ValueConverter<_NodaTime.ZonedDateTime, DateTimeOffset>(x => x.ToDateTimeOffset(), x => _NodaTime.ZonedDateTime.FromDateTimeOffset(x));

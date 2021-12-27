@@ -101,7 +101,7 @@ public static class ModelBuilderExtensions
     {
         var registerType = (IMutableProperty entityProp) =>
         {
-            entityProp.SetProviderClrType(typeof(TimeSpan));
+            entityProp.SetProviderClrType(typeof(int));
             entityProp.SetValueConverter(ValueConverters.Offset);
         };
 

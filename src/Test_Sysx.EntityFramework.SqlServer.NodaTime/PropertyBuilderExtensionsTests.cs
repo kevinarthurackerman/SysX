@@ -44,7 +44,7 @@ FROM [NodaTypesModels]";
         Assert.Equal("date", reader.GetDataTypeName(ordinal++));
         Assert.Equal("time", reader.GetDataTypeName(ordinal++));
         Assert.Equal("datetimeoffset", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("time", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("int", reader.GetDataTypeName(ordinal++));
         Assert.Equal("datetimeoffset", reader.GetDataTypeName(ordinal++));
         Assert.Equal("time", reader.GetDataTypeName(ordinal++));
         Assert.Equal("datetime2", reader.GetDataTypeName(ordinal++));
@@ -52,7 +52,7 @@ FROM [NodaTypesModels]";
         Assert.Equal("date", reader.GetDataTypeName(ordinal++));
         Assert.Equal("time", reader.GetDataTypeName(ordinal++));
         Assert.Equal("datetimeoffset", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("time", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("int", reader.GetDataTypeName(ordinal++));
         Assert.Equal("datetimeoffset", reader.GetDataTypeName(ordinal++));
     }
 

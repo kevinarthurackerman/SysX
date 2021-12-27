@@ -28,7 +28,7 @@ public static class PropertyBuilderExtensions
             .HasConversion(ValueConverters.OffsetDateTime);
 
     public static PropertyBuilder IsOffset(this PropertyBuilder propertyBuilder) =>
-        propertyBuilder.HasConversion(typeof(TimeSpan))
+        propertyBuilder.HasConversion(typeof(int))
             .HasConversion(ValueConverters.Offset);
 
     public static PropertyBuilder IsZonedDateTime(this PropertyBuilder propertyBuilder) =>
