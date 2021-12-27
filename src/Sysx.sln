@@ -39,6 +39,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Common\XUnit.targets = Common\XUnit.targets
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sysx.EntityFramework.SqlServer.NodaTime", "Sysx.EntityFramework.SqlServer.NodaTime\Sysx.EntityFramework.SqlServer.NodaTime.csproj", "{8F29177D-61AE-4A08-9A02-39CB9346D8A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_Sysx.EntityFramework.SqlServer.NodaTime", "Test_Sysx.EntityFramework.SqlServer.NodaTime\Test_Sysx.EntityFramework.SqlServer.NodaTime.csproj", "{4A90E497-A3E1-4BB2-B164-0A60FE961D25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,6 +105,14 @@ Global
 		{1D3EEF6B-8582-41D6-A946-45CB81604E50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D3EEF6B-8582-41D6-A946-45CB81604E50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D3EEF6B-8582-41D6-A946-45CB81604E50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F29177D-61AE-4A08-9A02-39CB9346D8A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F29177D-61AE-4A08-9A02-39CB9346D8A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F29177D-61AE-4A08-9A02-39CB9346D8A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F29177D-61AE-4A08-9A02-39CB9346D8A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A90E497-A3E1-4BB2-B164-0A60FE961D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A90E497-A3E1-4BB2-B164-0A60FE961D25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A90E497-A3E1-4BB2-B164-0A60FE961D25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A90E497-A3E1-4BB2-B164-0A60FE961D25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
