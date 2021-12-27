@@ -2,6 +2,6 @@
 global using NodaTime;
 global using System;
 global using System.Threading.Tasks;
-global using Sysx.EntityFramework.SqlServer.NodaTime;
-global using Sysx.EntityFramework.SqlServer.Testing;
+global using Sysx.EntityFramework.Sqlite.NodaTime;
+global using Sysx.EntityFramework.Sqlite.Testing;
 global using Xunit;

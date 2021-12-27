@@ -11,8 +11,7 @@
   <Import Project="..\XUnit.targets" />
 
   <ItemGroup Label="Project References">
-    <ProjectReference Include="..\Sysx.EntityFramework.SqlServer.NodaTime\Sysx.EntityFramework.SqlServer.NodaTime.csproj" />
-    <ProjectReference Include="..\Sysx.EntityFramework.SqlServer\Sysx.EntityFramework.SqlServer.csproj" />
+    <ProjectReference Include="..\Sysx.EntityFramework.Sqlite.NodaTime\Sysx.EntityFramework.Sqlite.NodaTime.csproj" />
   </ItemGroup>
 
 </Project>

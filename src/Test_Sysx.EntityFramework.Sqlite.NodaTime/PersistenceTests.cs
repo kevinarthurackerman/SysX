@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.EntityFramework.SqlServer.NodaTime;
+﻿namespace Test_Sysx.EntityFramework.Sqlite.NodaTime;
 using Assert = Assert;
 
 public class PersistenceTests
@@ -6,7 +6,7 @@ public class PersistenceTests
     [Fact]
     public async Task Should_Persist_Values()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
 
         var duration = Duration.FromMilliseconds(1000);
         var instant = Instant.FromUnixTimeMilliseconds(1000);
@@ -63,7 +63,7 @@ public class PersistenceTests
     [Fact]
     public async Task Should_Persist_Default_Values()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
 
         var testObject = new NodaTypesModel
         {
