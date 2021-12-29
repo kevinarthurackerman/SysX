@@ -37,8 +37,6 @@ public sealed class SqliteTestDbContextActivator : BaseTestDbContextActivator<Sq
         Action<SqliteDbContextOptionsBuilder>? configureOptions)
     {
         Assert.That(dbConnection != null);
-        Assert.That(configureContextOptions != null);
-        Assert.That(configureOptions != null);
 
         var optionsBuilder = new DbContextOptionsBuilder<TDbContext>();
         optionsBuilder.UseSqlite(dbConnection, x => configureOptions?.Invoke(x));

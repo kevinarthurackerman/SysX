@@ -37,8 +37,6 @@ public sealed class SqlServerTestDbContextActivator : BaseTestDbContextActivator
         Action<SqlServerDbContextOptionsBuilder>? configureOptions)
     {
         Assert.That(dbConnection != null);
-        Assert.That(configureContextOptions != null);
-        Assert.That(configureOptions != null);
 
         var optionsBuilder = new DbContextOptionsBuilder<TDbContext>();
         optionsBuilder.UseSqlServer(dbConnection, x => configureOptions?.Invoke(x));
