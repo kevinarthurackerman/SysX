@@ -15,15 +15,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <Reference Include="TestParent">
-      <HintPath>..\Test_Sysx._Parent\bin\Debug\$(TargetFramework)\Test_Sysx._Parent.dll</HintPath>
-    </Reference>
-    <Reference Include="TestChild">
-      <HintPath>..\Test_Sysx._Child\bin\Debug\$(TargetFramework)\Test_Sysx._Child.dll</HintPath>
-    </Reference>
-    <Reference Include="TestGrandchild">
-      <HintPath>..\Test_Sysx._Grandchild\bin\Debug\$(TargetFramework)\Test_Sysx._Grandchild.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Test_Sysx._Parent\Test_Sysx._Parent.csproj" />
+    <ProjectReference Include="..\Test_Sysx._Child\Test_Sysx._Child.csproj" />
+    <ProjectReference Include="..\Test_Sysx._Grandchild\Test_Sysx._Grandchild.csproj" />
   </ItemGroup>
 
 </Project>
