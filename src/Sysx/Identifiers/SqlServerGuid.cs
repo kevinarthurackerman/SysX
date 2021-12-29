@@ -6,6 +6,8 @@
 /// </summary>
 public struct SqlServerGuid : IComparable, IComparable<SqlServerGuid>, IEquatable<SqlServerGuid>, IFormattable
 {
+    public static readonly SqlServerGuid Empty = new (Guid.Empty);
+
     private readonly Guid innerGuid;
 
     public SqlServerGuid(Guid guid)

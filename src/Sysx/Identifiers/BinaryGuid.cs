@@ -6,6 +6,8 @@
 /// </summary>
 public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<BinaryGuid>, IFormattable
 {
+    public static readonly BinaryGuid Empty = new (Guid.Empty);
+
     private readonly Guid innerGuid;
 
     public BinaryGuid(Guid guid)

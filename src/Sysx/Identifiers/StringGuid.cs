@@ -6,6 +6,8 @@
 /// </summary>
 public struct StringGuid : IComparable, IComparable<StringGuid>, IEquatable<StringGuid>, IFormattable
 {
+    public static readonly StringGuid Empty = new (Guid.Empty);
+
     private readonly Guid innerGuid;
 
     public StringGuid(Guid guid)

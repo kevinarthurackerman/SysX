@@ -2,7 +2,7 @@
 global using System;
 global using System.Linq;
 global using System.Threading.Tasks;
-global using Sysx.EntityFramework.Identifiers;
+global using Sysx.EntityFramework.Sqlite.Plugins;
 global using Sysx.EntityFramework.Sqlite.Testing;
 global using Sysx.Identifiers;
 global using Xunit;

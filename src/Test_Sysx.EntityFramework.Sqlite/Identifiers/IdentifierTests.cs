@@ -4,9 +4,44 @@ using Assert = Assert;
 public class IdentifierTests
 {
     [Fact]
+    public async Task Should_Configure_Guid_Column_Types()
+    {
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+
+        var connection = dbContext.Database.GetDbConnection();
+
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = $@"
+SELECT
+    [{nameof(GuidPropertiesModel.Guid)}],
+    [{nameof(GuidPropertiesModel.BinaryGuid)}],
+    [{nameof(GuidPropertiesModel.StringGuid)}],
+    [{nameof(GuidPropertiesModel.SqlServerGuid)}],
+    [{nameof(GuidPropertiesModel.NullableGuid)}],
+    [{nameof(GuidPropertiesModel.NullableBinaryGuid)}],
+    [{nameof(GuidPropertiesModel.NullableStringGuid)}],
+    [{nameof(GuidPropertiesModel.NullableSqlServerGuid)}]
+FROM [GuidProperties]";
+
+        using var reader = command.ExecuteReader();
+
+        var ordinal = 0;
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+    }
+
+    [Fact]
     public async Task Should_Persist_Guid_Values()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObject = new GuidPropertiesModel
         {
@@ -39,7 +74,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Persist_Default_Guid_Values()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObject = new GuidPropertiesModel
         {
@@ -72,7 +107,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Sort_Guids()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -106,7 +141,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Sort_Binary_Guids()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObjects = Enumerable.Range(1, 1).Select(x => new GuidPropertiesModel
         {
@@ -140,7 +175,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Sort_String_Guids()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -174,7 +209,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Not_Sort_Sql_Server_Guids()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -207,7 +242,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Sort_Nullable_Guids()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -241,7 +276,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Sort_Nullable_Binary_Guids()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObjects = Enumerable.Range(1, 1).Select(x => new GuidPropertiesModel
         {
@@ -275,7 +310,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Sort_Nullable_String_Guids()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -309,7 +344,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Not_Sort_Nullable_Sql_Server_Guids()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>();
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -352,30 +387,6 @@ public class IdentifierTests
             modelBuilder.Entity<GuidPropertiesModel>()
                 .ToTable("GuidProperties")
                 .HasKey(x => x.Guid);
-
-            modelBuilder.Entity<GuidPropertiesModel>()
-                .Property(x => x.BinaryGuid)
-                .IsBinaryGuid();
-
-            modelBuilder.Entity<GuidPropertiesModel>()
-                .Property(x => x.StringGuid)
-                .IsStringGuid();
-
-            modelBuilder.Entity<GuidPropertiesModel>()
-                .Property(x => x.SqlServerGuid)
-                .IsSqlServerGuid();
-
-            modelBuilder.Entity<GuidPropertiesModel>()
-                .Property(x => x.NullableBinaryGuid)
-                .IsBinaryGuid();
-
-            modelBuilder.Entity<GuidPropertiesModel>()
-                .Property(x => x.NullableStringGuid)
-                .IsStringGuid();
-
-            modelBuilder.Entity<GuidPropertiesModel>()
-                .Property(x => x.NullableSqlServerGuid)
-                .IsSqlServerGuid();
         }
     }
 

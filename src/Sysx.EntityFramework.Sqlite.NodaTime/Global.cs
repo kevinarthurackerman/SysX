@@ -1,8 +1,12 @@
-﻿global using Microsoft.EntityFrameworkCore;
-global using Microsoft.EntityFrameworkCore.Metadata;
-global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿global using EnsureThat;
+global using Microsoft.EntityFrameworkCore.Infrastructure;
+global using Microsoft.EntityFrameworkCore.Storage;
 global using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+global using Microsoft.Extensions.DependencyInjection;
+global using NodaTime;
 global using System;
+global using System.Data;
 global using System.Globalization;
-global using Sysx.EntityFramework.Sqlite.NodaTime.Converters;
-global using _NodaTime = NodaTime;
+global using Sysx.DependencyInjection;
+global using Sysx.EntityFramework.Plugins;
+global using Sysx.EntityFramework.Sqlite.RelationalTypeMappings;

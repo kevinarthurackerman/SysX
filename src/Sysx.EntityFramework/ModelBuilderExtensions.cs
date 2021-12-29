@@ -4,6 +4,9 @@ public static class ModelBuilderExtensions
 {
     public static ModelBuilder RegisterPropertiesOfType<TValue>(this ModelBuilder modelBuilder, Action<IMutableProperty> configureValue)
     {
+        EnsureArg.IsNotNull(modelBuilder, nameof(modelBuilder));
+        EnsureArg.IsNotNull(configureValue, nameof(configureValue));
+
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var propertyInfos = entityType.ClrType.GetProperties().Where(x => x.PropertyType == typeof(TValue));

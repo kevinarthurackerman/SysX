@@ -1,34 +1,55 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.Testing;
 
-public sealed class SqlServerTestDbContextActivator : BaseTestDbContextActivator
+public sealed class SqlServerTestDbContextActivator : BaseTestDbContextActivator<SqlServerDbContextOptionsBuilder>
 {
     private static readonly SqlServerTestDbContextActivator instance = new();
 
     private SqlServerTestDbContextActivator() { }
 
-    /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}" />
-    public static TDbContext Create<TDbContext>() where TDbContext : DbContext => instance.CreateDbContext<TDbContext>();
+    /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}(Action{DbContextOptionsBuilder{TDbContext}}?)"/>
+    public static TDbContext Create<TDbContext>() where TDbContext : DbContext =>
+        instance.CreateDbContext<TDbContext>();
+
+    /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}(Action{DbContextOptionsBuilder{TDbContext}}?)"/>
+    public static TDbContext Create<TDbContext>(
+        Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions,
+        Action<SqlServerDbContextOptionsBuilder>? configureProviderOptions) where TDbContext : DbContext =>
+        instance.CreateDbContext(configureContextOptions, configureProviderOptions);
 
     override protected string GetDatabaseName(Type dbContextType)
     {
-        return $"{dbContextType.Name}_{Guid.NewGuid()}.mdf";
+        Assert.That(dbContextType != null);
+
+        return $"{dbContextType!.Name}_{Guid.NewGuid()}.mdf";
     }
 
     override protected DbConnection CreateConnection(string databasePath)
     {
+        Assert.That(databasePath != null);
+
         var connectionString = $"Data Source=(LocalDB)\\MSSQLLocalDB; AttachDbFilename={databasePath}; Integrated Security=True; Connect Timeout=30; Pooling=false;";
         return new SqlConnection(connectionString);
     }
 
-    override protected DbContextOptions<TDbContext> CreateDbContextOptions<TDbContext>(DbConnection dbConnection)
+    override protected DbContextOptions<TDbContext> ConfigureDbContextOptions<TDbContext>(
+        DbConnection dbConnection,
+        Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions,
+        Action<SqlServerDbContextOptionsBuilder>? configureOptions)
     {
-        return new DbContextOptionsBuilder<TDbContext>()
-                .UseSqlServer(dbConnection)
-                .Options;
+        Assert.That(dbConnection != null);
+        Assert.That(configureContextOptions != null);
+        Assert.That(configureOptions != null);
+
+        var optionsBuilder = new DbContextOptionsBuilder<TDbContext>();
+        optionsBuilder.UseSqlServer(dbConnection, x => configureOptions?.Invoke(x));
+        configureContextOptions?.Invoke(optionsBuilder);
+        return optionsBuilder.Options;
     }
 
     override protected void CreateDatabase(string databasePath)
     {
+        Assert.That(databasePath != null);
+
         var databaseName = Path.GetFileNameWithoutExtension(databasePath);
         using var connection = new SqlConnection("Data Source=(LocalDB)\\MSSQLLocalDB; Initial Catalog=master; Integrated Security=true;");
 

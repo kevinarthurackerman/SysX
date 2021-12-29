@@ -1,6 +1,6 @@
 ﻿namespace Sysx.EntityFramework.Testing;
 
-public abstract class BaseTestDbContextActivator
+public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder>
 {
     private static readonly string workingDirectory;
 
@@ -47,7 +47,9 @@ public abstract class BaseTestDbContextActivator
     /// A new test database is created each time this is called and is torn down at the end of the program execution.
     /// </summary>
     /// <typeparam name="TDbContext"></typeparam>
-    protected TDbContext CreateDbContext<TDbContext>() where TDbContext : DbContext
+    protected TDbContext CreateDbContext<TDbContext>(
+        Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions = null,
+        Action<TDbContextOptionsBuilder>? configureProviderOptions = null) where TDbContext : DbContext
     {
         var baseDatabasePathLocatorKey = new DatabasePathLocator(GetType(), typeof(TDbContext));
         var sourceDatabasePath = baseDatabasePathLocator.GetOrAdd(baseDatabasePathLocatorKey, key =>
@@ -98,9 +100,14 @@ public abstract class BaseTestDbContextActivator
 
             if (optionsCtor != null)
             {
-                var options = CreateDbContextOptions<TDbContext>(connection);
+                var options = ConfigureDbContextOptions(connection, configureContextOptions, configureProviderOptions);
 
                 return (TDbContext)optionsCtor.Invoke(new[] { options });
+            }
+
+            if (configureContextOptions != null || configureProviderOptions != null)
+            {
+                throw new InvalidOperationException($"An options configuration was provided, but {nameof(DbContext)} {typeof(TDbContext).Name} does not have a constructor that takes a single parameter of type {typeof(DbContextOptions).Name} or {typeof(DbContextOptions<TDbContext>).Name}");
             }
 
             var optionlessCtor = typeof(TDbContext).GetConstructor(Array.Empty<Type>());
@@ -122,7 +129,7 @@ public abstract class BaseTestDbContextActivator
 
     protected abstract DbConnection CreateConnection(string databasePath);
 
-    protected abstract DbContextOptions<TDbContext> CreateDbContextOptions<TDbContext>(DbConnection dbConnection)
+    protected abstract DbContextOptions<TDbContext> ConfigureDbContextOptions<TDbContext>(DbConnection dbConnection, Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions, Action<TDbContextOptionsBuilder>? configureProviderOptions)
         where TDbContext : DbContext;
 
     protected abstract void CreateDatabase(string databasePath);
