@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Enums.BaseEnumClass;
+﻿namespace Test_Sysx.Enums.BaseEnumeration;
 using Assert = Xunit.Assert;
 
 public class EqualityTests

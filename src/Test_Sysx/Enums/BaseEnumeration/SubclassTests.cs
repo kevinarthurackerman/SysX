@@ -1,9 +1,9 @@
-﻿namespace Test_Sysx.Enums.BaseEnumClass;
+﻿namespace Test_Sysx.Enums.BaseEnumeration;
 using Assert = Xunit.Assert;
 
 public class SubclassTests
 {
-    public class Animal : BaseEnumClass<Animal, int>
+    public class Animal : BaseEnumeration<Animal, int>
     {
         public void Should_Contain_Own_Type()
         {

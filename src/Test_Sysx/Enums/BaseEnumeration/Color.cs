@@ -1,6 +1,6 @@
-﻿namespace Test_Sysx.Enums.BaseEnumClass;
+﻿namespace Test_Sysx.Enums.BaseEnumeration;
 
-public class Color : BaseEnumClass<Color, int>
+public class Color : BaseEnumeration<Color, int>
 {
     public static readonly Color Red = new Color(1, "Red");
     public static readonly Color Blue = new Color(2, "Blue");

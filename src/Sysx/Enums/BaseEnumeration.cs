@@ -4,9 +4,9 @@
 /// Base class for implementing type safe class enums.
 /// </summary>
 [DebuggerDisplay("{Value}: {DisplayName}")]
-public abstract class BaseEnumClass<TEnum, TValue>
+public abstract class BaseEnumeration<TEnum, TValue>
     : IComparable<TEnum>, IEquatable<TEnum>, IComparable
-    where TEnum : BaseEnumClass<TEnum, TValue>
+    where TEnum : BaseEnumeration<TEnum, TValue>
     where TValue : IComparable<TValue>, IEquatable<TValue>, IComparable
 {
     private static readonly object initLock = new { };
@@ -52,7 +52,7 @@ public abstract class BaseEnumClass<TEnum, TValue>
         }
     }
 
-    static BaseEnumClass()
+    static BaseEnumeration()
     {
         var publicConstructors = typeof(TEnum).GetConstructors(BindingFlags.Public);
 
@@ -60,7 +60,7 @@ public abstract class BaseEnumClass<TEnum, TValue>
             optsFn: x => x.WithMessage($"Enum class {typeof(TEnum).Name} should not have a public constructor."));
     }
 
-    protected BaseEnumClass(TValue value, string displayName)
+    protected BaseEnumeration(TValue value, string displayName)
     {
         EnsureArg.HasValue(value, nameof(value));
         EnsureArg.IsNotNullOrWhiteSpace(displayName, nameof(displayName));
@@ -96,10 +96,10 @@ public abstract class BaseEnumClass<TEnum, TValue>
 
     public override int GetHashCode() => Value.GetHashCode();
 
-    public static bool operator ==(BaseEnumClass<TEnum, TValue>? left, BaseEnumClass<TEnum, TValue>? right) =>
+    public static bool operator ==(BaseEnumeration<TEnum, TValue>? left, BaseEnumeration<TEnum, TValue>? right) =>
         Equals(left, right);
 
-    public static bool operator !=(BaseEnumClass<TEnum, TValue>? left, BaseEnumClass<TEnum, TValue>? right) =>
+    public static bool operator !=(BaseEnumeration<TEnum, TValue>? left, BaseEnumeration<TEnum, TValue>? right) =>
         !Equals(left, right);
 
     public static TEnum ParseValue(TValue? value)

@@ -1,6 +1,6 @@
-﻿namespace Test_Sysx.Enums.BaseEnumClass;
+﻿namespace Test_Sysx.Enums.BaseEnumeration;
 
-public class State : BaseEnumClass<State, int>
+public class State : BaseEnumeration<State, int>
 {
     public static readonly State Off = new State(1, "Off");
     public static readonly State Starting = new State(2, "Starting");
