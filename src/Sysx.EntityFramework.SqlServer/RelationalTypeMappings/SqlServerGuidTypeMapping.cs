@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for SqlServerGuids
+/// </summary>
 public class SqlServerGuidTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<SqlServerGuid, Guid> converter

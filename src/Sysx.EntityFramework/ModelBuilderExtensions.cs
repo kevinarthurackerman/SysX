@@ -2,6 +2,9 @@
 
 public static class ModelBuilderExtensions
 {
+    /// <summary>
+    /// Configures all entity properties matching the type.
+    /// </summary>
     public static ModelBuilder RegisterPropertiesOfType<TValue>(this ModelBuilder modelBuilder, Action<IMutableProperty> configureValue)
     {
         EnsureArg.IsNotNull(modelBuilder, nameof(modelBuilder));

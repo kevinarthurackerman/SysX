@@ -2,6 +2,9 @@
 
 public static class DbContextOptionsBuilderExtensions
 {
+    /// <summary>
+    /// Adds handling of NodaTime types to EntityFramework
+    /// </summary>
     public static TRelationalDbContextOptionsBuilderInfrastructure UseNodaTime<TRelationalDbContextOptionsBuilderInfrastructure>
         (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder)
             where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure

@@ -2,6 +2,9 @@
 
 public static class DbContextOptionsBuilderExtensions
 {
+    /// <summary>
+    /// Checks if the extension already exists and adds it if it does not.
+    /// </summary>
     public static bool TryAddExtension<TExtension>(this IRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder, TExtension extension)
         where TExtension : class, IDbContextOptionsExtension
     {

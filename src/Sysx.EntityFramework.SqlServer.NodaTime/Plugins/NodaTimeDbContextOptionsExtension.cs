@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.NodaTime.Plugins;
 
+/// <summary>
+/// ContainerTypesDbContextOptionsExtension that adds handling of NodaTime types to EntityFramework
+/// </summary>
 public class NodaTimeDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
     public NodaTimeDbContextOptionsExtension() : base("NodaTime") { }

@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for Durations
+/// </summary>
 public class DurationTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<Duration, long> converter =

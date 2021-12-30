@@ -1,5 +1,8 @@
 ﻿namespace Sysx.Text.Json.Serialization;
 
+/// <summary>
+/// Converter for handling BinaryGuids
+/// </summary>
 public class BinaryGuidJsonConverter : JsonConverter<BinaryGuid>
 {
     public static readonly BinaryGuidJsonConverter Instance = new ();

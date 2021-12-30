@@ -6,11 +6,11 @@ public sealed class SqlServerTestDbContextActivator : BaseTestDbContextActivator
 
     private SqlServerTestDbContextActivator() { }
 
-    /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}(Action{DbContextOptionsBuilder{TDbContext}}?)"/>
+    /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}(Action{DbContextOptionsBuilder{TDbContext}}?, Action{TDbContextOptionsBuilder}?)"/>
     public static TDbContext Create<TDbContext>() where TDbContext : DbContext =>
         instance.CreateDbContext<TDbContext>();
 
-    /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}(Action{DbContextOptionsBuilder{TDbContext}}?)"/>
+    /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}(Action{DbContextOptionsBuilder{TDbContext}}?, Action{TDbContextOptionsBuilder}?)"/>
     public static TDbContext Create<TDbContext>(
         Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions,
         Action<SqlServerDbContextOptionsBuilder>? configureProviderOptions) where TDbContext : DbContext =>

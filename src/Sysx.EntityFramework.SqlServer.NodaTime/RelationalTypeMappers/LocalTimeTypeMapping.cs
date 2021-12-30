@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for LocalTimes
+/// </summary>
 public class LocalTimeTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<LocalTime, TimeSpan> converter = 

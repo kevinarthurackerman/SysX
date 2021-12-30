@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Plugins;
 
+/// <summary>
+/// The IMethodCallTranslatorPlugin used by ContainerTypesDbContextOptionsExtensions to handle IMethodCallTranslators
+/// </summary>
 public class ContainerTypesMethodCallTranslatorPlugin : IMethodCallTranslatorPlugin
 {
     public ContainerTypesMethodCallTranslatorPlugin(IEnumerable<IMethodCallTranslator> methodCallTranslators)

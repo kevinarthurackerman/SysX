@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for Durations
+/// </summary>
 public class DurationTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<Duration, string> converter = new (

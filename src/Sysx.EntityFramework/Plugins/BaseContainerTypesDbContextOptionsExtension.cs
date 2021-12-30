@@ -1,7 +1,13 @@
 ﻿namespace Sysx.EntityFramework.Plugins;
 
+/// <summary>
+/// A base class for implementing IDbContextOptionsExtensions that register types from the services provider.
+/// </summary>
 public abstract class BaseContainerTypesDbContextOptionsExtension : IDbContextOptionsExtension
 {
+    /// <summary>
+    /// A name for this extension to use for it's Info.
+    /// </summary>
     public string Name { get; }
 
     public virtual DbContextOptionsExtensionInfo Info => new ExtensionInfo(this);
@@ -50,7 +56,7 @@ public abstract class BaseContainerTypesDbContextOptionsExtension : IDbContextOp
             Assert.That(extension != null);
 
             this.extension = extension!;
-            LogFragment = $"'{this.extension.Name} Container Types Extension'=Enabled ";
+            LogFragment = $"'ContainerTypes:{this.extension.Name}'=Enabled ";
         }
 
         public override bool IsDatabaseProvider => false;
@@ -63,7 +69,7 @@ public abstract class BaseContainerTypesDbContextOptionsExtension : IDbContextOp
         {
             EnsureArg.IsNotNull(debugInfo, nameof(debugInfo));
 
-            debugInfo[$"{extension.Name} Container Types Extension"] = "1";
+            debugInfo[$"ContainerTypes:{extension.Name}"] = "1";
         }
     }
 }

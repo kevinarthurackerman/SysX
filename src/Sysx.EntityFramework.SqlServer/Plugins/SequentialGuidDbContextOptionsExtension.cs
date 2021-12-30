@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.Plugins;
 
+/// <summary>
+/// ContainerTypesDbContextOptionsExtension that adds handling of sequential GUID types to EntityFramework
+/// </summary>
 public class SequentialGuidDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
     public SequentialGuidDbContextOptionsExtension() : base("SequentialGuid") { }

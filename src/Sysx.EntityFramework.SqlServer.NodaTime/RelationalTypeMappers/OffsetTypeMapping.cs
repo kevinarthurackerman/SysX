@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for Offsets
+/// </summary>
 public class OffsetTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<Offset, int> converter =

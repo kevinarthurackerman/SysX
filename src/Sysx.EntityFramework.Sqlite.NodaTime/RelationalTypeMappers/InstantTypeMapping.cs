@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for Instants
+/// </summary>
 public class InstantTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<Instant, string> converter = new (

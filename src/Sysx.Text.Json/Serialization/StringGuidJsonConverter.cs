@@ -1,5 +1,8 @@
 ﻿namespace Sysx.Text.Json.Serialization;
 
+/// <summary>
+/// Converter for handling StringGuids
+/// </summary>
 public class StringGuidJsonConverter : JsonConverter<StringGuid>
 {
     public static readonly StringGuidJsonConverter Instance = new();

@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for Offsets
+/// </summary>
 public class OffsetTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<Offset, string> converter = new(

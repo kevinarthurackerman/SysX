@@ -1,5 +1,8 @@
 ﻿namespace Sysx.Text.Json.Serialization;
 
+/// <summary>
+/// Converter for handling SqlServerGuids
+/// </summary>
 public class SqlServerGuidJsonConverter : JsonConverter<SqlServerGuid>
 {
     public static readonly SqlServerGuidJsonConverter Instance = new();

@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for OffsetDateTimes
+/// </summary>
 public class OffsetDateTimeTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<OffsetDateTime, DateTimeOffset> converter =

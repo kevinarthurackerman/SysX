@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for OffsetDateTimes
+/// </summary>
 public class OffsetDateTimeTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<OffsetDateTime, string> converter = new(

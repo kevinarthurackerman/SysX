@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for LocalDateTimes
+/// </summary>
 public class LocalDateTimeTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<LocalDateTime, string> converter = new(

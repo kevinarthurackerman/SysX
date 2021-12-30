@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for BinaryGuids
+/// </summary>
 public class BinaryGuidTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<BinaryGuid, byte[]> converter

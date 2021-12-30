@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for Instants
+/// </summary>
 public class InstantTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<Instant, DateTime> converter = 

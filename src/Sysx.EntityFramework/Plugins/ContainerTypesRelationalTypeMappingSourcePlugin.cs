@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Plugins;
 
+/// <summary>
+/// The IRelationalTypeMappingSourcePlugin used by ContainerTypesDbContextOptionsExtensions to handle RelationalTypeMappings
+/// </summary>
 public class ContainerTypesRelationalTypeMappingSourcePlugin : IRelationalTypeMappingSourcePlugin
 {
     private readonly ImmutableDictionary<Type, RelationalTypeMapping> relationalTypeMappingLookupByType;

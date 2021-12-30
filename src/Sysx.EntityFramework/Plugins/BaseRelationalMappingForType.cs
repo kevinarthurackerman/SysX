@@ -1,7 +1,13 @@
 ﻿namespace Sysx.EntityFramework.Plugins;
 
+/// <summary>
+/// Base class for implementing container registered RelationalTypeMapping.
+/// </summary>
 public abstract class BaseRelationalMappingForType : RelationalTypeMapping
 {
+    /// <summary>
+    /// The Type that this RelationalTypeMapping will be applied to.
+    /// </summary>
     public abstract Type ForType { get; }
 
     protected BaseRelationalMappingForType(RelationalTypeMappingParameters parameters) : base(parameters) { }

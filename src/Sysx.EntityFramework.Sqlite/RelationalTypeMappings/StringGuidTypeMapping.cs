@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for StringGuids
+/// </summary>
 public class StringGuidTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<StringGuid, string> converter

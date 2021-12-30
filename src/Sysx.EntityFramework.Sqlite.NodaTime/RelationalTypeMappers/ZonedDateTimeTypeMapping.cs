@@ -1,5 +1,8 @@
 ﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
 
+/// <summary>
+/// Type mapping for ZonedDateTimes
+/// </summary>
 public class ZonedDateTimeTypeMapping : RelationalTypeMapping
 {
     private static readonly ValueConverter<ZonedDateTime, string> converter = new(

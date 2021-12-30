@@ -46,7 +46,6 @@ public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder>
     /// Creates a test database using the default EntityFramework migrations and returns a DbContext attached to that database.
     /// A new test database is created each time this is called and is torn down at the end of the program execution.
     /// </summary>
-    /// <typeparam name="TDbContext"></typeparam>
     protected TDbContext CreateDbContext<TDbContext>(
         Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions = null,
         Action<TDbContextOptionsBuilder>? configureProviderOptions = null) where TDbContext : DbContext
