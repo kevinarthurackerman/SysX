@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net48</TargetFrameworks>
+    <TargetFrameworks>net6.0;net48</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
@@ -14,7 +14,7 @@
     <ProjectReference Include="..\Sysx\Sysx.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <ProjectReference Include="..\Test_Sysx._Parent\Test_Sysx._Parent.csproj" />
     <ProjectReference Include="..\Test_Sysx._Child\Test_Sysx._Child.csproj" />
     <ProjectReference Include="..\Test_Sysx._Grandchild\Test_Sysx._Grandchild.csproj" />

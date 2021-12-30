@@ -52,13 +52,13 @@ public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<Bina
 
     public static bool operator !=(BinaryGuid a, BinaryGuid b) => a.innerGuid != b.innerGuid;
 
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     public static BinaryGuid Parse(ReadOnlySpan<char> input) => new(Guid.Parse(input));
 #endif
 
     public static BinaryGuid Parse(string input) => new(Guid.Parse(input));
 
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     public static BinaryGuid ParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format) => new(Guid.ParseExact(input, format));
 #endif
 
@@ -72,12 +72,12 @@ public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<Bina
 
     public string ToString(string? format, IFormatProvider? provider) => innerGuid.ToString(format, provider);
 
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default) =>
         innerGuid.TryFormat(destination, out charsWritten, format);
 #endif
 
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     public static bool TryParse(ReadOnlySpan<char> input, out BinaryGuid result)
     {
         if(Guid.TryParse(input, out var guid))
@@ -93,7 +93,7 @@ public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<Bina
 
 #if NET48
     public static bool TryParse(string? input, out BinaryGuid result)
-#elif NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#elif NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     public static bool TryParse([NotNullWhen(true)] string? input, out BinaryGuid result)
 #endif
     {
@@ -107,7 +107,7 @@ public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<Bina
         return false;
     }
 
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     public static bool TryParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, out BinaryGuid result)
     {
         if (Guid.TryParseExact(input, format, out var guid))
@@ -123,7 +123,7 @@ public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<Bina
 
 #if NET48
     public static bool TryParseExact(string? input, string? format, out BinaryGuid result)
-#elif NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#elif NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     public static bool TryParseExact([NotNullWhen(true)] string? input, [NotNullWhen(true)] string? format, out BinaryGuid result)
 #endif
     {
@@ -137,7 +137,7 @@ public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<Bina
         return false;
     }
 
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     public bool TryWriteBytes(Span<byte> destination) => innerGuid.TryWriteBytes(destination);
 #endif
 

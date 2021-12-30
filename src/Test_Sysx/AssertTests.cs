@@ -31,7 +31,7 @@ public class AssertTests
         Assert.NotNull(exception);
         Assert.Equal(typeof(ContractException), exception.GetType());
 
-#if NET5_0 || NETSTANDARD2_1
+#if NET6_0 || NET5_0 || NETSTANDARD2_1
         Assert.Equal($@"Condition 'varA == varB' failed at {filePath} line {lineNumber}: Should_Throw_With_Message", exception.Message);
 #elif NET48
         Assert.Equal($@"Condition failed at {filePath} line {lineNumber}: Should_Throw_With_Message", exception.Message);

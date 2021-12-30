@@ -18,7 +18,7 @@ public static class AssemblyX
         return EnumerableX.Descendants(rootAssembly, x => x.GetReferencedAssemblies().Select(y => Assembly.Load(y)));
     }
 
-#elif NET5_0 || NETCOREAPP3_1
+#elif NET6_0 || NET5_0 || NETCOREAPP3_1
     private static readonly LoadOptions defaultLoadOptions = LoadOptions.Default;
 
     /// <inheritdoc cref="Load(LoadOptions)"/>

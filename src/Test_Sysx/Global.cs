@@ -14,7 +14,7 @@ global using Sysx.Testing;
 global using Sysx.Threading;
 global using Xunit;
 global using Sysx;
-#if NET5_0
+#if NET6_0 || NET5_0
 global using System.Runtime.Loader;
 global using Sysx_Test__Child;
 global using Sysx_Test__Grandchild;

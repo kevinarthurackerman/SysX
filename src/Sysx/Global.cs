@@ -29,6 +29,6 @@ global using Sysx.Linq;
 global using Sysx.Linq.Expressions;
 global using Microsoft.Extensions.DependencyInjection;
 
-#if NET5_0 || NETCOREAPP3_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1
 global using System.Runtime.Loader;
 #endif

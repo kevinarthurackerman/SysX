@@ -43,7 +43,7 @@ internal static class SequentialGuidGenerator
     }
 #endif
 
-#if NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
     internal static Guid Next(SequentialGuidType sequentialGuidType, SequentialGuidOptions? options = null)
     {
         options ??= new();

@@ -6,7 +6,7 @@ public static class Assert
 
     public readonly record struct Context(string? FilePath, int? LineNumber, string? MemberName, string? Expression);
 
-#if NET5_0 || NETCOREAPP3_1
+#if NET6_0 || NET5_0 || NETCOREAPP3_1
     /// <summary>
     ///  Specifies a contract that must be met and throws an exception if violated
     /// </summary>
