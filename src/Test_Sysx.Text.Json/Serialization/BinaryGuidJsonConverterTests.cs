@@ -6,8 +6,7 @@ public class BinaryGuidJsonConverterTests
     [Fact]
     public void Should_Persist()
     {
-        var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuids();
+        var options = new JsonSerializerOptions().UseSequentialGuids();
 
         var value = BinaryGuid.NewGuid();
 
@@ -23,8 +22,7 @@ public class BinaryGuidJsonConverterTests
     [Fact]
     public void Should_Persist_Nullable()
     {
-        var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuids();
+        var options = new JsonSerializerOptions().UseSequentialGuids();
 
         var value = (BinaryGuid?)BinaryGuid.NewGuid();
 
@@ -40,8 +38,7 @@ public class BinaryGuidJsonConverterTests
     [Fact]
     public void Should_Persist_Null()
     {
-        var options = new JsonSerializerOptions();
-        options.Converters.AddSequentialGuids();
+        var options = new JsonSerializerOptions().UseSequentialGuids();
 
         var value = (BinaryGuid?)null;
 
