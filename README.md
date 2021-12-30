@@ -1,3 +1,4 @@
+
 # Sysx
 This is a general utilities library and a place for me to experiment with new ideas.
 
@@ -42,6 +43,11 @@ Implementation of the mediator pattern for C#. I like it for it's pipeline.
 Better handling of time and time zones.
 - Repository: https://github.com/nodatime/nodatime
 - Package Source: https://www.nuget.org/packages/NodaTime
+
+### NodaTime JSON Serialization
+JSON serialization for NodaTime types.
+- Repository: https://github.com/nodatime/nodatime.serialization
+- Package Source: https://www.nuget.org/packages/NodaTime.Serialization.SystemTextJson/
 
 ### Polly
 For implementing retry logic.
