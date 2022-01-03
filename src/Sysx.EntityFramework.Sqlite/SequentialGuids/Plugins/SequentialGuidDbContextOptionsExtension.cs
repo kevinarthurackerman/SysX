@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Sqlite.Plugins;
+﻿namespace Sysx.EntityFramework.Sqlite.SequentialGuids.Plugins;
 
 /// <summary>
 /// ContainerTypesDbContextOptionsExtension that adds handling of sequential GUID types to EntityFramework

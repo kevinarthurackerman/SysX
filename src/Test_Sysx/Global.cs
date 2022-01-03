@@ -14,6 +14,9 @@ global using Sysx.Testing;
 global using Sysx.Threading;
 global using Xunit;
 global using Sysx;
+global using EnsureThat;
+global using System.Collections.Immutable;
+global using System.Data;
 #if NET6_0 || NET5_0
 global using System.Runtime.Loader;
 global using Sysx_Test__Child;

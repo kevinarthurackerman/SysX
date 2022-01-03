@@ -1,8 +1,11 @@
 ﻿global using Microsoft.EntityFrameworkCore;
 global using System;
+global using System.Data;
 global using System.Linq;
 global using System.Threading.Tasks;
+global using Sysx.EntityFramework.Plugins;
 global using Sysx.EntityFramework.Sqlite.Plugins;
 global using Sysx.EntityFramework.Sqlite.Testing;
+global using Sysx.Enums;
 global using Sysx.Identifiers;
 global using Xunit;

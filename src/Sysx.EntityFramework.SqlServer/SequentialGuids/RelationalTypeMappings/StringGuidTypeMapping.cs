@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
+﻿namespace Sysx.EntityFramework.SqlServer.SequentialGuids.RelationalTypeMappings;
 
 /// <summary>
 /// Type mapping for StringGuids

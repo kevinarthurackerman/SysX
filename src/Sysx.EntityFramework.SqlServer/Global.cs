@@ -12,6 +12,7 @@ global using System.IO;
 global using System.Text;
 global using Sysx.DependencyInjection;
 global using Sysx.EntityFramework.Plugins;
-global using Sysx.EntityFramework.SqlServer.RelationalTypeMappings;
+global using Sysx.EntityFramework.SqlServer.SequentialGuids.Plugins;
+global using Sysx.EntityFramework.SqlServer.SequentialGuids.RelationalTypeMappings;
 global using Sysx.EntityFramework.Testing;
 global using Sysx.Identifiers;

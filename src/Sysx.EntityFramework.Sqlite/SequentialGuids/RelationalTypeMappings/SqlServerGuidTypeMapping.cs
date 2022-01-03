@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
+﻿namespace Sysx.EntityFramework.Sqlite.SequentialGuids.RelationalTypeMappings;
 
 /// <summary>
 /// Type mapping for SqlServerGuids

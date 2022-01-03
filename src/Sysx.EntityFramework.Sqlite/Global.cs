@@ -12,6 +12,7 @@ global using System.IO;
 global using System.Text;
 global using Sysx.DependencyInjection;
 global using Sysx.EntityFramework.Plugins;
-global using Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
+global using Sysx.EntityFramework.Sqlite.SequentialGuids.Plugins;
+global using Sysx.EntityFramework.Sqlite.SequentialGuids.RelationalTypeMappings;
 global using Sysx.EntityFramework.Testing;
 global using Sysx.Identifiers;

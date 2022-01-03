@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
+﻿namespace Sysx.EntityFramework.SqlServer.SequentialGuids.RelationalTypeMappings;
 
 /// <summary>
 /// Type mapping for BinaryGuids
@@ -10,7 +10,7 @@ public class BinaryGuidTypeMapping : RelationalTypeMapping
 
     public override Type ClrType => typeof(BinaryGuid);
     public override ValueConverter Converter => converter;
-    public override string StoreType => "BLOB";
+    public override string StoreType => "binary(16)";
     public override DbType? DbType => System.Data.DbType.Binary;
     public override int? Size => 16;
     public override bool IsFixedLength => true;
