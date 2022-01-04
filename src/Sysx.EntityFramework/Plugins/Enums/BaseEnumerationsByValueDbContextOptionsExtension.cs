@@ -28,7 +28,7 @@ public class BaseEnumerationsByValueDbContextOptionsExtension : BaseContainerTyp
             var enumType = genericParams[0];
             var valueType = genericParams[1];
 
-            services.AddScoped<RelationalTypeMapping>(services =>
+            services.AddSingleton<RelationalTypeMapping>(services =>
             {
                 var initializeRelationalTypeMapper = () =>
                 {

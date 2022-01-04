@@ -13,7 +13,7 @@ public class SequentialGuidDbContextOptionsExtension : BaseContainerTypesDbConte
 
         base.ApplyServices(services);
 
-        services.AddScoped<RelationalTypeMapping>(services =>
+        services.AddSingleton<RelationalTypeMapping>(services =>
         {
             var initializeRelationalTypeMapper = () =>
             {
