@@ -1,10 +1,11 @@
 ﻿namespace Sysx.EntityFramework.Plugins;
 
-public sealed class LazyInitializedRelationalTypeMapping<TClrType> : RelationalTypeMapping
+public sealed class LazyInitializedRelationalTypeMapping : RelationalTypeMapping
 {
+    private readonly Type clrType;
     private readonly Lazy<RelationalTypeMapping> innerRelationalTypeMapper;
 
-    public override Type ClrType => typeof(TClrType);
+    public override Type ClrType => clrType;
 
     public override ValueComparer Comparer => innerRelationalTypeMapper.Value.Comparer;
 
@@ -37,11 +38,13 @@ public sealed class LazyInitializedRelationalTypeMapping<TClrType> : RelationalT
     [Obsolete("Use KeyComparer. Key comparers must implement structural comparisons and deep copies.")]
     public override ValueComparer StructuralComparer => innerRelationalTypeMapper.Value.StructuralComparer;
     
-    public LazyInitializedRelationalTypeMapping(Func<RelationalTypeMapping> initializeRelationalTypeMapping)
+    public LazyInitializedRelationalTypeMapping(Type clrType, Func<RelationalTypeMapping> initializeRelationalTypeMapping)
         : base(string.Empty, typeof(object))
     {
+        EnsureArg.IsNotNull(clrType, nameof(clrType));
         EnsureArg.IsNotNull(initializeRelationalTypeMapping, nameof(initializeRelationalTypeMapping));
         
+        this.clrType = clrType;
         innerRelationalTypeMapper = new(initializeRelationalTypeMapping);
     }
 

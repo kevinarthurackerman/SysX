@@ -18,33 +18,63 @@ public class BaseEnumerationsByValueDbContextOptionsExtension : BaseContainerTyp
 
         base.ApplyServices(services);
 
-        var enumTypes = scanAssembly.GetTypes()
-            .Where(x => IsEnumerationType(x))
-            .ToArray();
-
-        foreach (var enumType in enumTypes)
+        foreach (var type in scanAssembly.GetTypes())
         {
-            services.AddSingleton(typeof(RelationalTypeMapping), services =>
-                new BaseEnumerationsByValueTypeMappingFactory(services)
-                    .CreateRelationalTypeMapping(enumType));
+            var baseEnumerationType = GetBaseEnumerationType(type);
+
+            if (baseEnumerationType == null) continue;
+
+            var genericParams = baseEnumerationType.GetGenericArguments();
+            var enumType = genericParams[0];
+            var valueType = genericParams[1];
+
+            services.AddScoped<RelationalTypeMapping>(services =>
+            {
+                var initializeRelationalTypeMapper = () =>
+                {
+                    var providerTypeMapping = services
+                        .GetRequiredService<IRelationalTypeMappingSource>()
+                        .FindMapping(valueType);
+
+                    var valueConverter = (ValueConverter)GetType()
+                        .GetMethod(nameof(CreateValueConverter), BindingFlags.NonPublic | BindingFlags.Static)!
+                        .MakeGenericMethod(enumType, valueType)
+                        .Invoke(null, null)!;
+
+                    return (RelationalTypeMapping)providerTypeMapping
+                        .Clone(new RelationalTypeMappingInfo(type))
+                        .Clone(valueConverter);
+                };
+
+                return new LazyInitializedRelationalTypeMapping(type, initializeRelationalTypeMapper);
+            });
         }
     }
 
-    private static bool IsEnumerationType(Type type)
+    private static Type? GetBaseEnumerationType(Type type)
     {
-        if (type == null) return false;
-        if (!type.IsClass) return false;
-        if (type.IsAbstract) return false;
+        var baseType = type!;
 
-        var baseType = type;
         while (baseType != null && baseType != baseType.BaseType)
         {
             if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(BaseEnumeration<,>))
-                    return true;
+            {
+                return baseType;
+            }
 
             baseType = baseType.BaseType;
         }
 
-        return false;
+        return null;
+    }
+
+    private static ValueConverter CreateValueConverter<TEnum, TValue>()
+        where TEnum : BaseEnumeration<TEnum, TValue>
+        where TValue : IComparable<TValue>, IEquatable<TValue>, IComparable
+    {
+        return new ValueConverter<TEnum, TValue>(
+            @enum => @enum.Value,
+            value => BaseEnumeration<TEnum, TValue>.ParseValue(value)
+        );
     }
 }

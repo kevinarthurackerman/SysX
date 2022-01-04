@@ -30,7 +30,7 @@ public class SequentialGuidDbContextOptionsExtension : BaseContainerTypesDbConte
                     .Clone(new ValueConverter<BinaryGuid, byte[]>(x => x.ToByteArray(), x => new BinaryGuid(new Guid(x))));
             };
 
-            return new LazyInitializedRelationalTypeMapping<BinaryGuid>(initializeRelationalTypeMapper);
+            return new LazyInitializedRelationalTypeMapping(typeof(BinaryGuid), initializeRelationalTypeMapper);
         });
         
         services.AddScoped<RelationalTypeMapping>(services =>
@@ -50,7 +50,7 @@ public class SequentialGuidDbContextOptionsExtension : BaseContainerTypesDbConte
                     .Clone(new ValueConverter<StringGuid, string>(x => x.ToString("D"), x => new StringGuid(Guid.ParseExact(x, "D"))));
             };
 
-            return new LazyInitializedRelationalTypeMapping<StringGuid>(initializeRelationalTypeMapper);
+            return new LazyInitializedRelationalTypeMapping(typeof(StringGuid), initializeRelationalTypeMapper);
         });
 
         services.AddScoped<RelationalTypeMapping>(services =>
@@ -62,11 +62,11 @@ public class SequentialGuidDbContextOptionsExtension : BaseContainerTypesDbConte
                     .FindMapping(typeof(Guid));
 
                 return (RelationalTypeMapping)providerTypeMapping
-                    .Clone(new RelationalTypeMappingInfo(typeof(SqlServerGuid), size: 36, fixedLength: true))
+                    .Clone(new RelationalTypeMappingInfo(typeof(SqlServerGuid)))
                     .Clone(new ValueConverter<SqlServerGuid, Guid>(x => (Guid)x, x => (SqlServerGuid)x));
             };
 
-            return new LazyInitializedRelationalTypeMapping<SqlServerGuid>(initializeRelationalTypeMapper);
+            return new LazyInitializedRelationalTypeMapping(typeof(SqlServerGuid), initializeRelationalTypeMapper);
         });
     }
 }
