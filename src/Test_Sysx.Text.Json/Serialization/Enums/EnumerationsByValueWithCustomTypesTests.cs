@@ -6,7 +6,7 @@ public class EnumerationsByValueWithCustomTypesTests
     [Fact]
     public void Should_Persist_Values()
     {
-        var options = new JsonSerializerOptions().UseEnumerationsByValue().UseSequentialGuids();
+        var options = new JsonSerializerOptions().UseEnumerationsByValue().UseIdentifiers();
 
         var testObject = new EnumerationPropertiesModel
         {
@@ -34,7 +34,7 @@ public class EnumerationsByValueWithCustomTypesTests
     [Fact]
     public void Should_Persist_Empty_Values()
     {
-        var options = new JsonSerializerOptions().UseEnumerationsByValue().UseSequentialGuids();
+        var options = new JsonSerializerOptions().UseEnumerationsByValue().UseIdentifiers();
 
         var testObject = new EnumerationPropertiesModel
         {

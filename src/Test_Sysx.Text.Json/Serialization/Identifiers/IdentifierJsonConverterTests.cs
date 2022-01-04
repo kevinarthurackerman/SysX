@@ -1,12 +1,12 @@
-﻿namespace Test_Sysx.Text.Json.Serialization.SequentialGuids;
+﻿namespace Test_Sysx.Text.Json.Serialization.Identifiers;
 using Assert = Assert;
 
-public class SequentialGuidJsonConverterTests
+public class IdentifierJsonConverterTests
 {
     [Fact]
     public void Should_Persist_Values()
     {
-        var options = new JsonSerializerOptions().UseSequentialGuids();
+        var options = new JsonSerializerOptions().UseIdentifiers();
 
         var testObject = new GuidPropertiesModel
         {
@@ -40,7 +40,7 @@ public class SequentialGuidJsonConverterTests
     [Fact]
     public void Should_Persist_Empty_Values()
     {
-        var options = new JsonSerializerOptions().UseSequentialGuids();
+        var options = new JsonSerializerOptions().UseIdentifiers();
 
         var testObject = new GuidPropertiesModel
         {

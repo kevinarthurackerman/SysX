@@ -1,6 +1,6 @@
 ﻿namespace Sysx.Identifiers;
 
-public struct SequentialGuidOptions
+public struct IdentifierOptions
 {
     private static readonly RandomNumberGenerator _rng = RandomNumberGenerator.Create();
 

@@ -6,7 +6,7 @@ public class EnumerationByValueWithCustomTypeTests
     public async Task Should_Configure_Enumeration_Column_Types()
     {
         using var dbContext = SqliteTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseSequentialGuids());
+            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseIdentifiers());
 
         var connection = dbContext.Database.GetDbConnection();
 
@@ -38,7 +38,7 @@ FROM [EnumerationProperties]";
     public async Task Should_Persist_Enumeration_Values()
     {
         using var dbContext = SqliteTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseSequentialGuids());
+            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseIdentifiers());
 
         var testObject = new EnumerationPropertiesModel
         {
@@ -68,7 +68,7 @@ FROM [EnumerationProperties]";
     public async Task Should_Persist_Default_Enumeration_Values()
     {
         using var dbContext = SqliteTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseSequentialGuids());
+            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseIdentifiers());
 
         var testObject = new EnumerationPropertiesModel
         {

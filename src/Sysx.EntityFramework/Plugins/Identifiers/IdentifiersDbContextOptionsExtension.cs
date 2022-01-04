@@ -1,11 +1,11 @@
-﻿namespace Sysx.EntityFramework.Plugins.SequentialGuids;
+﻿namespace Sysx.EntityFramework.Plugins.Identifiers;
 
 /// <summary>
-/// ContainerTypesDbContextOptionsExtension that adds handling of sequential GUID types to EntityFramework
+/// ContainerTypesDbContextOptionsExtension that adds handling of identifier types to EntityFramework
 /// </summary>
-public class SequentialGuidDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
+public class IdentifiersDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
-    public SequentialGuidDbContextOptionsExtension() : base("SequentialGuid") { }
+    public IdentifiersDbContextOptionsExtension() : base("Identifiers") { }
 
     public override void ApplyServices(IServiceCollection services)
     {

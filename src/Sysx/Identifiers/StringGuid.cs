@@ -27,8 +27,8 @@ public struct StringGuid : IComparable, IComparable<StringGuid>, IEquatable<Stri
 
     public static StringGuid NewGuid() => new(Guid.NewGuid());
 
-    public static StringGuid NewSequentialGuid(SequentialGuidOptions? options = default) =>
-        new (SequentialGuidGenerator.Next(SequentialGuidType.String, options));
+    public static StringGuid NewSequentialGuid(IdentifierOptions? options = default) =>
+        new (IdentifierGenerator.Next(IdentifierType.String, options));
 
     public static bool operator ==(StringGuid a, StringGuid b) =>  a.innerGuid == b.innerGuid;
 

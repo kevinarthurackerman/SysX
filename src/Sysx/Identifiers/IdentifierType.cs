@@ -1,6 +1,6 @@
 ﻿namespace Sysx.Identifiers;
 
-internal enum SequentialGuidType
+internal enum IdentifierType
 {
     String,
     Binary,

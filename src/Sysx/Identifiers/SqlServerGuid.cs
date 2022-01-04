@@ -27,8 +27,8 @@ public struct SqlServerGuid : IComparable, IComparable<SqlServerGuid>, IEquatabl
 
     public static SqlServerGuid NewGuid() => new(Guid.NewGuid());
 
-    public static SqlServerGuid NewSequentialGuid(SequentialGuidOptions? options = default) =>
-        new (SequentialGuidGenerator.Next(SequentialGuidType.SqlServer, options));
+    public static SqlServerGuid NewSequentialGuid(IdentifierOptions? options = default) =>
+        new (IdentifierGenerator.Next(IdentifierType.SqlServer, options));
 
     public static bool operator ==(SqlServerGuid a, SqlServerGuid b) =>  a.innerGuid == b.innerGuid;
 

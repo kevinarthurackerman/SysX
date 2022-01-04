@@ -6,7 +6,7 @@ public class IdentifierTests
     [Fact]
     public async Task Should_Configure_Guid_Column_Types()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var connection = dbContext.Database.GetDbConnection();
 
@@ -43,7 +43,7 @@ FROM [GuidProperties]";
     {
         var logs = new List<string>();
 
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObject = new GuidPropertiesModel
         {
@@ -76,7 +76,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Persist_Default_Guid_Values()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObject = new GuidPropertiesModel
         {
@@ -109,7 +109,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Not_Sort_Guids()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -142,7 +142,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Sort_Binary_Guids()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObjects = Enumerable.Range(1, 1).Select(x => new GuidPropertiesModel
         {
@@ -176,7 +176,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Sort_String_Guids()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -210,7 +210,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Sort_Sql_Server_Guids()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -244,7 +244,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Not_Sort_Nullable_Guids()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObjects = Enumerable.Range(1, 999).Select(x => new GuidPropertiesModel
         {
@@ -277,7 +277,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Sort_Nullable_Binary_Guids()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObjects = Enumerable.Range(1, 1).Select(x => new GuidPropertiesModel
         {
@@ -311,7 +311,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Sort_Nullable_String_Guids()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {
@@ -345,7 +345,7 @@ FROM [GuidProperties]";
     [Fact]
     public async Task Should_Sort_Nullable_Sql_Server_Guids()
     {
-        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseSequentialGuids());
+        using var dbContext = SqlServerTestDbContextActivator.Create<TestDbContext>(null, x => x.UseIdentifiers());
 
         var testObjects = Enumerable.Range(1, 1000).Select(x => new GuidPropertiesModel
         {

@@ -8,7 +8,7 @@ public class BinaryGuidTests
     {
         var time = new DateTime(2020, 1, 1);
 
-        var options = new SequentialGuidOptions
+        var options = new IdentifierOptions
         {
             GetNow = () =>
             {
@@ -32,7 +32,7 @@ public class BinaryGuidTests
     {
         var time = new DateTime(2020, 1, 1);
 
-        var options = new SequentialGuidOptions
+        var options = new IdentifierOptions
         {
             GetNow = () =>
             {

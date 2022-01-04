@@ -23,6 +23,6 @@ global using System.Reflection;
 global using System.Threading;
 global using Sysx.DependencyInjection;
 global using Sysx.EntityFramework.Plugins.Enums;
-global using Sysx.EntityFramework.Plugins.SequentialGuids;
+global using Sysx.EntityFramework.Plugins.Identifiers;
 global using Sysx.Enums;
 global using Sysx.Identifiers;

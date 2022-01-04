@@ -3,9 +3,9 @@
 public static class JsonSerializerOptionsExtensions
 {
     /// <summary>
-    /// Registers converters for sequential GUID types.
+    /// Registers converters for identifier types.
     /// </summary>
-    public static JsonSerializerOptions UseSequentialGuids(this JsonSerializerOptions jsonSerializerOptions)
+    public static JsonSerializerOptions UseIdentifiers(this JsonSerializerOptions jsonSerializerOptions)
     {
         EnsureArg.IsNotNull(jsonSerializerOptions, nameof(jsonSerializerOptions));
 

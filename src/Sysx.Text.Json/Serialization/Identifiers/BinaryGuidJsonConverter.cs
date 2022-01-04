@@ -1,15 +1,15 @@
-﻿namespace Sysx.Text.Json.Serialization.SequentialGuids;
+﻿namespace Sysx.Text.Json.Serialization.Identifiers;
 
 /// <summary>
-/// Converter for handling StringGuids
+/// Converter for handling BinaryGuids
 /// </summary>
-public class StringGuidJsonConverter : JsonConverter<StringGuid>
+public class BinaryGuidJsonConverter : JsonConverter<BinaryGuid>
 {
-    public static readonly StringGuidJsonConverter Instance = new();
+    public static readonly BinaryGuidJsonConverter Instance = new ();
 
-    private StringGuidJsonConverter() { }
+    private BinaryGuidJsonConverter() { }
 
-    public override StringGuid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override BinaryGuid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         EnsureArg.IsNotNull(typeToConvert, nameof(typeToConvert));
         EnsureArg.IsNotNull(options, nameof(options));
@@ -18,10 +18,10 @@ public class StringGuidJsonConverter : JsonConverter<StringGuid>
 
         var guid = converter.Read(ref reader, typeToConvert, options);
 
-        return new StringGuid(guid);
+        return new BinaryGuid(guid);
     }
 
-    public override void Write(Utf8JsonWriter writer, StringGuid value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, BinaryGuid value, JsonSerializerOptions options)
     {
         EnsureArg.IsNotNull(writer, nameof(writer));
         EnsureArg.IsNotNull(options, nameof(options));

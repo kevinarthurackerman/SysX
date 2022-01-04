@@ -1,4 +1,4 @@
-﻿namespace Sysx.Text.Json.Serialization.SequentialGuids;
+﻿namespace Sysx.Text.Json.Serialization.Identifiers;
 
 /// <summary>
 /// Converter for handling SqlServerGuids
