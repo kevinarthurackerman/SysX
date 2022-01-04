@@ -48,7 +48,7 @@ FROM [GuidProperties]";
         var testObject = new GuidPropertiesModel
         {
             Guid = Guid.NewGuid(),
-            BinaryGuid = BinaryGuid.Empty,// BinaryGuid.NewGuid(),
+            BinaryGuid = BinaryGuid.NewGuid(),
             StringGuid = StringGuid.NewGuid(),
             SqlServerGuid = SqlServerGuid.NewGuid(),
             NullableGuid = Guid.NewGuid(),
