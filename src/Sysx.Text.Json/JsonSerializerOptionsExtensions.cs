@@ -17,6 +17,7 @@ public static class JsonSerializerOptionsExtensions
     }
 
     /// <inheritdoc cref="UseEnumerationsByDisplayName(JsonSerializerOptions, ReflectionSource)" />
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static JsonSerializerOptions UseEnumerationsByDisplayName(this JsonSerializerOptions jsonSerializerOptions) =>
         jsonSerializerOptions.UseEnumerationsByDisplayName(ReflectionSource.GetCallingSource());
 
@@ -51,6 +52,7 @@ public static class JsonSerializerOptionsExtensions
     }
 
     /// <inheritdoc cref="UseEnumerationsByValue(JsonSerializerOptions, ReflectionSource)" />
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static JsonSerializerOptions UseEnumerationsByValue(this JsonSerializerOptions jsonSerializerOptions) =>
         jsonSerializerOptions.UseEnumerationsByValue(ReflectionSource.GetCallingSource());
 

@@ -20,6 +20,7 @@ global using System.IO;
 global using System.Linq;
 global using System.Linq.Expressions;
 global using System.Reflection;
+global using System.Runtime.CompilerServices;
 global using System.Threading;
 global using Sysx.DependencyInjection;
 global using Sysx.EntityFramework.Plugins.Enums;

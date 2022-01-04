@@ -36,6 +36,7 @@ public static class DbContextOptionsBuilderExtensions
     }
 
     /// <inheritdoc cref="UseEnumerationsByDisplayName{TRelationalDbContextOptionsBuilderInfrastructure}(TRelationalDbContextOptionsBuilderInfrastructure, ReflectionSource)"/>
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByDisplayName<TRelationalDbContextOptionsBuilderInfrastructure>
         (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder)
             where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure
@@ -56,6 +57,7 @@ public static class DbContextOptionsBuilderExtensions
     }
 
     /// <inheritdoc cref="UseEnumerationsByValue{TRelationalDbContextOptionsBuilderInfrastructure}(TRelationalDbContextOptionsBuilderInfrastructure, ReflectionSource)"/>
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByValue<TRelationalDbContextOptionsBuilderInfrastructure>
         (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder)
             where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure

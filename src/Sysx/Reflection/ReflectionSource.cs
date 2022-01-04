@@ -37,6 +37,7 @@ public class ReflectionSource : IEnumerable<Type>
 
     /// <summary>
     /// Gets the ReflectionSource containing the System.Reflection.Assembly of the method that invoked the currently executing method.
+    /// [MethodImpl(MethodImplOptions.NoInlining)] should be affixed to methods that call this method to ensure the proper Assembly is located.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static ReflectionSource GetCallingSource()

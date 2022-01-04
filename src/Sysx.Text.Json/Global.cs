@@ -1,6 +1,7 @@
 ﻿global using EnsureThat;
 global using System;
 global using System.Reflection;
+global using System.Runtime.CompilerServices;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using Sysx.Enums;
