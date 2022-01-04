@@ -35,43 +35,43 @@ public static class DbContextOptionsBuilderExtensions
         return dbContextOptionsBuilder;
     }
 
-    /// <inheritdoc cref="UseEnumerationsByDisplayName{TRelationalDbContextOptionsBuilderInfrastructure}(TRelationalDbContextOptionsBuilderInfrastructure, Assembly)"/>
+    /// <inheritdoc cref="UseEnumerationsByDisplayName{TRelationalDbContextOptionsBuilderInfrastructure}(TRelationalDbContextOptionsBuilderInfrastructure, ReflectionSource)"/>
     public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByDisplayName<TRelationalDbContextOptionsBuilderInfrastructure>
         (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder)
             where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure
-            => UseEnumerationsByDisplayName(dbContextOptionsBuilder, Assembly.GetCallingAssembly());
+            => UseEnumerationsByDisplayName(dbContextOptionsBuilder, ReflectionSource.GetCallingSource());
 
     /// <summary>
     /// Adds handling of enumeration types by mapping to their display name to EntityFramework
     /// </summary>
     public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByDisplayName<TRelationalDbContextOptionsBuilderInfrastructure>
-        (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder, Assembly scanAssembly)
+        (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder, ReflectionSource reflectionSource)
             where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure
     {
         EnsureArg.HasValue(dbContextOptionsBuilder, nameof(dbContextOptionsBuilder));
-        EnsureArg.IsNotNull(scanAssembly, nameof(scanAssembly));
+        EnsureArg.IsNotNull(reflectionSource, nameof(reflectionSource));
 
-        dbContextOptionsBuilder.TryAddExtension(new BaseEnumerationsByDisplayNameDbContextOptionsExtension(scanAssembly));
+        dbContextOptionsBuilder.TryAddExtension(new BaseEnumerationsByDisplayNameDbContextOptionsExtension(reflectionSource));
         return dbContextOptionsBuilder;
     }
 
-    /// <inheritdoc cref="UseEnumerationsByValue{TRelationalDbContextOptionsBuilderInfrastructure}(TRelationalDbContextOptionsBuilderInfrastructure, Assembly)"/>
+    /// <inheritdoc cref="UseEnumerationsByValue{TRelationalDbContextOptionsBuilderInfrastructure}(TRelationalDbContextOptionsBuilderInfrastructure, ReflectionSource)"/>
     public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByValue<TRelationalDbContextOptionsBuilderInfrastructure>
         (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder)
             where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure
-            => dbContextOptionsBuilder.UseEnumerationsByValue(Assembly.GetCallingAssembly());
+            => dbContextOptionsBuilder.UseEnumerationsByValue(ReflectionSource.GetCallingSource());
 
     /// <summary>
     /// Adds handling of enumeration types by mapping to their value type to EntityFramework
     /// </summary>
     public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByValue<TRelationalDbContextOptionsBuilderInfrastructure>
-        (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder, Assembly scanAssembly)
+        (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder, ReflectionSource reflectionSource)
             where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure
     {
         EnsureArg.HasValue(dbContextOptionsBuilder, nameof(dbContextOptionsBuilder));
-        EnsureArg.IsNotNull(scanAssembly, nameof(scanAssembly));
+        EnsureArg.IsNotNull(reflectionSource, nameof(reflectionSource));
 
-        dbContextOptionsBuilder.TryAddExtension(new BaseEnumerationsByValueDbContextOptionsExtension(scanAssembly));
+        dbContextOptionsBuilder.TryAddExtension(new BaseEnumerationsByValueDbContextOptionsExtension(reflectionSource));
         return dbContextOptionsBuilder;
     }
 }

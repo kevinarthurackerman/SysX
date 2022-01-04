@@ -16,19 +16,19 @@ public static class JsonSerializerOptionsExtensions
         return jsonSerializerOptions;
     }
 
-    /// <inheritdoc cref="UseEnumerationsByDisplayName(JsonSerializerOptions, Assembly)" />
+    /// <inheritdoc cref="UseEnumerationsByDisplayName(JsonSerializerOptions, ReflectionSource)" />
     public static JsonSerializerOptions UseEnumerationsByDisplayName(this JsonSerializerOptions jsonSerializerOptions) =>
-        jsonSerializerOptions.UseEnumerationsByDisplayName(Assembly.GetCallingAssembly());
+        jsonSerializerOptions.UseEnumerationsByDisplayName(ReflectionSource.GetCallingSource());
 
     /// <summary>
     /// Registers converters for types extending BaseEnumeration.
     /// </summary>
-    public static JsonSerializerOptions UseEnumerationsByDisplayName(this JsonSerializerOptions jsonSerializerOptions, Assembly scanAssembly)
+    public static JsonSerializerOptions UseEnumerationsByDisplayName(this JsonSerializerOptions jsonSerializerOptions, ReflectionSource reflectionSource)
     {
         EnsureArg.IsNotNull(jsonSerializerOptions, nameof(jsonSerializerOptions));
-        EnsureArg.IsNotNull(scanAssembly, nameof(scanAssembly));
+        EnsureArg.IsNotNull(reflectionSource, nameof(reflectionSource));
 
-        foreach (var type in scanAssembly.GetTypes())
+        foreach (var type in reflectionSource)
         {
             var baseEnumerationType = GetBaseEnumerationType(type);
 
@@ -50,19 +50,19 @@ public static class JsonSerializerOptionsExtensions
         return jsonSerializerOptions;
     }
 
-    /// <inheritdoc cref="UseEnumerationsByValue(JsonSerializerOptions, Assembly)" />
+    /// <inheritdoc cref="UseEnumerationsByValue(JsonSerializerOptions, ReflectionSource)" />
     public static JsonSerializerOptions UseEnumerationsByValue(this JsonSerializerOptions jsonSerializerOptions) =>
-        jsonSerializerOptions.UseEnumerationsByValue(Assembly.GetCallingAssembly());
+        jsonSerializerOptions.UseEnumerationsByValue(ReflectionSource.GetCallingSource());
 
     /// <summary>
     /// Registers converters for types extending BaseEnumeration.
     /// </summary>
-    public static JsonSerializerOptions UseEnumerationsByValue(this JsonSerializerOptions jsonSerializerOptions, Assembly scanAssembly)
+    public static JsonSerializerOptions UseEnumerationsByValue(this JsonSerializerOptions jsonSerializerOptions, ReflectionSource reflectionSource)
     {
         EnsureArg.IsNotNull(jsonSerializerOptions, nameof(jsonSerializerOptions));
-        EnsureArg.IsNotNull(scanAssembly, nameof(scanAssembly));
+        EnsureArg.IsNotNull(reflectionSource, nameof(reflectionSource));
 
-        foreach (var type in scanAssembly.GetTypes())
+        foreach (var type in reflectionSource)
         {
             var baseEnumerationType = GetBaseEnumerationType(type);
 

@@ -5,11 +5,11 @@
 /// </summary>
 public class BaseEnumerationsByValueDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
-    private readonly Assembly scanAssembly;
+    private readonly ReflectionSource reflectionSource;
 
-    public BaseEnumerationsByValueDbContextOptionsExtension(Assembly scanAssembly) : base("EnumerationsByValue")
+    public BaseEnumerationsByValueDbContextOptionsExtension(ReflectionSource reflectionSource) : base("EnumerationsByValue")
     {
-        this.scanAssembly = scanAssembly;
+        this.reflectionSource = reflectionSource;
     }
 
     public override void ApplyServices(IServiceCollection services)
@@ -18,7 +18,7 @@ public class BaseEnumerationsByValueDbContextOptionsExtension : BaseContainerTyp
 
         base.ApplyServices(services);
 
-        foreach (var type in scanAssembly.GetTypes())
+        foreach (var type in reflectionSource)
         {
             var baseEnumerationType = GetBaseEnumerationType(type);
 

@@ -5,11 +5,11 @@
 /// </summary>
 public class BaseEnumerationsByDisplayNameDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
-    private readonly Assembly scanAssembly;
+    private readonly ReflectionSource reflectionSource;
 
-    public BaseEnumerationsByDisplayNameDbContextOptionsExtension(Assembly scanAssembly) : base("EnumerationsByDisplayName")
+    public BaseEnumerationsByDisplayNameDbContextOptionsExtension(ReflectionSource reflectionSource) : base("EnumerationsByDisplayName")
     {
-        this.scanAssembly = scanAssembly;
+        this.reflectionSource = reflectionSource;
     }
 
     public override void ApplyServices(IServiceCollection services)
@@ -18,7 +18,7 @@ public class BaseEnumerationsByDisplayNameDbContextOptionsExtension : BaseContai
 
         base.ApplyServices(services);
 
-        foreach (var type in scanAssembly.GetTypes())
+        foreach (var type in reflectionSource)
         {
             var baseEnumerationType = GetBaseEnumerationType(type);
 

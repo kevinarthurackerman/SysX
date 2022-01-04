@@ -71,57 +71,57 @@ public static class IServicesCollectionExtensions
     }
 
     /// <summary>
-    /// Upserts all services from the assembly that are assignable to the service type with a singleton lifetime and removes any previously existing implementations.
+    /// Upserts all services from the ReflectionSource that are assignable to the service type with a singleton lifetime and removes any previously existing implementations.
     /// </summary>
-    public static IServiceCollection UpsertSingleton<TService>(this IServiceCollection services, Assembly sourceAssembly) =>
-        services.Upsert(typeof(TService), sourceAssembly, ServiceLifetime.Singleton);
+    public static IServiceCollection UpsertSingleton<TService>(this IServiceCollection services, ReflectionSource reflectionSource) =>
+        services.Upsert(typeof(TService), reflectionSource, ServiceLifetime.Singleton);
 
     /// <summary>
-    /// Upserts all services from the assembly that are assignable to the service type with a scoped lifetime and removes any previously existing implementations.
+    /// Upserts all services from the ReflectionSource that are assignable to the service type with a scoped lifetime and removes any previously existing implementations.
     /// </summary>
-    public static IServiceCollection UpsertScoped<TService>(this IServiceCollection services, Assembly sourceAssembly) =>
-        services.Upsert(typeof(TService), sourceAssembly, ServiceLifetime.Scoped);
+    public static IServiceCollection UpsertScoped<TService>(this IServiceCollection services, ReflectionSource reflectionSource) =>
+        services.Upsert(typeof(TService), reflectionSource, ServiceLifetime.Scoped);
 
     /// <summary>
-    /// Upserts all services from the assembly that are assignable to the service type with a transient lifetime and removes any previously existing implementations.
+    /// Upserts all services from the ReflectionSource that are assignable to the service type with a transient lifetime and removes any previously existing implementations.
     /// </summary>
-    public static IServiceCollection UpsertTransient<TService>(this IServiceCollection services, Assembly sourceAssembly) =>
-        services.Upsert(typeof(TService), sourceAssembly, ServiceLifetime.Transient);
+    public static IServiceCollection UpsertTransient<TService>(this IServiceCollection services, ReflectionSource reflectionSource) =>
+        services.Upsert(typeof(TService), reflectionSource, ServiceLifetime.Transient);
 
     /// <summary>
-    /// Upserts all services from the assembly that are assignable to the service type and removes any previously existing implementations.
+    /// Upserts all services from the ReflectionSource that are assignable to the service type and removes any previously existing implementations.
     /// </summary>
-    public static IServiceCollection Upsert<TService>(this IServiceCollection services, Assembly sourceAssembly, ServiceLifetime serviceLifetime) =>
-        services.Upsert(typeof(TService), sourceAssembly, serviceLifetime);
+    public static IServiceCollection Upsert<TService>(this IServiceCollection services, ReflectionSource reflectionSource, ServiceLifetime serviceLifetime) =>
+        services.Upsert(typeof(TService), reflectionSource, serviceLifetime);
 
     /// <summary>
-    /// Upserts all services from the assembly that are assignable to the service type with a singleton lifetime and removes any previously existing implementations.
+    /// Upserts all services from the ReflectionSource that are assignable to the service type with a singleton lifetime and removes any previously existing implementations.
     /// </summary>
-    public static IServiceCollection UpsertSingleton(this IServiceCollection services, Type serviceType, Assembly sourceAssembly) =>
-        services.Upsert(serviceType, sourceAssembly, ServiceLifetime.Singleton);
+    public static IServiceCollection UpsertSingleton(this IServiceCollection services, Type serviceType, ReflectionSource reflectionSource) =>
+        services.Upsert(serviceType, reflectionSource, ServiceLifetime.Singleton);
 
     /// <summary>
-    /// Upserts all services from the assembly that are assignable to the service type with a scoped lifetime and removes any previously existing implementations.
+    /// Upserts all services from the ReflectionSource that are assignable to the service type with a scoped lifetime and removes any previously existing implementations.
     /// </summary>
-    public static IServiceCollection UpsertScoped(this IServiceCollection services, Type serviceType, Assembly sourceAssembly) =>
-        services.Upsert(serviceType, sourceAssembly, ServiceLifetime.Scoped);
+    public static IServiceCollection UpsertScoped(this IServiceCollection services, Type serviceType, ReflectionSource reflectionSource) =>
+        services.Upsert(serviceType, reflectionSource, ServiceLifetime.Scoped);
 
     /// <summary>
-    /// Upserts all services from the assembly that are assignable to the service type with a transient lifetime and removes any previously existing implementations.
+    /// Upserts all services from the ReflectionSource that are assignable to the service type with a transient lifetime and removes any previously existing implementations.
     /// </summary>
-    public static IServiceCollection UpsertTransient(this IServiceCollection services, Type serviceType, Assembly sourceAssembly) =>
-        services.Upsert(serviceType, sourceAssembly, ServiceLifetime.Transient);
+    public static IServiceCollection UpsertTransient(this IServiceCollection services, Type serviceType, ReflectionSource reflectionSource) =>
+        services.Upsert(serviceType, reflectionSource, ServiceLifetime.Transient);
 
     /// <summary>
-    /// Upserts all services from the assembly that are assignable to the service type and removes any previously existing implementations.
+    /// Upserts all services from the ReflectionSource that are assignable to the service type and removes any previously existing implementations.
     /// </summary>
-    public static IServiceCollection Upsert(this IServiceCollection services, Type serviceType, Assembly sourceAssembly, ServiceLifetime serviceLifetime)
+    public static IServiceCollection Upsert(this IServiceCollection services, Type serviceType, ReflectionSource reflectionSource, ServiceLifetime serviceLifetime)
     {
         EnsureArg.IsNotNull(services, nameof(services));
         EnsureArg.IsNotNull(serviceType, nameof(serviceType));
-        EnsureArg.IsNotNull(sourceAssembly, nameof(sourceAssembly));
+        EnsureArg.IsNotNull(reflectionSource, nameof(reflectionSource));
 
-        var implementationTypes = sourceAssembly.GetTypes()
+        var implementationTypes = reflectionSource
             .Where(x => (x.IsClass || x.IsValueType) && !x.IsAbstract && serviceType.IsAssignableFrom(x))
             .ToArray();
 
