@@ -1,15 +1,15 @@
-﻿namespace Sysx.Text.Json.Serialization;
+﻿namespace Sysx.Text.Json.Serialization.SequentialGuids;
 
 /// <summary>
-/// Converter for handling SqlServerGuids
+/// Converter for handling BinaryGuids
 /// </summary>
-public class SqlServerGuidJsonConverter : JsonConverter<SqlServerGuid>
+public class BinaryGuidJsonConverter : JsonConverter<BinaryGuid>
 {
-    public static readonly SqlServerGuidJsonConverter Instance = new();
+    public static readonly BinaryGuidJsonConverter Instance = new ();
 
-    private SqlServerGuidJsonConverter() { }
+    private BinaryGuidJsonConverter() { }
 
-    public override SqlServerGuid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override BinaryGuid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         EnsureArg.IsNotNull(typeToConvert, nameof(typeToConvert));
         EnsureArg.IsNotNull(options, nameof(options));
@@ -18,10 +18,10 @@ public class SqlServerGuidJsonConverter : JsonConverter<SqlServerGuid>
 
         var guid = converter.Read(ref reader, typeToConvert, options);
 
-        return new SqlServerGuid(guid);
+        return new BinaryGuid(guid);
     }
 
-    public override void Write(Utf8JsonWriter writer, SqlServerGuid value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, BinaryGuid value, JsonSerializerOptions options)
     {
         EnsureArg.IsNotNull(writer, nameof(writer));
         EnsureArg.IsNotNull(options, nameof(options));

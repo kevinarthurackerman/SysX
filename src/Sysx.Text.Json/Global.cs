@@ -1,6 +1,9 @@
 ﻿global using EnsureThat;
 global using System;
+global using System.Reflection;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using Sysx.Enums;
 global using Sysx.Identifiers;
-global using Sysx.Text.Json.Serialization;
+global using Sysx.Text.Json.Serialization.Enums;
+global using Sysx.Text.Json.Serialization.SequentialGuids;

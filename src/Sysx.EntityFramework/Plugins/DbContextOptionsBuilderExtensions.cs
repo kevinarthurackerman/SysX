@@ -59,7 +59,7 @@ public static class DbContextOptionsBuilderExtensions
     public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByValue<TRelationalDbContextOptionsBuilderInfrastructure>
         (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder)
             where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure
-            => UseEnumerationsByValue(dbContextOptionsBuilder, Assembly.GetCallingAssembly());
+            => dbContextOptionsBuilder.UseEnumerationsByValue(Assembly.GetCallingAssembly());
 
     /// <summary>
     /// Adds handling of enumeration types by mapping to their value type to EntityFramework

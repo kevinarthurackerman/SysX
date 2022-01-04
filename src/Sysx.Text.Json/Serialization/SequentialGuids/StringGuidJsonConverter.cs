@@ -1,4 +1,4 @@
-﻿namespace Sysx.Text.Json.Serialization;
+﻿namespace Sysx.Text.Json.Serialization.SequentialGuids;
 
 /// <summary>
 /// Converter for handling StringGuids

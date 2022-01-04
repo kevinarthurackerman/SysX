@@ -42,6 +42,7 @@ public abstract class BaseEnumeration<TEnum, TValue>
                 .Where(x => typeof(TEnum).IsAssignableFrom(x.FieldType))
                 .Select(x => x.GetValue(null))
                 .Cast<TEnum>()
+                .Distinct()
                 .OrderBy(t => t.Value)
                 .ToArray();
 
