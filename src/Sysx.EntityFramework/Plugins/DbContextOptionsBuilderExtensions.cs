@@ -35,6 +35,26 @@ public static class DbContextOptionsBuilderExtensions
         return dbContextOptionsBuilder;
     }
 
+    /// <inheritdoc cref="UseEnumerationsByDisplayName{TRelationalDbContextOptionsBuilderInfrastructure}(TRelationalDbContextOptionsBuilderInfrastructure, Assembly)"/>
+    public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByDisplayName<TRelationalDbContextOptionsBuilderInfrastructure>
+        (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder)
+            where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure
+            => UseEnumerationsByDisplayName(dbContextOptionsBuilder, Assembly.GetCallingAssembly());
+
+    /// <summary>
+    /// Adds handling of enumeration types by mapping to their display name to EntityFramework
+    /// </summary>
+    public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByDisplayName<TRelationalDbContextOptionsBuilderInfrastructure>
+        (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder, Assembly scanAssembly)
+            where TRelationalDbContextOptionsBuilderInfrastructure : IRelationalDbContextOptionsBuilderInfrastructure
+    {
+        EnsureArg.HasValue(dbContextOptionsBuilder, nameof(dbContextOptionsBuilder));
+        EnsureArg.IsNotNull(scanAssembly, nameof(scanAssembly));
+
+        dbContextOptionsBuilder.TryAddExtension(new BaseEnumerationsByDisplayNameDbContextOptionsExtension(scanAssembly));
+        return dbContextOptionsBuilder;
+    }
+
     /// <inheritdoc cref="UseEnumerationsByValue{TRelationalDbContextOptionsBuilderInfrastructure}(TRelationalDbContextOptionsBuilderInfrastructure, Assembly)"/>
     public static TRelationalDbContextOptionsBuilderInfrastructure UseEnumerationsByValue<TRelationalDbContextOptionsBuilderInfrastructure>
         (this TRelationalDbContextOptionsBuilderInfrastructure dbContextOptionsBuilder)

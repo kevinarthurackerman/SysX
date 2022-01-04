@@ -1,12 +1,12 @@
-﻿namespace Test_Sysx.EntityFramework.SqlServer.Enums;
+﻿namespace Test_Sysx.EntityFramework.Sqlite.Enums;
 
-public class EnumerationTests
+public class EnumerationByValueWithCustomTypeTests
 {
     [Fact]
     public async Task Should_Configure_Enumeration_Column_Types()
     {
-        using var dbContext = SqlServerTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue());
+        using var dbContext = SqliteTestDbContextActivator
+            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseSequentialGuids());
 
         var connection = dbContext.Database.GetDbConnection();
 
@@ -26,19 +26,19 @@ FROM [EnumerationProperties]";
         using var reader = command.ExecuteReader();
 
         var ordinal = 0;
-        Assert.Equal("uniqueidentifier", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("int", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("int", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("int", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("int", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("int", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
     }
 
     [Fact]
     public async Task Should_Persist_Enumeration_Values()
     {
-        using var dbContext = SqlServerTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue());
+        using var dbContext = SqliteTestDbContextActivator
+            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseSequentialGuids());
 
         var testObject = new EnumerationPropertiesModel
         {
@@ -67,8 +67,8 @@ FROM [EnumerationProperties]";
     [Fact]
     public async Task Should_Persist_Default_Enumeration_Values()
     {
-        using var dbContext = SqlServerTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue());
+        using var dbContext = SqliteTestDbContextActivator
+            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue().UseSequentialGuids());
 
         var testObject = new EnumerationPropertiesModel
         {
@@ -120,27 +120,27 @@ FROM [EnumerationProperties]";
         public Animal? SnakeAnimal { get; set; }
     }
 
-    public class Animal : BaseEnumeration<Animal, int>
+    public class Animal : BaseEnumeration<Animal, BinaryGuid>
     {
-        public static readonly Animal Null = new(0, "Null");
+        public static readonly Animal Null = new(BinaryGuid.NewGuid(), "Null");
 
-        protected Animal(int value, string displayName) : base(value, displayName) { }
+        protected Animal(BinaryGuid value, string displayName) : base(value, displayName) { }
     }
 
     public class Mammal : Animal
     {
-        public static readonly Mammal Lion = new(1, "Lion");
-        public static readonly Mammal Tiger = new(2, "Tiger");
-        public static readonly Mammal Bear = new(3, "Bear");
+        public static readonly Mammal Lion = new(BinaryGuid.NewGuid(), "Lion");
+        public static readonly Mammal Tiger = new(BinaryGuid.NewGuid(), "Tiger");
+        public static readonly Mammal Bear = new(BinaryGuid.NewGuid(), "Bear");
 
-        protected Mammal(int value, string displayName) : base(value, displayName) { }
+        protected Mammal(BinaryGuid value, string displayName) : base(value, displayName) { }
     }
 
     public class Reptile : Animal
     {
-        public static readonly Reptile Snake = new(4, "Snake");
-        public static readonly Reptile Turtle = new(5, "Turtle");
+        public static readonly Reptile Snake = new(BinaryGuid.NewGuid(), "Snake");
+        public static readonly Reptile Turtle = new(BinaryGuid.NewGuid(), "Turtle");
 
-        protected Reptile(int value, string displayName) : base(value, displayName) { }
+        protected Reptile(BinaryGuid value, string displayName) : base(value, displayName) { }
     }
 }

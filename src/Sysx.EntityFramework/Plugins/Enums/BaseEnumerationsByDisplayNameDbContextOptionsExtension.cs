@@ -3,11 +3,11 @@
 /// <summary>
 /// ContainerTypesDbContextOptionsExtension that adds handling of enumeration types to EntityFramework
 /// </summary>
-public class BaseEnumerationsByValueDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
+public class BaseEnumerationsByDisplayNameDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
     private readonly Assembly scanAssembly;
 
-    public BaseEnumerationsByValueDbContextOptionsExtension(Assembly scanAssembly) : base("EnumerationsByValue")
+    public BaseEnumerationsByDisplayNameDbContextOptionsExtension(Assembly scanAssembly) : base("EnumerationsByDisplayName")
     {
         this.scanAssembly = scanAssembly;
     }
@@ -34,7 +34,7 @@ public class BaseEnumerationsByValueDbContextOptionsExtension : BaseContainerTyp
                 {
                     var providerTypeMapping = services
                         .GetRequiredService<IRelationalTypeMappingSource>()
-                        .FindMapping(valueType);
+                        .FindMapping(typeof(string));
 
                     var valueConverter = (ValueConverter)GetType()
                         .GetMethod(nameof(CreateValueConverter), BindingFlags.NonPublic | BindingFlags.Static)!
@@ -72,9 +72,9 @@ public class BaseEnumerationsByValueDbContextOptionsExtension : BaseContainerTyp
         where TEnum : BaseEnumeration<TEnum, TValue>
         where TValue : IComparable<TValue>, IEquatable<TValue>, IComparable
     {
-        return new ValueConverter<TEnum, TValue>(
-            @enum => @enum.Value,
-            value => BaseEnumeration<TEnum, TValue>.ParseValue(value)
+        return new ValueConverter<TEnum, string>(
+            @enum => @enum.DisplayName,
+            displayName => BaseEnumeration<TEnum, TValue>.Parse(displayName)
         );
     }
 }
