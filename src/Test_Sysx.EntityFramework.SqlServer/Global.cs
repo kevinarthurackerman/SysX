@@ -1,8 +1,10 @@
 ﻿global using Microsoft.EntityFrameworkCore;
+global using NodaTime;
 global using System;
 global using System.Collections.Generic;
 global using System.Linq;
 global using System.Threading.Tasks;
+global using Sysx.EntityFramework.NodaTime.Plugins;
 global using Sysx.EntityFramework.Plugins;
 global using Sysx.EntityFramework.SqlServer.Testing;
 global using Sysx.Enums;

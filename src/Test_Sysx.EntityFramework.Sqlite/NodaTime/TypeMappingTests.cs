@@ -38,21 +38,21 @@ FROM [NodaTypesModels]";
 
         var ordinal = 0;
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("INTEGER", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("INTEGER", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("INTEGER", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("INTEGER", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
     }
 

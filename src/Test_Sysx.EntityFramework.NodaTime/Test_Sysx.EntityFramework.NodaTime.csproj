@@ -9,10 +9,9 @@
 
   <Import Project="..\Assertions.targets" />
   <Import Project="..\XUnit.targets" />
-
+  
   <ItemGroup Label="Project References">
-    <ProjectReference Include="..\Sysx.EntityFramework.SqlServer.NodaTime\Sysx.EntityFramework.SqlServer.NodaTime.csproj" />
-    <ProjectReference Include="..\Sysx.EntityFramework.SqlServer\Sysx.EntityFramework.SqlServer.csproj" />
+    <ProjectReference Include="..\Sysx.EntityFramework.NodaTime\Sysx.EntityFramework.NodaTime.csproj" />
   </ItemGroup>
 
 </Project>

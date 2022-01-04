@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.SqlServer.NodaTime.Plugins;
+﻿namespace Sysx.EntityFramework.NodaTime.Plugins;
 
 public static class DbContextOptionsBuilderExtensions
 {

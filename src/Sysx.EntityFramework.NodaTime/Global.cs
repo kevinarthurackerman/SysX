@@ -5,8 +5,4 @@ global using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 global using Microsoft.Extensions.DependencyInjection;
 global using NodaTime;
 global using System;
-global using System.Data;
-global using System.Globalization;
-global using Sysx.DependencyInjection;
 global using Sysx.EntityFramework.Plugins;
-global using Sysx.EntityFramework.Sqlite.RelationalTypeMappings;
