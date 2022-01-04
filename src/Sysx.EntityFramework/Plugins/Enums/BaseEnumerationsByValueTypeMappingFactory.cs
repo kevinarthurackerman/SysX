@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Enums.RelationalTypeMappings;
+﻿namespace Sysx.EntityFramework.Plugins.Enums;
 
 /// <summary>
 /// Factory for producing RelationalTypeMappings for types extending BaseEnumeration.
@@ -258,31 +258,13 @@ public class BaseEnumerationsByValueTypeMappingFactory
 
                     innerRelationalTypeMapper = serviceProvider.GetRequiredService<IRelationalTypeMappingSource>().FindMapping(typeof(TValue));
 
-                    if (innerRelationalTypeMapper.Converter == null)
-                    {
-                        clrConverter = enumConverter;
-                    }
-                    else
-                    {
-                        var createConverterMethod = GetType()
-                            .GetMethod(nameof(CreateValueConverter), BindingFlags.NonPublic | BindingFlags.Static)!
-                            .MakeGenericMethod(innerRelationalTypeMapper.Converter.ProviderClrType ?? typeof(TValue));
-
-                        clrConverter = (ValueConverter)createConverterMethod
-                            .Invoke(null, new[] { innerRelationalTypeMapper })!;
-                    }
+                    clrConverter = innerRelationalTypeMapper.Converter == null
+                        ? enumConverter
+                        : enumConverter.ComposeWith(innerRelationalTypeMapper.Converter);
 
                     isInitialized = true;
                 }
             }
-        }
-
-        private static ValueConverter CreateValueConverter<TProviderType>(RelationalTypeMapping relationalTypeMapping)
-        {
-            return new ValueConverter<TEnum, TProviderType>(
-                (TEnum enumeration) => (TProviderType)relationalTypeMapping!.Converter.ConvertToProvider(enumeration.Value),
-                (TProviderType clrValue) => BaseEnumeration<TEnum, TValue>.ParseValue((TValue)relationalTypeMapping!.Converter.ConvertFromProvider(clrValue))
-            );
         }
     }
 }

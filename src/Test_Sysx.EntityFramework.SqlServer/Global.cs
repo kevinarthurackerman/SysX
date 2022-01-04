@@ -4,7 +4,6 @@ global using System.Collections.Generic;
 global using System.Linq;
 global using System.Threading.Tasks;
 global using Sysx.EntityFramework.Plugins;
-global using Sysx.EntityFramework.SqlServer.Plugins;
 global using Sysx.EntityFramework.SqlServer.Testing;
 global using Sysx.Enums;
 global using Sysx.Identifiers;

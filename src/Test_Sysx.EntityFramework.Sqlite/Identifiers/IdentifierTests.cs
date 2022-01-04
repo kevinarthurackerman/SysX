@@ -31,11 +31,11 @@ FROM [GuidProperties]";
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
         Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
         Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
-        Assert.Equal("BLOB", reader.GetDataTypeName(ordinal++));
+        Assert.Equal("TEXT", reader.GetDataTypeName(ordinal++));
     }
 
     [Fact]
