@@ -100,6 +100,38 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
+    /// Adds the FilteredAssemblies, Types, and TypeFilters of the passed ReflectionSource in this ReflectionSource.
+    /// </summary>
+    public ReflectionSource Include(ReflectionSource reflectionSource)
+    {
+        EnsureArg.IsNotNull(reflectionSource, nameof(reflectionSource));
+
+        foreach (var filteredAssembly in reflectionSource.FilteredAssemblies) FilteredAssemblies.Add(filteredAssembly);
+        foreach (var type in reflectionSource.Types) Types.Add(type);
+        foreach (var typeFilter in reflectionSource.TypeFilters) TypeFilters.Add(typeFilter);
+
+        return this;
+    }
+
+    /// <inheritdoc cref="Include(IEnumerable{ReflectionSource})" />
+    public ReflectionSource Include(params ReflectionSource[] reflectionSources) => Include(reflectionSources.AsEnumerable());
+
+    /// <summary>
+    /// Adds the FilteredAssemblies, Types, and TypeFilters of the passed ReflectionSources in this ReflectionSource.
+    /// </summary>
+    public ReflectionSource Include(IEnumerable<ReflectionSource> reflectionSources)
+    {
+        EnsureArg.IsNotNull(reflectionSources, nameof(reflectionSources));
+        Ensure.That(reflectionSources, nameof(reflectionSources)).DoesNotContainNull();
+
+        foreach (var filteredAssembly in reflectionSources.SelectMany(x => x.FilteredAssemblies)) FilteredAssemblies.Add(filteredAssembly);
+        foreach (var type in reflectionSources.SelectMany(x => x.Types)) Types.Add(type);
+        foreach (var typeFilter in reflectionSources.SelectMany(x => x.TypeFilters)) TypeFilters.Add(typeFilter);
+
+        return this;
+    }
+
+    /// <summary>
     /// Includes this Assembly in this ReflectionSource.
     /// </summary>
     public ReflectionSource Include(Assembly assembly) => Include(assembly, Unfiltered);
@@ -287,6 +319,8 @@ public class ReflectionSource : IEnumerable<Type>
     public static implicit operator ImmutableQueue<Type>(ReflectionSource reflectionSet) => ImmutableQueue.Create(reflectionSet.ToArray());
     public static implicit operator ImmutableHashSet<Type>(ReflectionSource reflectionSet) => reflectionSet.ToImmutableHashSet();
     public static implicit operator ImmutableStack<Type>(ReflectionSource reflectionSet) => ImmutableStack.Create(reflectionSet.ToArray());
+
+    public static ReflectionSource operator +(ReflectionSource left, ReflectionSource right) => left.Include(right);
 
     public delegate bool TypeFilter(Type type);
 
