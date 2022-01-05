@@ -3,15 +3,12 @@
 /// <summary>
 /// ContainerTypesDbContextOptionsExtension that adds handling of identifier types to EntityFramework
 /// </summary>
-public class IdentifiersDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
+public sealed class IdentifiersDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
-    public IdentifiersDbContextOptionsExtension() : base("Identifiers") { }
-
-    public override void ApplyServices(IServiceCollection services)
+    public override void RegisterServices(IServiceCollection services, IDatabaseProvider databaseProvider)
     {
         EnsureArg.IsNotNull(services, nameof(services));
-
-        base.ApplyServices(services);
+        EnsureArg.IsNotNull(databaseProvider, nameof(databaseProvider));
 
         services.AddSingleton<RelationalTypeMapping>(services =>
         {
@@ -21,7 +18,7 @@ public class IdentifiersDbContextOptionsExtension : BaseContainerTypesDbContextO
                     .GetRequiredService<IRelationalTypeMappingSource>()
                     .FindMapping(typeof(byte[]));
 
-                var storeType = providerTypeMapping.StoreType.Equals("varbinary(max)", StringComparison.OrdinalIgnoreCase)
+                var storeType = databaseProvider.IsSqlServer()
                     ? "binary(16)"
                     : providerTypeMapping.StoreType;
 
@@ -41,7 +38,7 @@ public class IdentifiersDbContextOptionsExtension : BaseContainerTypesDbContextO
                     .GetRequiredService<IRelationalTypeMappingSource>()
                     .FindMapping(typeof(string));
 
-                var storeType = providerTypeMapping.StoreType.Equals("nvarchar(max)", StringComparison.OrdinalIgnoreCase)
+                var storeType = databaseProvider.IsSqlServer()
                     ? "char(36)"
                     : providerTypeMapping.StoreType;
 

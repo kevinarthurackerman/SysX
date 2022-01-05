@@ -3,20 +3,19 @@
 /// <summary>
 /// ContainerTypesDbContextOptionsExtension that adds handling of enumeration types to EntityFramework
 /// </summary>
-public class BaseEnumerationsByDisplayNameDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
+public sealed class BaseEnumerationsByDisplayNameDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
     private readonly ReflectionSource reflectionSource;
 
-    public BaseEnumerationsByDisplayNameDbContextOptionsExtension(ReflectionSource reflectionSource) : base("EnumerationsByDisplayName")
+    public BaseEnumerationsByDisplayNameDbContextOptionsExtension(ReflectionSource reflectionSource)
     {
         this.reflectionSource = reflectionSource;
     }
 
-    public override void ApplyServices(IServiceCollection services)
+    public override void RegisterServices(IServiceCollection services, IDatabaseProvider databaseProvider)
     {
         EnsureArg.IsNotNull(services, nameof(services));
-
-        base.ApplyServices(services);
+        EnsureArg.IsNotNull(databaseProvider, nameof(databaseProvider));
 
         foreach (var type in reflectionSource)
         {

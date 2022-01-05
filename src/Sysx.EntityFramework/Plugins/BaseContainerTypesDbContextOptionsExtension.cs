@@ -12,17 +12,33 @@ public abstract class BaseContainerTypesDbContextOptionsExtension : IDbContextOp
 
     public virtual DbContextOptionsExtensionInfo Info => new ExtensionInfo(this);
 
+    public BaseContainerTypesDbContextOptionsExtension()
+    {
+        Name = GetType().FullName!;
+    }
+
     public BaseContainerTypesDbContextOptionsExtension(string extensionName)
     {
         Name = extensionName;
     }
 
-    public virtual void ApplyServices(IServiceCollection services)
+    public void ApplyServices(IServiceCollection services)
     {
         EnsureArg.IsNotNull(services, nameof(services));
 
         services.UseEntityFrameworkContainerTypes();
+
+        using var scope = services.BuildServiceProvider().CreateScope();
+
+        var provider = scope.ServiceProvider.GetRequiredService<IDatabaseProvider>();
+
+        RegisterServices(services, provider);
     }
+
+    /// <summary>
+    /// Override this method to provide additional services to the EntityFramework internal IServiceProvider.
+    /// </summary>
+    public virtual void RegisterServices(IServiceCollection services, IDatabaseProvider databaseProvider) { }
 
     public virtual void Validate(IDbContextOptions options)
     {

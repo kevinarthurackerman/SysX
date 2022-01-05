@@ -3,15 +3,28 @@
 /// <summary>
 /// ContainerTypesDbContextOptionsExtension that adds handling of NodaTime types to EntityFramework
 /// </summary>
-public class NodaTimeDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
+public sealed class NodaTimeDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
-    public NodaTimeDbContextOptionsExtension() : base("NodaTime") { }
-
-    public override void ApplyServices(IServiceCollection services)
+    public override void RegisterServices(IServiceCollection services, IDatabaseProvider databaseProvider)
     {
         EnsureArg.IsNotNull(services, nameof(services));
+        EnsureArg.IsNotNull(databaseProvider, nameof(databaseProvider));
 
-        base.ApplyServices(services);
+        services.AddSingleton<RelationalTypeMapping>(services =>
+        {
+            var initializeRelationalTypeMapper = () =>
+            {
+                var providerTypeMapping = services
+                    .GetRequiredService<IRelationalTypeMappingSource>()
+                    .FindMapping(typeof(short));
+
+                return (RelationalTypeMapping)providerTypeMapping
+                    .Clone(new RelationalTypeMappingInfo(typeof(AnnualDate)))
+                    .Clone(new ValueConverter<AnnualDate, short>(x => (short)((x.Month * 100) + x.Day), x => new AnnualDate(x / 100, x % 100)));
+            };
+
+            return new LazyInitializedRelationalTypeMapping(typeof(AnnualDate), initializeRelationalTypeMapper);
+        });
 
         services.AddSingleton<RelationalTypeMapping>(services =>
         {
@@ -51,6 +64,27 @@ public class NodaTimeDbContextOptionsExtension : BaseContainerTypesDbContextOpti
             {
                 var providerTypeMapping = services
                     .GetRequiredService<IRelationalTypeMappingSource>()
+                    .FindMapping(typeof(string));
+
+                var storeType = databaseProvider.IsSqlServer()
+                    ? "varchar(30)"
+                    : providerTypeMapping.StoreType;
+
+                return (RelationalTypeMapping)providerTypeMapping
+                    .Clone(new RelationalTypeMappingInfo(typeof(Interval)))
+                    .Clone(new ValueConverter<Interval, string>(
+                        x => x.ToString(), x => ParseInterval(x)));
+            };
+
+            return new LazyInitializedRelationalTypeMapping(typeof(Interval), initializeRelationalTypeMapper);
+        });
+
+        services.AddSingleton<RelationalTypeMapping>(services =>
+        {
+            var initializeRelationalTypeMapper = () =>
+            {
+                var providerTypeMapping = services
+                    .GetRequiredService<IRelationalTypeMappingSource>()
                     .FindMapping(typeof(DateTime));
 
                 return (RelationalTypeMapping)providerTypeMapping
@@ -65,17 +99,32 @@ public class NodaTimeDbContextOptionsExtension : BaseContainerTypesDbContextOpti
         {
             var initializeRelationalTypeMapper = () =>
             {
-                var providerTypeMapping = services
-                    .GetRequiredService<IRelationalTypeMappingSource>()
-                    .FindMapping(typeof(DateTime));
+                if (databaseProvider.IsSqlite())
+                {
+                    var providerTypeMapping = services
+                        .GetRequiredService<IRelationalTypeMappingSource>()
+                        .FindMapping(typeof(string));
 
-                var storeType = providerTypeMapping.StoreType.Equals("datetime2", StringComparison.OrdinalIgnoreCase)
-                    ? "date"
-                    : providerTypeMapping.StoreType;
+                    return (RelationalTypeMapping)providerTypeMapping
+                        .Clone(new RelationalTypeMappingInfo(typeof(string)))
+                        .Clone(new ValueConverter<LocalDate, string>(
+                            x => x.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                            x => LocalDatePattern.Iso.Parse(x).GetValueOrThrow()));
+                }
+                else
+                {
+                    var providerTypeMapping = services
+                        .GetRequiredService<IRelationalTypeMappingSource>()
+                        .FindMapping(typeof(DateTime));
 
-                return (RelationalTypeMapping)providerTypeMapping
-                    .Clone(new RelationalTypeMappingInfo(typeof(LocalDate), storeTypeName: storeType))
-                    .Clone(new ValueConverter<LocalDate, DateTime>(x => x.ToDateTimeUnspecified(), x => LocalDate.FromDateTime(x)));
+                    var storeType = databaseProvider.IsSqlServer()
+                        ? "date"
+                        : providerTypeMapping.StoreType;
+
+                    return (RelationalTypeMapping)providerTypeMapping
+                        .Clone(new RelationalTypeMappingInfo(typeof(LocalDate), storeTypeName: storeType))
+                        .Clone(new ValueConverter<LocalDate, DateTime>(x => x.ToDateTimeUnspecified(), x => LocalDate.FromDateTime(x)));
+                }
             };
 
             return new LazyInitializedRelationalTypeMapping(typeof(LocalDate), initializeRelationalTypeMapper);
@@ -135,6 +184,27 @@ public class NodaTimeDbContextOptionsExtension : BaseContainerTypesDbContextOpti
             {
                 var providerTypeMapping = services
                     .GetRequiredService<IRelationalTypeMappingSource>()
+                    .FindMapping(typeof(string));
+
+                var storeType = databaseProvider.IsSqlServer()
+                    ? "varchar(max)"
+                    : providerTypeMapping.StoreType;
+
+                return (RelationalTypeMapping)providerTypeMapping
+                    .Clone(new RelationalTypeMappingInfo(typeof(Period)))
+                    .Clone(new ValueConverter<Period, string>(
+                        x => x.ToString(), x => PeriodPattern.Roundtrip.Parse(x).GetValueOrThrow()));
+            };
+
+            return new LazyInitializedRelationalTypeMapping(typeof(Period), initializeRelationalTypeMapper);
+        });
+
+        services.AddSingleton<RelationalTypeMapping>(services =>
+        {
+            var initializeRelationalTypeMapper = () =>
+            {
+                var providerTypeMapping = services
+                    .GetRequiredService<IRelationalTypeMappingSource>()
                     .FindMapping(typeof(DateTimeOffset));
 
                 return (RelationalTypeMapping)providerTypeMapping
@@ -144,5 +214,17 @@ public class NodaTimeDbContextOptionsExtension : BaseContainerTypesDbContextOpti
 
             return new LazyInitializedRelationalTypeMapping(typeof(ZonedDateTime), initializeRelationalTypeMapper);
         });
+    }
+
+    static private Interval ParseInterval(string value)
+    {
+        var fragments = value.Split('/');
+
+        Ensure.Collection.SizeIs(fragments, 2, nameof(value), x => x.WithMessage($"Invalid format for {nameof(Interval)} type."));
+
+        var start = InstantPattern.General.Parse(fragments[0]).GetValueOrThrow();
+        var end = InstantPattern.General.Parse(fragments[1]).GetValueOrThrow();
+
+        return new Interval(start, end);
     }
 }
