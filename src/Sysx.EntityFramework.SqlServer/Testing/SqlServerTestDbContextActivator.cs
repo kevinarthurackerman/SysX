@@ -1,6 +1,7 @@
 ﻿namespace Sysx.EntityFramework.SqlServer.Testing;
 
-public sealed class SqlServerTestDbContextActivator : BaseTestDbContextActivator<SqlServerDbContextOptionsBuilder>
+public sealed class SqlServerTestDbContextActivator
+    : BaseTestDbContextActivator<SqlServerDbContextOptionsBuilder, SqlServerDbContextOptionsBuilder, SqlServerOptionsExtension>
 {
     private static readonly SqlServerTestDbContextActivator instance = new();
 
@@ -12,9 +13,8 @@ public sealed class SqlServerTestDbContextActivator : BaseTestDbContextActivator
 
     /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}(Action{DbContextOptionsBuilder{TDbContext}}?, Action{TDbContextOptionsBuilder}?)"/>
     public static TDbContext Create<TDbContext>(
-        Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions,
-        Action<SqlServerDbContextOptionsBuilder>? configureProviderOptions) where TDbContext : DbContext =>
-        instance.CreateDbContext(configureContextOptions, configureProviderOptions);
+        Action<CreateDbContextOptions<TDbContext>>? configure) where TDbContext : DbContext =>
+        instance.CreateDbContext(configure);
 
     override protected string GetDatabaseName(Type dbContextType)
     {
@@ -33,15 +33,14 @@ public sealed class SqlServerTestDbContextActivator : BaseTestDbContextActivator
 
     override protected DbContextOptions<TDbContext> ConfigureDbContextOptions<TDbContext>(
         DbConnection dbConnection,
-        Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions,
-        Action<SqlServerDbContextOptionsBuilder>? configureOptions)
+        Action<CreateDbContextOptions<TDbContext>>? configure)
     {
         Assert.That(dbConnection != null);
 
-        var optionsBuilder = new DbContextOptionsBuilder<TDbContext>();
-        optionsBuilder.UseSqlServer(dbConnection, x => configureOptions?.Invoke(x));
-        configureContextOptions?.Invoke(optionsBuilder);
-        return optionsBuilder.Options;
+        var dbContextOptions = new DbContextOptionsBuilder<TDbContext>();
+        dbContextOptions.UseSqlServer(dbConnection, providerOptions =>
+            configure?.Invoke(new CreateDbContextOptions<TDbContext>(dbContextOptions, providerOptions)));
+        return dbContextOptions.Options;
     }
 
     override protected void CreateDatabase(string databasePath)

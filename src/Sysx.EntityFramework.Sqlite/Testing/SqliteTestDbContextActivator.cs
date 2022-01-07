@@ -1,6 +1,7 @@
 ﻿namespace Sysx.EntityFramework.Sqlite.Testing;
 
-public sealed class SqliteTestDbContextActivator : BaseTestDbContextActivator<SqliteDbContextOptionsBuilder>
+public sealed class SqliteTestDbContextActivator
+    : BaseTestDbContextActivator<SqliteDbContextOptionsBuilder, SqliteDbContextOptionsBuilder, SqliteOptionsExtension>
 {
     private static readonly SqliteTestDbContextActivator instance = new();
 
@@ -11,10 +12,8 @@ public sealed class SqliteTestDbContextActivator : BaseTestDbContextActivator<Sq
         instance.CreateDbContext<TDbContext>();
 
     /// <inheritdoc cref="BaseTestDbContextActivator.CreateDbContext{TDbContext}(Action{DbContextOptionsBuilder{TDbContext}}?, Action{TDbContextOptionsBuilder}?)"/>
-    public static TDbContext Create<TDbContext>(
-        Action<DbContextOptionsBuilder<TDbContext>>? configureDbContextOptions,
-        Action<SqliteDbContextOptionsBuilder>? configureProviderOptions) where TDbContext : DbContext =>
-        instance.CreateDbContext(configureDbContextOptions, configureProviderOptions);
+    public static TDbContext Create<TDbContext>(Action<CreateDbContextOptions<TDbContext>>? configure) where TDbContext : DbContext =>
+        instance.CreateDbContext(configure);
 
     override protected string GetDatabaseName(Type dbContextType)
     {
@@ -33,15 +32,14 @@ public sealed class SqliteTestDbContextActivator : BaseTestDbContextActivator<Sq
 
     override protected DbContextOptions<TDbContext> ConfigureDbContextOptions<TDbContext>(
         DbConnection dbConnection,
-        Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions,
-        Action<SqliteDbContextOptionsBuilder>? configureOptions)
+        Action<CreateDbContextOptions<TDbContext>>? configure)
     {
         Assert.That(dbConnection != null);
 
-        var optionsBuilder = new DbContextOptionsBuilder<TDbContext>();
-        optionsBuilder.UseSqlite(dbConnection, x => configureOptions?.Invoke(x));
-        configureContextOptions?.Invoke(optionsBuilder);
-        return optionsBuilder.Options;
+        var dbContextOptions = new DbContextOptionsBuilder<TDbContext>();
+        dbContextOptions.UseSqlite(dbConnection, providerOptions =>
+            configure?.Invoke(new CreateDbContextOptions<TDbContext>(dbContextOptions, providerOptions)));
+        return dbContextOptions.Options;
     }
 
     override protected void CreateDatabase(string databasePath)

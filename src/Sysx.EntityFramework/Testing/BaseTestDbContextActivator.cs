@@ -1,6 +1,9 @@
 ﻿namespace Sysx.EntityFramework.Testing;
 
-public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder>
+public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder, TBuilder, TExtension>
+    where TDbContextOptionsBuilder : RelationalDbContextOptionsBuilder<TBuilder, TExtension>
+    where TBuilder : RelationalDbContextOptionsBuilder<TBuilder, TExtension>
+    where TExtension : RelationalOptionsExtension, new()
 {
     private static readonly string workingDirectory;
 
@@ -46,9 +49,8 @@ public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder>
     /// Creates a test database using the default EntityFramework migrations and returns a DbContext attached to that database.
     /// A new test database is created each time this is called and is torn down at the end of the program execution.
     /// </summary>
-    protected TDbContext CreateDbContext<TDbContext>(
-        Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions = null,
-        Action<TDbContextOptionsBuilder>? configureProviderOptions = null) where TDbContext : DbContext
+    protected TDbContext CreateDbContext<TDbContext>(Action<CreateDbContextOptions<TDbContext>>? configure = null)
+        where TDbContext : DbContext
     {
         var baseDatabasePathLocatorKey = new DatabasePathLocator(GetType(), typeof(TDbContext));
         var sourceDatabasePath = baseDatabasePathLocator.GetOrAdd(baseDatabasePathLocatorKey, key =>
@@ -99,12 +101,12 @@ public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder>
 
             if (optionsCtor != null)
             {
-                var options = ConfigureDbContextOptions(connection, configureContextOptions, configureProviderOptions);
+                var options = ConfigureDbContextOptions(connection, configure);
 
                 return (TDbContext)optionsCtor.Invoke(new[] { options });
             }
 
-            if (configureContextOptions != null || configureProviderOptions != null)
+            if (configure != null)
             {
                 throw new InvalidOperationException($"An options configuration was provided, but {nameof(DbContext)} {typeof(TDbContext).Name} does not have a constructor that takes a single parameter of type {typeof(DbContextOptions).Name} or {typeof(DbContextOptions<TDbContext>).Name}");
             }
@@ -128,10 +130,12 @@ public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder>
 
     protected abstract DbConnection CreateConnection(string databasePath);
 
-    protected abstract DbContextOptions<TDbContext> ConfigureDbContextOptions<TDbContext>(DbConnection dbConnection, Action<DbContextOptionsBuilder<TDbContext>>? configureContextOptions, Action<TDbContextOptionsBuilder>? configureProviderOptions)
+    protected abstract DbContextOptions<TDbContext> ConfigureDbContextOptions<TDbContext>(DbConnection dbConnection, Action<CreateDbContextOptions<TDbContext>>? configure)
         where TDbContext : DbContext;
 
     protected abstract void CreateDatabase(string databasePath);
+
+    public record struct CreateDbContextOptions<TDbContext>(DbContextOptionsBuilder<TDbContext> DbContext, TDbContextOptionsBuilder Provider) where TDbContext : DbContext;
 
     private record struct DatabasePathLocator(Type ActivatorType, Type DbContextType);
 }

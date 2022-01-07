@@ -6,7 +6,7 @@ public class EnumerationByValueTests
     public async Task Should_Configure_Enumeration_Column_Types()
     {
         using var dbContext = SqlServerTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue());
+            .Create<TestDbContext>(x => x.Provider.UseEnumerationsByValue());
 
         var connection = dbContext.Database.GetDbConnection();
 
@@ -38,7 +38,7 @@ FROM [EnumerationProperties]";
     public async Task Should_Persist_Enumeration_Values()
     {
         using var dbContext = SqlServerTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue());
+            .Create<TestDbContext>(x => x.Provider.UseEnumerationsByValue());
 
         var testObject = new EnumerationPropertiesModel
         {
@@ -68,7 +68,7 @@ FROM [EnumerationProperties]";
     public async Task Should_Persist_Default_Enumeration_Values()
     {
         using var dbContext = SqlServerTestDbContextActivator
-            .Create<TestDbContext>(null, x => x.UseEnumerationsByValue());
+            .Create<TestDbContext>(x => x.Provider.UseEnumerationsByValue());
 
         var testObject = new EnumerationPropertiesModel
         {

@@ -6,7 +6,7 @@ public class TypeMappingTests
     [Fact]
     public async Task Should_Configure_Column_Types()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseNodaTime());
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(x => x.Provider.UseNodaTime());
 
         var connection = dbContext.Database.GetDbConnection();
 
@@ -69,7 +69,7 @@ FROM [NodaTypesModels]";
     [Fact]
     public async Task Should_Persist_Values()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseNodaTime());
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(x => x.Provider.UseNodaTime());
 
         var duration = Duration.FromMilliseconds(1000);
         var instant = Instant.FromUnixTimeMilliseconds(1000);
@@ -136,7 +136,7 @@ FROM [NodaTypesModels]";
     [Fact]
     public async Task Should_Persist_Default_Values()
     {
-        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(null, x => x.UseNodaTime());
+        using var dbContext = SqliteTestDbContextActivator.Create<TestDbContext>(x => x.Provider.UseNodaTime());
 
         var testObject = new NodaTypesModel
         {
