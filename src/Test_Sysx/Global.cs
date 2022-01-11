@@ -14,6 +14,7 @@ global using Sysx.Testing;
 global using Sysx.Threading;
 global using Xunit;
 global using Sysx;
+global using Sysx.EnsureThat;
 global using EnsureThat;
 global using System.Collections.Immutable;
 global using System.Data;

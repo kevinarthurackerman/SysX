@@ -14,28 +14,44 @@ public static class ParamExtensions
             message => new ObjectDisposedException(param.Value.GetType().FullName, message));
     }
 
-    public static void DoesNotContainNull<T>(this Param<IEnumerable<T>> param)
+    public static void DoesNotContainNull<TEnumerable>(this Param<TEnumerable> param)
+        where TEnumerable : IEnumerable
     {
-        if (param.Value.All(x => x != null)) return;
-
-        throw ThrowException(
-            param,
-            $"Value '{param.Name}' must not contain null values.",
-            message => new ArgumentNullException(param.Name, message));
+        foreach(var value in param.Value)
+        {
+            if (value == null)
+            {
+                throw ThrowException(
+                    param,
+                    $"Value '{param.Name}' must not contain null values.",
+                    message => new ArgumentNullException(param.Name, message));
+            }
+        }
     }
 
-    public static void DoesNotContain<T>(this Param<IEnumerable<T>> param, T value)
+    public static void DoesNotContain<T, TEnumerable>(this Param<TEnumerable> param, T value)
+        where TEnumerable : IEnumerable
     {
         if (value == null)
-            if (param.Value.All(x => x != null)) return;
-        else if (param.Value.Where(x => x != null).All(x => !x!.Equals(value))) return;
+        {
+            foreach (var val in param.Value)
+                if (val == null) Throw();
+        }
+        else
+        {
+            foreach (var val in param.Value)
+                if (val is T tVal && tVal.Equals(value)) Throw();
+        }
 
-        var commaSeparatedValues = string.Join(", ", param.Value);
+        void Throw()
+        {
+            var commaSeparatedValues = string.Join(", ", param.Value);
 
-        throw ThrowException(
-            param,
-            $"Value '{param.Name}' '[{commaSeparatedValues}]' must not contain a value of {value}.",
-            message => new ArgumentException(param.Name, message));
+            throw ThrowException(
+                param,
+                $"Value '{param.Name}' '[{commaSeparatedValues}]' must not contain a value of {value}.",
+                message => new ArgumentException(param.Name, message));
+        }
     }
 
     public static void DoesNotContain(this StringParam param, char value)
@@ -48,18 +64,29 @@ public static class ParamExtensions
             message => new ArgumentException(param.Name, message));
     }
 
-    public static void IsNotContainedIn<T>(this Param<T> param, IEnumerable<T> value)
+    public static void IsNotContainedIn<T, TEnumerable>(this Param<T> param, TEnumerable value)
+        where TEnumerable : IEnumerable<T>
     {
         if (param.Value == null)
-            if (value.All(x => x != null)) return;
-            else if (value.Where(x => x != null).All(x => !x!.Equals(param.Value))) return;
+        {
+            foreach (var val in value)
+                if (val == null) Throw();
+        }
+        else
+        {
+            foreach (var val in value)
+                if (val is T tVal && tVal.Equals(param.Value)) Throw();
+        }
 
-        var commaSeparatedValues = string.Join(", ", value);
+        void Throw()
+        {
+            var commaSeparatedValues = string.Join(", ", value);
 
-        throw ThrowException(
-            param,
-            $"Value '{param.Name}' '{param.Value}' must not be contained in '[{commaSeparatedValues}]'.",
-            message => new ArgumentException(param.Name, message));
+            throw ThrowException(
+                param,
+                $"Value '{param.Name}' '{param.Value}' must not be contained in '[{commaSeparatedValues}]'.",
+                message => new ArgumentException(param.Name, message));
+        }
     }
 
     private static Exception ThrowException<T>(Param<T> param, string defaultMessage, DefaultExceptionFactory defaultExceptionFactory)
