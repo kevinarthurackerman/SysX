@@ -8,10 +8,10 @@ public static class JsonSerializerOptionsExtensions
     public static JsonSerializerOptions UseIdentifiers(this JsonSerializerOptions jsonSerializerOptions)
     {
         EnsureArg.IsNotNull(jsonSerializerOptions, nameof(jsonSerializerOptions));
-
-        jsonSerializerOptions.Converters.Add(BinaryGuidJsonConverter.Instance);
-        jsonSerializerOptions.Converters.Add(SqlServerGuidJsonConverter.Instance);
-        jsonSerializerOptions.Converters.Add(StringGuidJsonConverter.Instance);
+        
+        jsonSerializerOptions.Converters.Add(new DelegatingJsonConverter<BinaryGuid, Guid>());
+        jsonSerializerOptions.Converters.Add(new DelegatingJsonConverter<SqlServerGuid, Guid>());
+        jsonSerializerOptions.Converters.Add(new DelegatingJsonConverter<StringGuid, Guid>());
 
         return jsonSerializerOptions;
     }
@@ -39,11 +39,10 @@ public static class JsonSerializerOptionsExtensions
             var enumType = genericParams[0];
             var valueType = genericParams[1];
 
-            var jsonConverter = (JsonConverter)typeof(BaseEnumerationByDisplayNameConverter<,,>)
-                .MakeGenericType(type, enumType, valueType)
-                .GetField("Instance", BindingFlags.Public | BindingFlags.Static)!
-                .GetValue(null)!;
-
+            var jsonConverter = (JsonConverter)typeof(JsonSerializerOptionsExtensions)
+                .GetMethod(nameof(CreateEnumerationByNameConverter), BindingFlags.Static | BindingFlags.NonPublic)!
+                .MakeGenericMethod(type, enumType, valueType)
+                .Invoke(null, null)!;
 
             jsonSerializerOptions.Converters.Add(jsonConverter);
         }
@@ -74,15 +73,37 @@ public static class JsonSerializerOptionsExtensions
             var enumType = genericParams[0];
             var valueType = genericParams[1];
 
-            var jsonConverter = (JsonConverter)typeof(BaseEnumerationByValueConverter<,,>)
-                .MakeGenericType(type, enumType, valueType)
-                .GetField("Instance", BindingFlags.Public | BindingFlags.Static)!
-                .GetValue(null)!;
+            var jsonConverter = (JsonConverter)typeof(JsonSerializerOptionsExtensions)
+                .GetMethod(nameof(CreateEnumerationByValueConverter), BindingFlags.Static | BindingFlags.NonPublic)!
+                .MakeGenericMethod(type, enumType, valueType)
+                .Invoke(null, null)!;
 
             jsonSerializerOptions.Converters.Add(jsonConverter);
         }
 
         return jsonSerializerOptions;
+    }
+
+    private static JsonConverter CreateEnumerationByNameConverter<TEnumeration, TEnum, TValue>()
+        where TEnumeration : TEnum
+        where TEnum : BaseEnumeration<TEnum, TValue>
+        where TValue : IComparable<TValue>, IEquatable<TValue>, IComparable
+    {
+        return new DelegatingJsonConverter<TEnumeration, string>(
+            x => x?.DisplayName,
+            x => (TEnumeration)BaseEnumeration<TEnum, TValue>.Parse(x)
+        );
+    }
+
+    private static JsonConverter CreateEnumerationByValueConverter<TEnumeration, TEnum, TValue>()
+        where TEnumeration : TEnum
+        where TEnum : BaseEnumeration<TEnum, TValue>
+        where TValue : IComparable<TValue>, IEquatable<TValue>, IComparable
+    {
+        return new DelegatingJsonConverter<TEnumeration, TValue>(
+            x => x == null ? default : x.Value,
+            x => (TEnumeration)BaseEnumeration<TEnum, TValue>.ParseValue(x)
+        );
     }
 
     private static Type? GetBaseEnumerationType(Type type)

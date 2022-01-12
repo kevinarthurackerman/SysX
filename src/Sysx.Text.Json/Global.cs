@@ -7,5 +7,4 @@ global using System.Text.Json.Serialization;
 global using Sysx.Enums;
 global using Sysx.Identifiers;
 global using Sysx.Reflection;
-global using Sysx.Text.Json.Serialization.Enums;
 global using Sysx.Text.Json.Serialization.Identifiers;
