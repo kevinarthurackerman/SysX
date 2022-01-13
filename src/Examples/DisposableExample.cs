@@ -17,25 +17,4 @@ public class DisposableExample : IDisposable
         largeObject = null;
         disposable?.Dispose();
     }
-
-    public override bool Equals(object? obj)
-    {
-        Ensure.That(this).IsNotDisposed(disposed);
-
-        return base.Equals(obj);
-    }
-
-    public override int GetHashCode()
-    {
-        Ensure.That(this).IsNotDisposed(disposed);
-
-        return base.GetHashCode();
-    }
-
-    public override string? ToString()
-    {
-        Ensure.That(this).IsNotDisposed(disposed);
-
-        return base.ToString();
-    }
 }
