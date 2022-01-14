@@ -1,40 +1,56 @@
 ﻿namespace Sysx.JobEngine;
 
-public interface IOnAssetEvent<TAsset> : IOnModifyAssetEvent<TAsset>, IOnGetAssetEvent<TAsset> { }
+public interface IOnAssetEvent<TKey, TAsset>
+    : IOnModifyAssetEvent<TKey, TAsset>, IOnGetAssetEvent<TKey, TAsset>
+    where TAsset : class, IAsset<TKey>
+    { }
 
-public interface IOnModifyAssetEvent<TAsset> : IOnAddAssetEvent<TAsset>, IOnUpsertAssetEvent<TAsset>, IOnUpdateAssetEvent<TAsset>, IOnDeleteAssetEvent<TAsset> { }
+public interface IOnModifyAssetEvent<TKey, TAsset>
+    : IOnAddAssetEvent<TKey, TAsset>, IOnUpsertAssetEvent<TKey, TAsset>, IOnUpdateAssetEvent<TKey, TAsset>, IOnDeleteAssetEvent<TKey, TAsset>
+    where TAsset : class, IAsset<TKey>
+    { }
 
-public interface IOnGetAssetEvent<TAsset>
+public interface IOnGetAssetEvent<TKey, TAsset>
+    where TAsset : class, IAsset<TKey>
 {
-    public OnAssetEventResultData Execute(in OnAssetEventRequest request, OnAssetEventNext next);
+    public OnAssetEventResultData<TKey, TAsset> Execute(in OnAssetEventRequest<TKey, TAsset> request, OnAssetEventNext<TKey, TAsset> next);
 }
 
-public interface IOnAddAssetEvent<TAsset>
+public interface IOnAddAssetEvent<TKey, TAsset>
+    where TAsset : class, IAsset<TKey>
 {
-    public OnAssetEventResultData Execute(in OnAssetEventRequest request, OnAssetEventNext next);
+    public OnAssetEventResultData<TKey, TAsset> Execute(in OnAssetEventRequest<TKey, TAsset> request, OnAssetEventNext<TKey, TAsset> next);
 }
 
-public interface IOnUpsertAssetEvent<TAsset>
+public interface IOnUpsertAssetEvent<TKey, TAsset>
+    where TAsset : class, IAsset<TKey>
 {
-    public OnAssetEventResultData Execute(in OnAssetEventRequest request, OnAssetEventNext next);
+    public OnAssetEventResultData<TKey, TAsset> Execute(in OnAssetEventRequest<TKey, TAsset> request, OnAssetEventNext<TKey, TAsset> next);
 }
 
-public interface IOnUpdateAssetEvent<TAsset>
+public interface IOnUpdateAssetEvent<TKey, TAsset>
+    where TAsset : class, IAsset<TKey>
 {
-    public OnAssetEventResultData Execute(in OnAssetEventRequest request, OnAssetEventNext next);
+    public OnAssetEventResultData<TKey, TAsset> Execute(in OnAssetEventRequest<TKey, TAsset> request, OnAssetEventNext<TKey, TAsset> next);
 }
 
-public interface IOnDeleteAssetEvent<TAsset>
+public interface IOnDeleteAssetEvent<TKey, TAsset>
+    where TAsset : class, IAsset<TKey>
 {
-    public OnAssetEventResultData Execute(in OnAssetEventRequest request, OnAssetEventNext next);
+    public OnAssetEventResultData<TKey, TAsset> Execute(in OnAssetEventRequest<TKey, TAsset> request, OnAssetEventNext<TKey, TAsset> next);
 }
 
-public readonly record struct OnAssetEventRequestData(Type AssetType, object? AssetKey, object? Asset);
+public readonly record struct OnAssetEventRequestData<TKey, TAsset>(Type AssetType, TKey AssetKey, TAsset? Asset)
+    where TAsset : class, IAsset<TKey>;
 
-public readonly record struct OnAssetEventRequest(in OnAssetEventRequestData Previous, in OnAssetEventRequestData Current);
+public readonly record struct OnAssetEventRequest<TKey, TAsset>(in OnAssetEventRequestData<TKey, TAsset> Previous, in OnAssetEventRequestData<TKey, TAsset> Current)
+    where TAsset : class, IAsset<TKey>;
 
-public readonly record struct OnAssetEventResultData(Type AssetType, object? AssetKey, object? Asset, bool Success);
+public readonly record struct OnAssetEventResultData<TKey, TAsset>(Type AssetType, TKey AssetKey, TAsset? Asset, bool Success)
+    where TAsset : class, IAsset<TKey>;
 
-public readonly record struct OnAssetEventResult(in OnAssetEventResultData Previous, in OnAssetEventResultData Current);
+public readonly record struct OnAssetEventResult<TKey, TAsset>(in OnAssetEventResultData<TKey, TAsset> Previous, in OnAssetEventResultData<TKey, TAsset> Current)
+    where TAsset : class, IAsset<TKey>;
 
-public delegate OnAssetEventResult OnAssetEventNext(in OnAssetEventRequestData requestData);
+public delegate OnAssetEventResult<TKey, TAsset> OnAssetEventNext<TKey, TAsset>(in OnAssetEventRequestData<TKey, TAsset> requestData)
+    where TAsset : class, IAsset<TKey>;

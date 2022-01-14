@@ -1,13 +1,13 @@
 ﻿namespace Test_Sysx.JobEngine.VoxelEngine.Assets;
 
-public class Pallet
+public class Pallet : IAsset<Guid>
 {
-    public Guid Id { get; }
+    public Guid Key { get; }
     public ImmutableDictionary<int, VoxelType> VoxelCodeMappings { get; }
 
-    public Pallet(Guid id, ImmutableDictionary<int, VoxelType> voxelCodeMappings)
+    public Pallet(Guid key, ImmutableDictionary<int, VoxelType> voxelCodeMappings)
     {
-        Id = id;
+        Key = key;
         VoxelCodeMappings = voxelCodeMappings;
     }
 

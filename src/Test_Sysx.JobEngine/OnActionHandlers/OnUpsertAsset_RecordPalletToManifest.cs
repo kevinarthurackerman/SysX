@@ -1,6 +1,6 @@
 ﻿namespace Test_Sysx.JobEngine.OnActionHandlers;
 
-public class OnUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Pallet>, IOnUpsertAssetEvent<Pallet>
+public class OnUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Guid, Pallet>, IOnUpsertAssetEvent<Guid, Pallet>
 {
     private readonly AssetContext assetContext;
 
@@ -9,17 +9,18 @@ public class OnUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Pallet>, IO
         assetContext = engineServiceProvider.GetRequiredService<AssetContext>();
     }
 
-    public OnAssetEventResultData Execute(in OnAssetEventRequest request, OnAssetEventNext next)
+    public OnAssetEventResultData<Guid, Pallet> Execute(in OnAssetEventRequest<Guid, Pallet> request, OnAssetEventNext<Guid, Pallet> next)
     {
         var result = next(request.Current);
 
-        var pallet = (Pallet)result.Current.Asset;
+        if (result.Current.Success && result.Current.Asset != null)
+        {
+            var manifest = assetContext.Manifests().Get("main");
 
-        var manifest = assetContext.GetAsset<Manifest>("main");
+            manifest = new Manifest(manifest.Key, manifest.PalletIds.Append(result.Current.Asset.Key).Distinct().ToArray());
 
-        manifest = new Manifest(manifest.Id, manifest.PalletIds.Append(pallet.Id).Distinct().ToArray());
-
-        assetContext.UpsertAsset(manifest);
+            assetContext.Manifests().Update(manifest);
+        }
 
         return result.Current;
     }

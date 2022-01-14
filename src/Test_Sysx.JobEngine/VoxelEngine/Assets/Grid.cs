@@ -1,15 +1,15 @@
 ﻿namespace Test_Sysx.JobEngine.VoxelEngine.Assets;
 
-public class Grid
+public class Grid : IAsset<Guid>
 {
-    public Guid Id { get; }
+    public Guid Key { get; }
     public Guid VoxelPalletId { get; }
     public Guid VoxelShapeId { get; }
     public IEnumerable<Guid> VoxelChunkIds { get; }
 
-    public Grid(Guid id, Guid voxelPalletId, Guid voxelShapeId, IEnumerable<Guid> voxelChunkIds)
+    public Grid(Guid key, Guid voxelPalletId, Guid voxelShapeId, IEnumerable<Guid> voxelChunkIds)
     {
-        Id = id;
+        Key = key;
         VoxelPalletId = voxelPalletId;
         VoxelShapeId = voxelShapeId;
         VoxelChunkIds = voxelChunkIds;

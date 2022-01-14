@@ -1,14 +1,14 @@
 ﻿namespace Test_Sysx.JobEngine.Assets;
 
-public class Manifest
+public class Manifest : IAsset<string>
 {
-    public string Id { get; }
+    public string Key { get; }
 
     public IEnumerable<Guid> PalletIds { get; }
 
-    public Manifest(string id, IEnumerable<Guid> palletIds)
+    public Manifest(string key, IEnumerable<Guid> palletIds)
     {
-        Id = id;
+        Key = key;
         PalletIds = palletIds;
     }
 }

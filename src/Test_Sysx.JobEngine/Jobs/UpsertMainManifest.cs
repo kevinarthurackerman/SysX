@@ -15,12 +15,10 @@ public static class UpsertMainManifest
 
         public void Execute(in Job data)
         {
-            //var manifest = assetContext.GetAsset<Manifest>("main");
-
-            //if (manifest == null)
-            //{
-                assetContext.UpsertAsset(new Manifest("main", Array.Empty<Guid>()));
-            //}
+            if (!assetContext.Manifests().TryGet("main", out var _))
+            {
+                assetContext.Manifests().Add(new Manifest("main", Array.Empty<Guid>()));
+            }
         }
     }
 }

@@ -15,576 +15,538 @@ public class AssetContext
         localServiceProvider = (IServiceProvider?)engineServiceProvider ?? queueServiceProvider!; // todo: either require to have a service provider or handle not having one
     }
 
-    public TAsset GetAsset<TAsset>(object key)
+    public TAsset GetAsset<TKey, TAsset>(TKey key)
+        where TAsset : class, IAsset<TKey>?
     {
-        EnsureArg.HasValue(key);
+        EnsureArg.HasValue(key, nameof(key));
 
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), key, null);
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
 
         var handler = RootHandler;
 
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
         var eventHandlers = localServiceProvider
-            .GetServices<IOnGetAssetEvent<TAsset>>()
+            .GetServices<IOnGetAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
 
         foreach (var eventHandler in eventHandlers)
         {
             var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
             {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
             };
         }
 
         var handlerResult = handler(initialRequestData);
 
-        return (TAsset)handlerResult.Current.Asset!;
+        return handlerResult.Current.Asset!;
 
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
             {
                 throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
             }
-
-            if (key.GetType() != assetSet.AssetMapping.KeyType)
-            {
-                throw new ArgumentException($"Key type {key.GetType()} does not match key type {assetSet.AssetMapping.KeyType} of asset type {typeof(TAsset)}.");
-            }
-
-            if (!assetSet.Assets.TryGetValue(key, out var asset))
+            else if (!assetSet.Assets.TryGetValue(key, out var asset))
             {
                 throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
             }
-
-            previousResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-            var currentResultData = previousResultData.Value;
-            return new OnAssetEventResult(previousResultData.Value, currentResultData);
+            else
+            {
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, (TAsset)asset, true);
+                var currentResultData = previousResultData.Value;
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
         }
     }
 
-    public bool TryGetAsset<TAsset>(object key, out TAsset? result)
+    public bool TryGetAsset<TKey, TAsset>(TKey key, out TAsset? result)
+        where TAsset : class, IAsset<TKey>
     {
-        EnsureArg.HasValue(key);
+        EnsureArg.HasValue(key, nameof(key));
 
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), key, null);
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
 
         var handler = RootHandler;
 
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
         var eventHandlers = localServiceProvider
-            .GetServices<IOnGetAssetEvent<TAsset>>()
+            .GetServices<IOnGetAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
 
         foreach (var eventHandler in eventHandlers)
         {
             var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
             {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
             };
         }
 
         var handlerResult = handler(initialRequestData);
 
-        result = (TAsset?)handlerResult.Current.Asset;
+        result = handlerResult.Current.Asset;
 
         return handlerResult.Current.Success;
 
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet)
-                || key.GetType() != assetSet.AssetMapping.KeyType
                 || !assetSet!.Assets.TryGetValue(key, out var asset))
             {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, null, false);
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, false);
                 var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
             }
             else
             {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, (TAsset)asset, true);
                 var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
             }
         }
     }
 
-    public TAsset AddAsset<TAsset>(TAsset asset)
+    public TAsset AddAsset<TKey, TAsset>(TAsset asset)
+        where TAsset : class, IAsset<TKey>
     {
-        EnsureArg.HasValue(asset);
+        EnsureArg.IsNotNull(asset, nameof(asset));
+        EnsureArg.HasValue(asset.Key, nameof(asset.Key));
 
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), null, asset);
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
 
         var handler = RootHandler;
 
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
         var eventHandlers = localServiceProvider
-            .GetServices<IOnAddAssetEvent<TAsset>>()
+            .GetServices<IOnAddAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
 
         foreach (var eventHandler in eventHandlers)
         {
             var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
             {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
             };
         }
 
         var handlerResult = handler(initialRequestData);
 
-        return (TAsset)handlerResult.Current.Asset!;
+        return handlerResult.Current.Asset!;
 
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
             {
                 throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
             }
-
-            var key = assetSet.AssetMapping.KeySelector(requestData.Asset!);
-
-            if (key.GetType() != assetSet.AssetMapping.KeyType)
+            else if (assetSet.Assets.TryGetValue(asset.Key!, out var _))
             {
-                throw new ArgumentException($"Key type {key.GetType()} does not match key type {assetSet.AssetMapping.KeyType} of asset type {typeof(TAsset)}.");
-            }
-
-            if (assetSet.Assets.TryGetValue(key, out var _))
-            {
-                throw new ArgumentException($"An asset with type {typeof(TAsset)} and key '{key}' already exists.");
-            }
-
-            assetSet.Assets[key] = asset;
-
-            previousResultData = new OnAssetEventResultData(typeof(TAsset), key, null, true);
-            var currentResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-            return new OnAssetEventResult(previousResultData.Value, currentResultData);
-        }
-    }
-
-    public bool TryAddAsset<TAsset>(TAsset asset, out TAsset? result)
-    {
-        EnsureArg.HasValue(asset);
-
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), null, asset);
-
-        var handler = RootHandler;
-
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
-
-        var eventHandlers = localServiceProvider
-            .GetServices<IOnAddAssetEvent<TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = (TAsset?)handlerResult.Current.Asset;
-
-        return handlerResult.Current.Success;
-
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
-        {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), null, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
-            }
-
-            var key = assetSet.AssetMapping.KeySelector(requestData.Asset!);
-
-            if (key.GetType() != assetSet.AssetMapping.KeyType
-                || assetSet.Assets.TryGetValue(key, out var _))
-            {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
+                throw new ArgumentException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' already exists.");
             }
             else
             {
-                assetSet.Assets[key] = asset;
+                assetSet.Assets[asset.Key!] = asset;
 
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, null, true);
-                var currentResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, true);
+                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
             }
         }
     }
 
-    public TAsset UpsertAsset<TAsset>(TAsset asset)
+    public bool TryAddAsset<TKey, TAsset>(TAsset asset, out TAsset? result)
+        where TAsset : class, IAsset<TKey>
     {
-        EnsureArg.HasValue(asset);
+        EnsureArg.IsNotNull(asset, nameof(asset));
+        EnsureArg.HasValue(asset.Key, nameof(asset.Key));
 
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), null, asset);
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
 
         var handler = RootHandler;
 
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
         var eventHandlers = localServiceProvider
-            .GetServices<IOnUpsertAssetEvent<TAsset>>()
+            .GetServices<IOnAddAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
 
         foreach (var eventHandler in eventHandlers)
         {
             var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
             {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
             };
         }
 
         var handlerResult = handler(initialRequestData);
 
-        return (TAsset)handlerResult.Current.Asset!;
-
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
-        {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
-                throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
-            }
-
-            var key = assetSet.AssetMapping.KeySelector(requestData.Asset!);
-
-            if (key.GetType() != assetSet.AssetMapping.KeyType)
-            {
-                throw new ArgumentException($"Key type {key.GetType()} does not match key type {assetSet.AssetMapping.KeyType} of asset type {typeof(TAsset)}.");
-            }
-
-            assetSet.Assets.TryGetValue(key, out var prevAsset);
-
-            assetSet.Assets[key] = asset;
-
-            previousResultData = new OnAssetEventResultData(typeof(TAsset), key, prevAsset, true);
-            var currentResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-            return new OnAssetEventResult(previousResultData.Value, currentResultData);
-        }
-    }
-
-    public bool TryUpsertAsset<TAsset>(TAsset asset, out TAsset? result)
-    {
-        EnsureArg.HasValue(asset);
-
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), null, asset);
-
-        var handler = RootHandler;
-
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
-
-        var eventHandlers = localServiceProvider
-            .GetServices<IOnUpsertAssetEvent<TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = (TAsset?)handlerResult.Current.Asset;
+        result = handlerResult.Current.Asset;
 
         return handlerResult.Current.Success;
 
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
-        {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), null, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
-            }
-
-            var key = assetSet.AssetMapping.KeySelector(requestData.Asset!);
-
-            if (key.GetType() != assetSet.AssetMapping.KeyType)
-            {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
-            }
-            else
-            {
-                assetSet.Assets.TryGetValue(key, out var prevAsset);
-
-                assetSet.Assets[key] = asset;
-
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, prevAsset, true);
-                var currentResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
-            }
-        }
-    }
-
-    public TAsset UpdateAsset<TAsset>(TAsset asset)
-    {
-        EnsureArg.HasValue(asset);
-
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), null, asset);
-
-        var handler = RootHandler;
-
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
-
-        var eventHandlers = localServiceProvider
-            .GetServices<IOnUpdateAssetEvent<TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        return (TAsset)handlerResult.Current.Asset!;
-
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
-        {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
-                throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
-            }
-
-            var key = assetSet.AssetMapping.KeySelector(requestData.Asset!);
-
-            if (key.GetType() != assetSet.AssetMapping.KeyType)
-            {
-                throw new ArgumentException($"Key type {key.GetType()} does not match key type {assetSet.AssetMapping.KeyType} of asset type {typeof(TAsset)}.");
-            }
-
-            if (!assetSet.Assets.TryGetValue(key, out var prevAsset))
-            {
-                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
-            }
-
-            assetSet.Assets[key] = asset;
-
-            previousResultData = new OnAssetEventResultData(typeof(TAsset), key, prevAsset, true);
-            var currentResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-            return new OnAssetEventResult(previousResultData.Value, currentResultData);
-        }
-    }
-
-    public bool TryUpdateAsset<TAsset>(TAsset asset, out TAsset? result)
-    {
-        EnsureArg.HasValue(asset);
-
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), null, asset);
-
-        var handler = RootHandler;
-
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
-
-        var eventHandlers = localServiceProvider
-            .GetServices<IOnUpdateAssetEvent<TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = (TAsset?)handlerResult.Current.Asset;
-
-        return handlerResult.Current.Success;
-
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
-        {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), null, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
-            }
-
-            var key = assetSet.AssetMapping.KeySelector(requestData.Asset!);
-
-            if (key.GetType() != assetSet.AssetMapping.KeyType
-                || !assetSet.Assets.TryGetValue(key, out var prevAsset))
-            {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
-            }
-            else
-            {
-                assetSet.Assets[key] = asset;
-
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, prevAsset, true);
-                var currentResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
-            }
-        }
-    }
-
-    public TAsset DeleteAsset<TAsset>(object key)
-    {
-        EnsureArg.HasValue(key);
-
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), key, null);
-
-        var handler = RootHandler;
-
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
-
-        var eventHandlers = localServiceProvider
-            .GetServices<IOnDeleteAssetEvent<TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        return (TAsset)handlerResult.Current.Asset!;
-
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
-        {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
-                throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
-            }
-
-            if (key.GetType() != assetSet.AssetMapping.KeyType)
-            {
-                throw new ArgumentException($"Key type {key.GetType()} does not match key type {assetSet.AssetMapping.KeyType} of asset type {typeof(TAsset)}.");
-            }
-
-            if (!assetSet.Assets.TryGetValue(key, out var asset))
-            {
-                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
-            }
-
-            assetSet.Assets.Remove(key);
-
-            previousResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-            var currentResultData = new OnAssetEventResultData(typeof(TAsset), key, null, true);
-            return new OnAssetEventResult(previousResultData.Value, currentResultData);
-        }
-    }
-
-    public bool TryDeleteAsset<TAsset>(object key, out TAsset? result)
-    {
-        EnsureArg.HasValue(key);
-
-        var initialRequestData = new OnAssetEventRequestData(typeof(TAsset), key, null);
-
-        var handler = RootHandler;
-
-        OnAssetEventResultData? previousResultData = null;
-        OnAssetEventResultData? currentResultData = null;
-
-        var eventHandlers = localServiceProvider
-            .GetServices<IOnDeleteAssetEvent<TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData requestData) => innerHandler(requestData));
-                return new OnAssetEventResult(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = (TAsset?)handlerResult.Current.Asset;
-
-        return handlerResult.Current.Success;
-
-        OnAssetEventResult RootHandler(in OnAssetEventRequestData requestData)
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet)
-                || key.GetType() != assetSet.AssetMapping.KeyType
-                || !assetSet.Assets.TryGetValue(key, out var asset))
+                || assetSet.Assets.TryGetValue(asset.Key!, out var _))
             {
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, null, false);
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
                 var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+            else
+            {
+                assetSet.Assets[asset.Key!] = asset;
+
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, true);
+                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+        }
+    }
+
+    public TAsset UpsertAsset<TKey, TAsset>(TAsset asset)
+        where TAsset : class, IAsset<TKey>
+    {
+        EnsureArg.IsNotNull(asset, nameof(asset));
+        EnsureArg.HasValue(asset.Key, nameof(asset.Key));
+
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
+
+        var handler = RootHandler;
+
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
+
+        var eventHandlers = localServiceProvider
+            .GetServices<IOnUpsertAssetEvent<TKey, TAsset>>()
+            .Reverse()
+            .ToArray();
+
+        foreach (var eventHandler in eventHandlers)
+        {
+            var innerHandler = handler;
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
+            {
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
+            };
+        }
+
+        var handlerResult = handler(initialRequestData);
+
+        return handlerResult.Current.Asset!;
+
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        {
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
+            {
+                throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
+            }
+            else
+            {
+                assetSet.Assets.TryGetValue(asset.Key!, out var prevAsset);
+
+                assetSet.Assets[asset.Key!] = asset;
+
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, (TAsset?)prevAsset, true);
+                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+        }
+    }
+
+    public bool TryUpsertAsset<TKey, TAsset>(TAsset asset, out TAsset? result)
+        where TAsset : class, IAsset<TKey>
+    {
+        EnsureArg.IsNotNull(asset, nameof(asset));
+        EnsureArg.HasValue(asset.Key, nameof(asset.Key));
+
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
+
+        var handler = RootHandler;
+
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
+
+        var eventHandlers = localServiceProvider
+            .GetServices<IOnUpsertAssetEvent<TKey, TAsset>>()
+            .Reverse()
+            .ToArray();
+
+        foreach (var eventHandler in eventHandlers)
+        {
+            var innerHandler = handler;
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
+            {
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
+            };
+        }
+
+        var handlerResult = handler(initialRequestData);
+
+        result = handlerResult.Current.Asset;
+
+        return handlerResult.Current.Success;
+
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        {
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
+            {
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
+                var currentResultData = previousResultData.Value;
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+            else
+            {
+                assetSet.Assets.TryGetValue(asset.Key!, out var prevAsset);
+
+                assetSet.Assets[asset.Key!] = asset;
+
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, (TAsset?)prevAsset, true);
+                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+        }
+    }
+
+    public TAsset UpdateAsset<TKey, TAsset>(TAsset asset)
+        where TAsset : class, IAsset<TKey>
+    {
+        EnsureArg.IsNotNull(asset, nameof(asset));
+        EnsureArg.HasValue(asset.Key, nameof(asset.Key));
+
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
+
+        var handler = RootHandler;
+
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
+
+        var eventHandlers = localServiceProvider
+            .GetServices<IOnUpdateAssetEvent<TKey, TAsset>>()
+            .Reverse()
+            .ToArray();
+
+        foreach (var eventHandler in eventHandlers)
+        {
+            var innerHandler = handler;
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
+            {
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
+            };
+        }
+
+        var handlerResult = handler(initialRequestData);
+
+        return handlerResult.Current.Asset!;
+
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        {
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
+            {
+                throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
+            }
+            else if (!assetSet.Assets.TryGetValue(asset.Key!, out var prevAsset))
+            {
+                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' was not found.");
+            }
+            else
+            {
+                assetSet.Assets[asset.Key!] = asset;
+
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, (TAsset)prevAsset, true);
+                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+        }
+    }
+
+    public bool TryUpdateAsset<TKey, TAsset>(TAsset asset, out TAsset? result)
+        where TAsset : class, IAsset<TKey>
+    {
+        EnsureArg.IsNotNull(asset, nameof(asset));
+        EnsureArg.HasValue(asset.Key, nameof(asset.Key));
+
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
+
+        var handler = RootHandler;
+
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
+
+        var eventHandlers = localServiceProvider
+            .GetServices<IOnUpdateAssetEvent<TKey, TAsset>>()
+            .Reverse()
+            .ToArray();
+
+        foreach (var eventHandler in eventHandlers)
+        {
+            var innerHandler = handler;
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
+            {
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
+            };
+        }
+
+        var handlerResult = handler(initialRequestData);
+
+        result = handlerResult.Current.Asset;
+
+        return handlerResult.Current.Success;
+
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        {
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet)
+                || !assetSet.Assets.TryGetValue(asset.Key!, out var prevAsset))
+            {
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
+                var currentResultData = previousResultData.Value;
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+            else
+            {
+                assetSet.Assets[asset.Key!] = asset;
+
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, (TAsset)prevAsset, true);
+                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+        }
+    }
+
+    public TAsset DeleteAsset<TKey, TAsset>(TKey key)
+        where TAsset : class, IAsset<TKey>
+    {
+        EnsureArg.HasValue(key, nameof(key));
+
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
+
+        var handler = RootHandler;
+
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
+
+        var eventHandlers = localServiceProvider
+            .GetServices<IOnDeleteAssetEvent<TKey, TAsset>>()
+            .Reverse()
+            .ToArray();
+
+        foreach (var eventHandler in eventHandlers)
+        {
+            var innerHandler = handler;
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
+            {
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
+            };
+        }
+
+        var handlerResult = handler(initialRequestData);
+
+        return handlerResult.Current.Asset!;
+
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        {
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
+            {
+                throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
+            }
+            else if (!assetSet.Assets.TryGetValue(key, out var asset))
+            {
+                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
             }
             else
             {
                 assetSet.Assets.Remove(key);
 
-                previousResultData = new OnAssetEventResultData(typeof(TAsset), key, asset, true);
-                var currentResultData = new OnAssetEventResultData(typeof(TAsset), key, null, true);
-                return new OnAssetEventResult(previousResultData.Value, currentResultData);
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, (TAsset)asset, true);
+                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, true);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+        }
+    }
+
+    public bool TryDeleteAsset<TKey, TAsset>(TKey key, out TAsset? result)
+        where TAsset : class, IAsset<TKey>
+    {
+        EnsureArg.HasValue(key, nameof(key));
+
+        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
+
+        var handler = RootHandler;
+
+        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
+        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
+
+        var eventHandlers = localServiceProvider
+            .GetServices<IOnDeleteAssetEvent<TKey, TAsset>>()
+            .Reverse()
+            .ToArray();
+
+        foreach (var eventHandler in eventHandlers)
+        {
+            var innerHandler = handler;
+            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
+            {
+                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
+                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
+            };
+        }
+
+        var handlerResult = handler(initialRequestData);
+
+        result = handlerResult.Current.Asset;
+
+        return handlerResult.Current.Success;
+
+        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        {
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet)
+                || !assetSet.Assets.TryGetValue(key, out var asset))
+            {
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, false);
+                var currentResultData = previousResultData.Value;
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+            else
+            {
+                assetSet.Assets.Remove(key);
+
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, (TAsset)asset, true);
+                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, true);
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
             }
         }
     }
@@ -604,21 +566,16 @@ public class AssetContext
     public interface IAssetMapping
     {
         public Type AssetType { get; }
-        public Type KeyType { get; }
-        public Func<object, object> KeySelector { get; }
     }
 
-    public class AssetMapping<TAsset, TAssetKey> : IAssetMapping
+    public class AssetMapping<TKey, TAsset> : IAssetMapping
+        where TAsset : class, IAsset<TKey>
     {
-        public AssetMapping(Func<TAsset, TAssetKey> keySelector)
+        public AssetMapping()
         {
             AssetType = typeof(TAsset);
-            KeyType = typeof(TAssetKey);
-            KeySelector = asset => keySelector((TAsset)asset)!;
         }
 
         public Type AssetType { get; }
-        public Type KeyType { get; }
-        public Func<object, object> KeySelector { get; }
     }
 }

@@ -1,11 +1,11 @@
 ﻿namespace Test_Sysx.JobEngine.VoxelEngine.Assets;
 
-public class Shape
+public class Shape : IAsset<Guid>
 {
-    public Guid Id { get; }
+    public Guid Key { get; }
 
-    public Shape(Guid id)
+    public Shape(Guid key)
     {
-        Id = id;
+        Key = key;
     }
 }

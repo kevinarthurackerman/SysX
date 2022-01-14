@@ -8,9 +8,9 @@ public class Tests
         var configuration = EngineFactory.CreateEngine(
             configureEngineServices: x =>
             {
-                x.AddSingleton<IAssetMapping>(new AssetMapping<Manifest, string>(x => x.Id));
-                x.AddTransient<IOnAddAssetEvent<Pallet>, OnUpsertAsset_RecordPalletToManifest>();
-                x.AddTransient<IOnUpsertAssetEvent<Pallet>, OnUpsertAsset_RecordPalletToManifest>();
+                x.AddSingleton<IAssetMapping>(new AssetMapping<string, Manifest>());
+                x.AddTransient<IOnAddAssetEvent<Guid, Pallet>, OnUpsertAsset_RecordPalletToManifest>();
+                x.AddTransient<IOnUpsertAssetEvent<Guid, Pallet>, OnUpsertAsset_RecordPalletToManifest>();
             },
             configureDefaultQueueServices: x => { },
             configureConfigQueueServices: x =>

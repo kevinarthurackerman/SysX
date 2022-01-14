@@ -13,23 +13,23 @@ public static class EngineFactory
         {
             ConfigureEngineServices = services =>
             {
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Pallet, Guid>(x => x.Id));
+                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
                 services.AddSingleton<AssetContext>();
-                services.AddSingleton(typeof(IOnGetAssetEvent<>), typeof(OnAssetEvent_Log<>));
-                services.AddSingleton(typeof(IOnAddAssetEvent<>), typeof(OnAssetEvent_Log<>));
-                services.AddSingleton(typeof(IOnUpsertAssetEvent<>), typeof(OnAssetEvent_Log<>));
-                services.AddSingleton(typeof(IOnUpdateAssetEvent<>), typeof(OnAssetEvent_Log<>));
-                services.AddSingleton(typeof(IOnDeleteAssetEvent<>), typeof(OnAssetEvent_Log<>));
+                services.AddSingleton(typeof(IOnGetAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(typeof(IOnAddAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(typeof(IOnUpsertAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(typeof(IOnUpdateAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(typeof(IOnDeleteAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
                 configureEngineServices(services);
             },
             DefaultConfigureQueueServices = services =>
             {
                 services.AddSingleton<EngineContext>();
-                services.AddSingleton(typeof(IOnGetAssetEvent<>), typeof(OnAssetEvent_Log<>));
-                services.AddSingleton(typeof(IOnAddAssetEvent<>), typeof(OnAssetEvent_Log<>));
-                services.AddSingleton(typeof(IOnUpsertAssetEvent<>), typeof(OnAssetEvent_Log<>));
-                services.AddSingleton(typeof(IOnUpdateAssetEvent<>), typeof(OnAssetEvent_Log<>));
-                services.AddSingleton(typeof(IOnDeleteAssetEvent<>), typeof(OnAssetEvent_Log<>));
+                services.AddSingleton(typeof(IOnGetAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(typeof(IOnAddAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(typeof(IOnUpsertAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(typeof(IOnUpdateAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(typeof(IOnDeleteAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
                 configureDefaultQueueServices(services);
             }
         });
@@ -47,8 +47,8 @@ public static class EngineFactory
         {
             ConfigureQueueServices = services =>
             {
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Grid, Guid>(x => x.Id));
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Chunk, Guid>(x => x.Id));
+                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Grid>());
+                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Chunk>());
                 services.AddSingleton<AssetContext>();
                 configureMainQueueServices(services);
             }
@@ -58,7 +58,7 @@ public static class EngineFactory
         {
             ConfigureQueueServices = services =>
             {
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Shape, Guid>(x => x.Id));
+                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Shape>());
                 services.AddSingleton<AssetContext>();
                 configureContouringQueueServices(services);
             }

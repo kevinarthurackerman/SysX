@@ -17,7 +17,7 @@ public static class CreatePallet
         {
             var voxelPallet = new Pallet(data.Id, data.VoxelCodeMappings);
 
-            engineContext.AssetContext.UpsertAsset(voxelPallet);
+            engineContext.AssetContext.Pallets().Upsert(voxelPallet);
         }
     }
 }

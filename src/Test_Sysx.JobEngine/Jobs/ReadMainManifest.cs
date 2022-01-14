@@ -15,7 +15,7 @@ public static class ReadMainManifest
 
         public void Execute(in Job data)
         {
-            var manifest = assetContext.GetAsset<Manifest>("main");
+            var manifest = assetContext.Manifests().Get("main");
         }
     }
 }
