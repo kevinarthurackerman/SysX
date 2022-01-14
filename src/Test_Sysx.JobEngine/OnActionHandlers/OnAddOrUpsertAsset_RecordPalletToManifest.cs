@@ -1,10 +1,10 @@
 ﻿namespace Test_Sysx.JobEngine.OnActionHandlers;
 
-public class OnUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Guid, Pallet>, IOnUpsertAssetEvent<Guid, Pallet>
+public class OnAddOrUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Guid, Pallet>, IOnUpsertAssetEvent<Guid, Pallet>
 {
     private readonly AssetContext assetContext;
 
-    public OnUpsertAsset_RecordPalletToManifest(AssetContext assetContext)
+    public OnAddOrUpsertAsset_RecordPalletToManifest(AssetContext assetContext)
     {
         this.assetContext = assetContext;
     }

@@ -6,18 +6,18 @@ public class Tests
     public void Test()
     {
         var configuration = EngineFactory.CreateEngine(
-            configureEngineServices: x => { },
-            configureDefaultQueueServices: x => { },
-            configureConfigQueueServices: x =>
+            configureEngineServices: services => { },
+            configureDefaultQueueServices: services => { },
+            configureConfigQueueServices: services =>
             {
-                x.AddSingleton<IAssetMapping>(new AssetMapping<string, Manifest>());
-                x.AddTransient<IJobExecutor<UpsertMainManifest.Job>, UpsertMainManifest.Handler>();
-                x.AddTransient<IJobExecutor<ReadMainManifest.Job>, ReadMainManifest.Handler>();
-                x.AddTransient<IOnAddAssetEvent<Guid, Pallet>, OnUpsertAsset_RecordPalletToManifest>();
-                x.AddTransient<IOnUpsertAssetEvent<Guid, Pallet>, OnUpsertAsset_RecordPalletToManifest>();
+                services.AddSingleton<IAssetMapping>(new AssetMapping<string, Manifest>());
+                services.AddTransient<IJobExecutor<UpsertMainManifest.Job>, UpsertMainManifest.Handler>();
+                services.AddTransient<IJobExecutor<ReadMainManifest.Job>, ReadMainManifest.Handler>();
+                services.AddTransient<IOnAddAssetEvent<Guid, Pallet>, OnAddOrUpsertAsset_RecordPalletToManifest>();
+                services.AddTransient<IOnUpsertAssetEvent<Guid, Pallet>, OnAddOrUpsertAsset_RecordPalletToManifest>();
             },
-            configureMainQueueServices: x => { },
-            configureContouringQueueServices: x => { });
+            configureMainQueueServices: services => { },
+            configureContouringQueueServices: services => { });
 
         var voxelPalletId = Guid.NewGuid();
 
