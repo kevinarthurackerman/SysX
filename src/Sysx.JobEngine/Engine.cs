@@ -2,7 +2,7 @@
 
 public class Engine
 {
-    private readonly List<QueueInfo> queues = new();
+    private readonly Dictionary<QueueKey, QueueInfo> queues = new();
     private readonly IServiceCollection defaultQueueServices;
     private readonly IServiceProvider engineServices;
 
@@ -13,20 +13,32 @@ public class Engine
         queues = new();
 
         var engineServices = new ServiceCollection()
-            .AddSingleton<IEngineServiceProvider>(engineServices =>
+            .AddSingleton(engineServices =>
             {
-                var internalServiceProvider = new InternalServiceProvider();
+                var internalServiceProvider = (IEngineServiceProvider)new InternalServiceProvider();
                 internalServiceProvider.SetServiceProvider(engineServices);
                 return internalServiceProvider;
             })
             .AddScoped<IQueueServiceProvider>(_ => new InternalServiceProvider())
-            .AddScoped<IQueue, Queue>();
+            .AddScoped<IQueue, Queue>()
+            .AddSingleton<IQueueLocator, QueueLocator>();
 
         createEngineOptions.ConfigureEngineServices(engineServices);
 
         this.engineServices = engineServices.BuildServiceProvider();
 
-        var defaultQueueServices = new ServiceCollection();
+        var defaultQueueServices = new ServiceCollection()
+            .AddSingleton(queueServiceProvider =>
+            {
+                var internalServiceProvider = (IQueueServiceProvider)new InternalServiceProvider();
+                internalServiceProvider.SetServiceProvider(queueServiceProvider);
+                return internalServiceProvider;
+            })
+            .AddSingleton(queueServiceProvider =>
+            {
+                return queueServiceProvider.GetRequiredService<IEngineServiceProvider>()
+                    .GetRequiredService<IQueueLocator>();
+            });
 
         createEngineOptions.DefaultConfigureQueueServices(defaultQueueServices);
 
@@ -34,20 +46,18 @@ public class Engine
     }
 
     public IQueue CreateQueue(in CreateQueueOptions createQueueOptions)
+        => CreateQueue<IQueue>(in createQueueOptions);
+
+    public TQueue CreateQueue<TQueue>(in CreateQueueOptions createQueueOptions)
+        where TQueue : IQueue
     {
         var queueScope = engineServices.CreateScope();
 
         var queueServices = new ServiceCollection()
-            .AddSingleton<IEngineServiceProvider>(_ => 
+            .AddSingleton(_ => 
             {
-                var internalServiceProvider = new InternalServiceProvider();
-                internalServiceProvider.SetServiceProvider(engineServices);
-                return internalServiceProvider;
-            })
-            .AddSingleton<IQueueServiceProvider>(queueServiceProvider => 
-            {
-                var internalServiceProvider = new InternalServiceProvider();
-                internalServiceProvider.SetServiceProvider(queueServiceProvider);
+                var internalServiceProvider = (IEngineServiceProvider)new InternalServiceProvider();
+                internalServiceProvider.SetServiceProvider(queueScope.ServiceProvider);
                 return internalServiceProvider;
             });
 
@@ -58,25 +68,42 @@ public class Engine
 
         var queueServiceProvider = queueServices.BuildServiceProvider();
 
-        ((InternalServiceProvider)queueScope.ServiceProvider.GetRequiredService<IQueueServiceProvider>())
+        queueScope.ServiceProvider.GetRequiredService<IQueueServiceProvider>()
             .SetServiceProvider(queueServiceProvider);
 
-        var queue = queueScope.ServiceProvider.GetRequiredService<IQueue>();
+        var queue = queueScope.ServiceProvider.GetRequiredService<TQueue>();
 
-        queues.Add(new QueueInfo(queue, queueScope));
+        queues.Add(new QueueKey(typeof(TQueue), createQueueOptions.Name), new QueueInfo(queue, queueScope));
+
+        engineServices.GetRequiredService<IQueueLocator>()
+            .RegisterQueue(queue, createQueueOptions.Name);
 
         return queue;
     }
 
-    public void RemoveQueue(IQueue queue)
+    public void RemoveQueue()
+        => RemoveQueue<IQueue>("Default");
+
+    public void RemoveQueue(string name)
+        => RemoveQueue<IQueue>(name);
+
+    public void RemoveQueue<TQueue>()
+        where TQueue : IQueue
+        => RemoveQueue<TQueue>("Default");
+
+    public void RemoveQueue<TQueue>(string name)
+        where TQueue : IQueue
     {
-        var queueInfo = queues
-            .Where(x => x.Queue == queue)
-            .Single();
+        var key = new QueueKey(typeof(TQueue), name);
 
-        queueInfo.QueueScope.Dispose();
+        var queue = queues[key];
 
-        queues.Remove(queueInfo);
+        queues.Remove(new QueueKey(typeof(TQueue), name));
+
+        queue.QueueScope.Dispose();
+
+        engineServices.GetRequiredService<IQueueLocator>()
+            .DeregisterQueue<TQueue>(name);
     }
 
     private static IServiceCollection Copy(IServiceCollection services)
@@ -112,16 +139,21 @@ public class Engine
     {
         public static CreateQueueOptions Default => new()
         {
+            Name = "Default",
             ConfigureQueueServices = x => { }
         };
 
+        public string Name { get; set; }
         public Action<IServiceCollection> ConfigureQueueServices { get; set; }
 
         public void Validate()
         {
+            EnsureArg.IsNotNull(Name, nameof(Name));
             EnsureArg.IsNotNull(ConfigureQueueServices, nameof(ConfigureQueueServices));
         }
     }
 
     private readonly record struct QueueInfo(IQueue Queue, IDisposable QueueScope);
+
+    private readonly record struct QueueKey(Type Type, string Name);
 }

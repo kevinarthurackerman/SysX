@@ -3,16 +3,15 @@
 public class AssetContext
 {
     private readonly Dictionary<Type, AssetSet> assetSetCache = new();
-    private readonly IServiceProvider localServiceProvider;
+    private readonly IQueueServiceProvider queueServiceProvider;
 
     public AssetContext(
         IEnumerable<IAssetMapping> assetMappings,
-        IEngineServiceProvider? engineServiceProvider = null,
-        IQueueServiceProvider? queueServiceProvider = null)
+        IQueueServiceProvider queueServiceProvider)
     {
         foreach(var assetMapping in assetMappings)
             assetSetCache.Add(assetMapping.AssetType, new AssetSet(assetMapping));
-        localServiceProvider = (IServiceProvider?)engineServiceProvider ?? queueServiceProvider!; // todo: either require to have a service provider or handle not having one
+        this.queueServiceProvider = queueServiceProvider;
     }
 
     public TAsset GetAsset<TKey, TAsset>(TKey key)
@@ -27,7 +26,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnGetAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -78,7 +77,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnGetAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -131,7 +130,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnAddAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -185,7 +184,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnAddAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -240,7 +239,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnUpsertAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -292,7 +291,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnUpsertAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -348,7 +347,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnUpdateAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -402,7 +401,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnUpdateAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -456,7 +455,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnDeleteAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();
@@ -509,7 +508,7 @@ public class AssetContext
         OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
         OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
 
-        var eventHandlers = localServiceProvider
+        var eventHandlers = queueServiceProvider
             .GetServices<IOnDeleteAssetEvent<TKey, TAsset>>()
             .Reverse()
             .ToArray();

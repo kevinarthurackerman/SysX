@@ -4,9 +4,9 @@ public class OnUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Guid, Palle
 {
     private readonly AssetContext assetContext;
 
-    public OnUpsertAsset_RecordPalletToManifest(IEngineServiceProvider engineServiceProvider)
+    public OnUpsertAsset_RecordPalletToManifest(AssetContext assetContext)
     {
-        assetContext = engineServiceProvider.GetRequiredService<AssetContext>();
+        this.assetContext = assetContext;
     }
 
     public OnAssetEventResultData<Guid, Pallet> Execute(in OnAssetEventRequest<Guid, Pallet> request, OnAssetEventNext<Guid, Pallet> next)

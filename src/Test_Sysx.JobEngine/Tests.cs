@@ -6,17 +6,15 @@ public class Tests
     public void Test()
     {
         var configuration = EngineFactory.CreateEngine(
-            configureEngineServices: x =>
-            {
-                x.AddSingleton<IAssetMapping>(new AssetMapping<string, Manifest>());
-                x.AddTransient<IOnAddAssetEvent<Guid, Pallet>, OnUpsertAsset_RecordPalletToManifest>();
-                x.AddTransient<IOnUpsertAssetEvent<Guid, Pallet>, OnUpsertAsset_RecordPalletToManifest>();
-            },
+            configureEngineServices: x => { },
             configureDefaultQueueServices: x => { },
             configureConfigQueueServices: x =>
             {
+                x.AddSingleton<IAssetMapping>(new AssetMapping<string, Manifest>());
                 x.AddTransient<IJobExecutor<UpsertMainManifest.Job>, UpsertMainManifest.Handler>();
                 x.AddTransient<IJobExecutor<ReadMainManifest.Job>, ReadMainManifest.Handler>();
+                x.AddTransient<IOnAddAssetEvent<Guid, Pallet>, OnUpsertAsset_RecordPalletToManifest>();
+                x.AddTransient<IOnUpsertAssetEvent<Guid, Pallet>, OnUpsertAsset_RecordPalletToManifest>();
             },
             configureMainQueueServices: x => { },
             configureContouringQueueServices: x => { });

@@ -8,9 +8,9 @@ public static class ReadMainManifest
     {
         private readonly AssetContext assetContext;
 
-        public Handler(IEngineServiceProvider engineServiceProvider)
+        public Handler(AssetContext assetContext)
         {
-            assetContext = engineServiceProvider.GetRequiredService<AssetContext>();
+            this.assetContext = assetContext;
         }
 
         public void Execute(in Job data)

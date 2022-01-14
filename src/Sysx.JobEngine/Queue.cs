@@ -2,7 +2,7 @@
 
 public interface IQueue
 {
-    void SubmitJob<TJob>(TJob data)
+    public void SubmitJob<TJob>(TJob data)
         where TJob : IJob;
 }
 
