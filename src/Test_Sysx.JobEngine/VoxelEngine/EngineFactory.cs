@@ -28,6 +28,9 @@ public static class EngineFactory
                 services.AddSingleton(typeof(IOnUpsertAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
                 services.AddSingleton(typeof(IOnUpdateAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
                 services.AddSingleton(typeof(IOnDeleteAssetEvent<,>), typeof(OnAssetEvent_Log<,>));
+                services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<IQueueLocator>().Get<ConfigQueue>());
+                services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<IQueueLocator>().Get<MainQueue>());
+                services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<IQueueLocator>().Get<ContouringQueue>());
                 configureDefaultQueueServices(services);
             }
         });
