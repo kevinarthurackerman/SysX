@@ -100,10 +100,16 @@ public class Engine
 
         queues.Remove(new QueueKey(typeof(TQueue), name));
 
-        queue.QueueScope.Dispose();
-
         engineServices.GetRequiredService<IQueueLocator>()
             .DeregisterQueue<TQueue>(name);
+
+        if (queue.Queue is IDisposable disposable)
+            disposable.Dispose();
+
+        if (queue.Queue is IAsyncDisposable asyncDisposable)
+            asyncDisposable.DisposeAsync().AsTask().GetAwaiter().GetResult();
+
+        queue.QueueScope.Dispose();
     }
 
     private static IServiceCollection Copy(IServiceCollection services)
