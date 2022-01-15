@@ -13,7 +13,7 @@ public class Queue : IQueue, IAsyncDisposable
     private readonly Dictionary<Type, IJobRunner> jobRunners;
     private bool disposed;
     private TaskCompletionSource<object> coordinatingQueueCompletionSource;
-    private Exception? backgroundException;
+    private List<Exception>? backgroundExceptions;
 
     public Queue(IQueueServiceProvider queueServiceProvider)
     {
@@ -22,7 +22,7 @@ public class Queue : IQueue, IAsyncDisposable
         jobRunners = new();
         disposed = false;
         coordinatingQueueCompletionSource = new();
-        backgroundException = null;
+        backgroundExceptions = null;
 
         new Thread(RunJobs) { Name = GetType().Name }.Start();
     }
@@ -73,7 +73,10 @@ public class Queue : IQueue, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            backgroundException = ex;
+            if (backgroundExceptions == null)
+                backgroundExceptions = new List<Exception>();
+
+            backgroundExceptions.Add(ex);
         }
         finally
         {
@@ -83,9 +86,9 @@ public class Queue : IQueue, IAsyncDisposable
 
     private void ThrowBackgroundExceptionIfAny()
     {
-        if (backgroundException != null)
+        if (backgroundExceptions != null)
         {
-            throw new AggregateException("An exception was throw while running jobs in the background.", backgroundException);
+            throw new AggregateException("One or more exceptions were throw while running jobs in the background. See inner exceptions for details.", backgroundExceptions);
         }
     }
 
