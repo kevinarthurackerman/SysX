@@ -30,5 +30,7 @@ public class Tests
         });
 
         configuration.ConfigQueue.SubmitJob(new ReadMainManifest.Job());
+
+        configuration.Engine.Dispose();
     }
 }

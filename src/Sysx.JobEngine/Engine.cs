@@ -1,16 +1,18 @@
 ﻿namespace Sysx.JobEngine;
 
-public class Engine
+public class Engine : IDisposable
 {
-    private readonly Dictionary<QueueKey, QueueInfo> queues = new();
+    private readonly Dictionary<QueueKey, QueueInfo> queues;
     private readonly IServiceCollection defaultQueueServices;
     private readonly IServiceProvider engineServices;
+    private bool disposed;
 
     public Engine(in CreateEngineOptions createEngineOptions)
     {
         createEngineOptions.Validate();
 
         queues = new();
+        disposed = false;
 
         var engineServices = new ServiceCollection()
             .AddSingleton(engineServices =>
@@ -51,6 +53,8 @@ public class Engine
     public TQueue CreateQueue<TQueue>(in CreateQueueOptions createQueueOptions)
         where TQueue : IQueue
     {
+        Ensure.That(this).IsNotDisposed(disposed);
+
         var queueScope = engineServices.CreateScope();
 
         var queueServices = new ServiceCollection()
@@ -94,6 +98,14 @@ public class Engine
     public void RemoveQueue<TQueue>(string name)
         where TQueue : IQueue
     {
+        Ensure.That(this).IsNotDisposed(disposed);
+
+        RemoveQueueInner<TQueue>(name);
+    }
+
+    private void RemoveQueueInner<TQueue>(string name)
+        where TQueue : IQueue
+    {
         var key = new QueueKey(typeof(TQueue), name);
 
         var queue = queues[key];
@@ -103,13 +115,37 @@ public class Engine
         engineServices.GetRequiredService<IQueueLocator>()
             .DeregisterQueue<TQueue>(name);
 
-        if (queue.Queue is IDisposable disposable)
-            disposable.Dispose();
+        if (queue.Queue is IAsyncDisposable asyncDisposableQueue)
+        {
+            asyncDisposableQueue.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
+        else if (queue.Queue is IDisposable disposableQueue)
+        {
+            disposableQueue.Dispose();
+        }
 
-        if (queue.Queue is IAsyncDisposable asyncDisposable)
-            asyncDisposable.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        if (queue.QueueScope is IAsyncDisposable asyncDisposableQueueScope)
+        {
+            asyncDisposableQueueScope.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
+        else if (queue.QueueScope is IDisposable disposableQueueScope)
+        {
+            disposableQueueScope.Dispose();
+        }
+    }
 
-        queue.QueueScope.Dispose();
+    public void Dispose()
+    {
+        if (disposed) return;
+
+        disposed = true;
+
+        foreach (var queueKey in queues.Keys)
+        {
+            typeof(Engine).GetMethod(nameof(RemoveQueueInner), BindingFlags.NonPublic | BindingFlags.Instance)!
+                .MakeGenericMethod(queueKey.Type)
+                .Invoke(this, new object[] { queueKey.Name });
+        }
     }
 
     private static IServiceCollection Copy(IServiceCollection services)
@@ -159,7 +195,7 @@ public class Engine
         }
     }
 
-    private readonly record struct QueueInfo(IQueue Queue, IDisposable QueueScope);
+    private readonly record struct QueueInfo(IQueue Queue, IServiceScope QueueScope);
 
     private readonly record struct QueueKey(Type Type, string Name);
 }

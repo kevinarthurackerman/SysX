@@ -1,16 +1,26 @@
 ﻿namespace Sysx.JobEngine;
 
-public class AssetContext
+public class AssetContext : ISinglePhaseNotification
 {
-    private readonly Dictionary<Type, AssetSet> assetSetCache = new();
     private readonly IQueueServiceProvider queueServiceProvider;
+    private readonly Dictionary<Type, IAssetSet> assetSetCache;
+    private Transaction? transaction;
 
     public AssetContext(
         IEnumerable<IAssetMapping> assetMappings,
         IQueueServiceProvider queueServiceProvider)
     {
-        foreach(var assetMapping in assetMappings)
-            assetSetCache.Add(assetMapping.AssetType, new AssetSet(assetMapping));
+        assetSetCache = assetMappings.ToDictionary(
+            assetMapping => assetMapping.AssetType,
+            assetMapping =>
+            {
+                return (IAssetSet)typeof(AssetSet<,>)
+                    .MakeGenericType(assetMapping.AssetKeyType, assetMapping.AssetType)
+                    .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Single()
+                    .Invoke(new[] { assetMapping });
+            });
+
         this.queueServiceProvider = queueServiceProvider;
     }
 
@@ -18,6 +28,8 @@ public class AssetContext
         where TAsset : class, IAsset<TKey>?
     {
         EnsureArg.HasValue(key, nameof(key));
+
+        EnlistTransaction();
 
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
 
@@ -49,19 +61,18 @@ public class AssetContext
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
                 throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
-            }
-            else if (!assetSet.Assets.TryGetValue(key, out var asset))
-            {
+
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
+
+            var asset = typedAssetSet.GetAsset(key);
+
+            if (asset == null)
                 throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
-            }
-            else
-            {
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, (TAsset)asset, true);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
+
+            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, asset, true);
+            var currentResultData = previousResultData.Value;
+            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
         }
     }
 
@@ -69,6 +80,8 @@ public class AssetContext
         where TAsset : class, IAsset<TKey>
     {
         EnsureArg.HasValue(key, nameof(key));
+
+        EnlistTransaction();
 
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
 
@@ -101,8 +114,18 @@ public class AssetContext
 
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet)
-                || !assetSet!.Assets.TryGetValue(key, out var asset))
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
+            {
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, false);
+                var currentResultData = previousResultData.Value;
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
+
+            var asset = typedAssetSet.GetAsset(key);
+
+            if (asset == null)
             {
                 previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, false);
                 var currentResultData = previousResultData.Value;
@@ -110,7 +133,7 @@ public class AssetContext
             }
             else
             {
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, (TAsset)asset, true);
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, asset, true);
                 var currentResultData = previousResultData.Value;
                 return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
             }
@@ -123,6 +146,8 @@ public class AssetContext
         EnsureArg.IsNotNull(asset, nameof(asset));
         EnsureArg.HasValue(asset.Key, nameof(asset.Key));
 
+        EnlistTransaction();
+
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
 
         var handler = RootHandler;
@@ -153,21 +178,20 @@ public class AssetContext
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
                 throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
-            }
-            else if (assetSet.Assets.TryGetValue(asset.Key!, out var _))
-            {
-                throw new ArgumentException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' already exists.");
-            }
-            else
-            {
-                assetSet.Assets[asset.Key!] = asset;
 
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, true);
-                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
+
+            var existingAsset = typedAssetSet.GetAsset(asset.Key);
+
+            if (existingAsset != null)
+                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' already exists.");
+
+            typedAssetSet.SetAsset(asset.Key, asset);
+
+            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, true);
+            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
         }
     }
 
@@ -176,6 +200,8 @@ public class AssetContext
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
         EnsureArg.HasValue(asset.Key, nameof(asset.Key));
+
+        EnlistTransaction();
 
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
 
@@ -208,8 +234,18 @@ public class AssetContext
 
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet)
-                || assetSet.Assets.TryGetValue(asset.Key!, out var _))
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
+            {
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
+                var currentResultData = previousResultData.Value;
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
+
+            var existingAsset = typedAssetSet.GetAsset(asset.Key);
+
+            if (existingAsset != null)
             {
                 previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
                 var currentResultData = previousResultData.Value;
@@ -217,7 +253,7 @@ public class AssetContext
             }
             else
             {
-                assetSet.Assets[asset.Key!] = asset;
+                typedAssetSet.SetAsset(asset.Key, asset);
 
                 previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, true);
                 var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
@@ -232,6 +268,8 @@ public class AssetContext
         EnsureArg.IsNotNull(asset, nameof(asset));
         EnsureArg.HasValue(asset.Key, nameof(asset.Key));
 
+        EnlistTransaction();
+
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
 
         var handler = RootHandler;
@@ -262,19 +300,17 @@ public class AssetContext
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
                 throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
-            }
-            else
-            {
-                assetSet.Assets.TryGetValue(asset.Key!, out var prevAsset);
 
-                assetSet.Assets[asset.Key!] = asset;
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
 
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, (TAsset?)prevAsset, true);
-                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
+            var existingAsset = typedAssetSet.GetAsset(asset.Key);
+
+            typedAssetSet.SetAsset(asset.Key, asset);
+
+            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, existingAsset, true);
+            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
         }
     }
 
@@ -283,6 +319,8 @@ public class AssetContext
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
         EnsureArg.HasValue(asset.Key, nameof(asset.Key));
+
+        EnlistTransaction();
 
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
 
@@ -323,11 +361,13 @@ public class AssetContext
             }
             else
             {
-                assetSet.Assets.TryGetValue(asset.Key!, out var prevAsset);
+                var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
 
-                assetSet.Assets[asset.Key!] = asset;
+                var existingAsset = typedAssetSet.GetAsset(asset.Key);
 
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, (TAsset?)prevAsset, true);
+                typedAssetSet.SetAsset(asset.Key, asset);
+
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, existingAsset, true);
                 var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
                 return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
             }
@@ -340,6 +380,8 @@ public class AssetContext
         EnsureArg.IsNotNull(asset, nameof(asset));
         EnsureArg.HasValue(asset.Key, nameof(asset.Key));
 
+        EnlistTransaction();
+
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
 
         var handler = RootHandler;
@@ -370,21 +412,20 @@ public class AssetContext
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
                 throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
-            }
-            else if (!assetSet.Assets.TryGetValue(asset.Key!, out var prevAsset))
-            {
-                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' was not found.");
-            }
-            else
-            {
-                assetSet.Assets[asset.Key!] = asset;
 
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, (TAsset)prevAsset, true);
-                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
+
+            var existingAsset = typedAssetSet.GetAsset(asset.Key);
+
+            if (existingAsset == null)
+                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' was not found.");
+
+            typedAssetSet.SetAsset(asset.Key, asset);
+
+            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, existingAsset, true);
+            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
+            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
         }
     }
 
@@ -393,6 +434,8 @@ public class AssetContext
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
         EnsureArg.HasValue(asset.Key, nameof(asset.Key));
+
+        EnlistTransaction();
 
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
 
@@ -425,8 +468,18 @@ public class AssetContext
 
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet)
-                || !assetSet.Assets.TryGetValue(asset.Key!, out var prevAsset))
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
+            {
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
+                var currentResultData = previousResultData.Value;
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
+
+            var existingAsset = typedAssetSet.GetAsset(asset.Key);
+
+            if (existingAsset == null)
             {
                 previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
                 var currentResultData = previousResultData.Value;
@@ -434,9 +487,9 @@ public class AssetContext
             }
             else
             {
-                assetSet.Assets[asset.Key!] = asset;
+                typedAssetSet.SetAsset(asset.Key, asset);
 
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, (TAsset)prevAsset, true);
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, existingAsset, true);
                 var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
                 return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
             }
@@ -448,6 +501,8 @@ public class AssetContext
     {
         EnsureArg.HasValue(key, nameof(key));
 
+        EnlistTransaction();
+
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
 
         var handler = RootHandler;
@@ -478,21 +533,20 @@ public class AssetContext
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
             if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
-            {
                 throw new KeyNotFoundException($"A set of assets was not found matching the type {typeof(TAsset)}.");
-            }
-            else if (!assetSet.Assets.TryGetValue(key, out var asset))
-            {
-                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
-            }
-            else
-            {
-                assetSet.Assets.Remove(key);
 
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, (TAsset)asset, true);
-                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, true);
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
+
+            var asset = typedAssetSet.GetAsset(key);
+
+            if (asset == null)
+                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
+
+            typedAssetSet.SetAsset(asset.Key, null);
+
+            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, asset, true);
+            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, true);
+            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
         }
     }
 
@@ -500,6 +554,8 @@ public class AssetContext
         where TAsset : class, IAsset<TKey>
     {
         EnsureArg.HasValue(key, nameof(key));
+
+        EnlistTransaction();
 
         var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
 
@@ -532,8 +588,18 @@ public class AssetContext
 
         OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
         {
-            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet)
-                || !assetSet.Assets.TryGetValue(key, out var asset))
+            if (!assetSetCache.TryGetValue(typeof(TAsset), out var assetSet))
+            {
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, false);
+                var currentResultData = previousResultData.Value;
+                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            }
+
+            var typedAssetSet = (AssetSet<TKey, TAsset>)assetSet;
+
+            var asset = typedAssetSet.GetAsset(key);
+
+            if (asset == null)
             {
                 previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, false);
                 var currentResultData = previousResultData.Value;
@@ -541,29 +607,144 @@ public class AssetContext
             }
             else
             {
-                assetSet.Assets.Remove(key);
+                typedAssetSet.SetAsset(asset.Key, null);
 
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, (TAsset)asset, true);
+                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, asset, true);
                 var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, true);
                 return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
             }
         }
     }
 
-    private class AssetSet
+    public void SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
+    {
+        Commit();
+        singlePhaseEnlistment.Committed();
+    }
+
+    public void Commit(Enlistment enlistment)
+    {
+        Commit();
+        enlistment.Done();
+    }
+
+    public void InDoubt(Enlistment enlistment)
+    {
+        enlistment.Done();
+    }
+
+    public void Prepare(PreparingEnlistment preparingEnlistment)
+    {
+        preparingEnlistment.Prepared();
+    }
+
+    public void Rollback(Enlistment enlistment)
+    {
+        transaction = null;
+
+        foreach (var assetSet in assetSetCache.Values)
+            assetSet.Rollback();
+
+        enlistment.Done();
+    }
+
+    private void EnlistTransaction()
+    {
+        if (Transaction.Current != null && Transaction.Current != transaction)
+        {
+            transaction = Transaction.Current;
+            transaction.EnlistVolatile(this, EnlistmentOptions.None);
+        }
+    }
+
+    private void Commit()
+    {
+        transaction = null;
+
+        foreach (var assetSet in assetSetCache.Values)
+            assetSet.Commit();
+    }
+
+    private interface IAssetSet
+    {
+        internal void Commit();
+        internal void Rollback();
+    }
+
+    private class AssetSet<TKey, TAsset> : IAssetSet
+        where TAsset : class, IAsset<TKey>
     {
         internal IAssetMapping AssetMapping { get; }
-        internal IDictionary<object, object> Assets { get; }
+        internal IDictionary<TKey, TAsset> Assets { get; }
+        internal IDictionary<TKey, TAsset?> UncommittedAssets { get; }
 
         internal AssetSet(IAssetMapping assetMapping)
         {
             AssetMapping = assetMapping;
-            Assets = new Dictionary<object, object>();
+#pragma warning disable CS8714 // Key can be nullable in order to match asset key, but null will never be passed in as a key.
+            Assets = new Dictionary<TKey, TAsset>();
+            UncommittedAssets = new Dictionary<TKey, TAsset?>();
+#pragma warning restore CS8714 // Key can be nullable in order to match asset key, but null will never be passed in as a key.
+        }
+
+        internal TAsset? GetAsset(TKey key)
+        {
+            if (Transaction.Current != null)
+            {
+                if (UncommittedAssets.TryGetValue(key, out var uncommittedAsset))
+                    return uncommittedAsset;
+            }
+
+            Assets.TryGetValue(key, out var asset);
+
+            return asset;
+        }
+
+        internal void SetAsset(TKey key, TAsset? asset)
+        {
+            if (Transaction.Current != null)
+            {
+                UncommittedAssets[key] = asset;
+            }
+            else
+            {
+                if (asset == null)
+                {
+                    Assets.Remove(key);
+                }
+                else
+                {
+                    Assets[key] = asset;
+                }
+            }
+        }
+
+        void IAssetSet.Commit()
+        {
+            foreach(var asset in UncommittedAssets)
+            {
+                if (asset.Value == null)
+                {
+                    Assets.Remove(asset.Key);
+                }
+                else
+                {
+                    Assets[asset.Key] = asset.Value;
+                }
+            }
+
+            UncommittedAssets.Clear();
+        }
+
+        void IAssetSet.Rollback()
+        {
+            UncommittedAssets.Clear();
         }
     }
 
     public interface IAssetMapping
     {
+        public Type AssetKeyType { get; }
         public Type AssetType { get; }
     }
 
@@ -572,9 +753,11 @@ public class AssetContext
     {
         public AssetMapping()
         {
+            AssetKeyType = typeof(TKey);
             AssetType = typeof(TAsset);
         }
 
+        public Type AssetKeyType { get; }
         public Type AssetType { get; }
     }
 }

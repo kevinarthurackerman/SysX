@@ -1,4 +1,6 @@
-﻿namespace Sysx.JobEngine;
+﻿using System.Transactions;
+
+namespace Sysx.JobEngine;
 
 public interface IQueue
 {
@@ -60,23 +62,36 @@ public class Queue : IQueue, IAsyncDisposable
         await coordinatingQueueCompletionSource.Task;
 
         coordinatingQueue.Dispose();
+
+        ThrowBackgroundExceptionIfAny();
     }
 
     private void RunJobs()
     {
+        IJobRunner? nextJobRunner = null;
         try
         {
             foreach (var jobRunner in coordinatingQueue.GetConsumingEnumerable())
             {
+                nextJobRunner = jobRunner;
                 jobRunner.RunNext();
+                nextJobRunner = null;
             }
         }
         catch (Exception ex)
         {
             if (backgroundExceptions == null)
                 backgroundExceptions = new List<Exception>();
+            
 
-            backgroundExceptions.Add(ex);
+            if (nextJobRunner == null)
+            {
+                backgroundExceptions.Add(new AggregateException($"Exception thrown before job type could be resolved. See inner exceptions for details.", ex));
+            }
+            else
+            {
+                backgroundExceptions.Add(new AggregateException($"Exception throw while running job type {nextJobRunner.GetJobType()}. See inner exceptions for details.", ex));
+            }
         }
         finally
         {
@@ -94,7 +109,8 @@ public class Queue : IQueue, IAsyncDisposable
 
     private interface IJobRunner
     {
-        void RunNext();
+        internal Type GetJobType();
+        internal void RunNext();
     }
 
     private class JobRunner<TJob> : IJobRunner
@@ -103,22 +119,28 @@ public class Queue : IQueue, IAsyncDisposable
         private readonly Queue<TJob> jobs = new();
         private readonly IQueueServiceProvider queueServiceProvider;
 
-        public JobRunner(IQueueServiceProvider queueServiceProvider)
+        internal JobRunner(IQueueServiceProvider queueServiceProvider)
         {
             this.queueServiceProvider = queueServiceProvider;
         }
 
-        public void AddJob(TJob job) => jobs.Enqueue(job);
+        internal void AddJob(TJob job) => jobs.Enqueue(job);
 
-        public void RunNext()
+        Type IJobRunner.GetJobType() => typeof(TJob);
+
+        void IJobRunner.RunNext()
         {
             var data = jobs.Dequeue();
+
+            using var transactionScope = new TransactionScope();
 
             using var jobScope = queueServiceProvider.CreateScope();
 
             var executor = jobScope.ServiceProvider.GetRequiredService<IJobExecutor<TJob>>();
 
             executor.Execute(data);
+
+            transactionScope.Complete();
         }
     }
 }
