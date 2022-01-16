@@ -2,5 +2,5 @@
 
 public static class AssetContextExtensions
 {
-    public static AssetSet<string, Manifest> Manifests(this AssetContext assetContext) => new(assetContext);
+    public static AssetSet<string, Manifest> Manifests(this AssetContext assetContext) => assetContext.AssetSet<string, Manifest>();
 }
