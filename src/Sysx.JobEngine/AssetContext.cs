@@ -616,6 +616,19 @@ public class AssetContext : ISinglePhaseNotification
         }
     }
 
+    public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommittedAssets<TKey, TAsset>()
+        where TAsset : class, IAsset<TKey>
+    {
+        var assetSet = (AssetSet<TKey, TAsset>)assetSetCache[typeof(TAsset)];
+
+        foreach (var uncommitted in assetSet.UncommittedAssets)
+        {
+            assetSet.Assets.TryGetValue(uncommitted.Key, out var current);
+
+            yield return new UncommittedAsset<TKey, TAsset>(current, uncommitted.Value);
+        }
+    }
+
     public void SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
     {
         Commit();
@@ -760,4 +773,7 @@ public class AssetContext : ISinglePhaseNotification
         public Type AssetKeyType { get; }
         public Type AssetType { get; }
     }
+
+    public readonly record struct UncommittedAsset<TKey, TAsset>(TAsset? Current, TAsset? Uncommitted)
+        where TAsset : IAsset<TKey>;
 }
