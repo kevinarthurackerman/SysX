@@ -43,13 +43,13 @@ public interface IOnDeleteAssetEvent<TKey, TAsset>
 public readonly record struct OnAssetEventRequestData<TKey, TAsset>(Type AssetType, TKey AssetKey, TAsset? Asset)
     where TAsset : class, IAsset<TKey>;
 
-public readonly record struct OnAssetEventRequest<TKey, TAsset>(in OnAssetEventRequestData<TKey, TAsset> Previous, in OnAssetEventRequestData<TKey, TAsset> Current)
+public readonly record struct OnAssetEventRequest<TKey, TAsset>(in OnAssetEventRequestData<TKey, TAsset> Original, in OnAssetEventRequestData<TKey, TAsset> Current)
     where TAsset : class, IAsset<TKey>;
 
 public readonly record struct OnAssetEventResultData<TKey, TAsset>(Type AssetType, TKey AssetKey, TAsset? Asset, bool Success)
     where TAsset : class, IAsset<TKey>;
 
-public readonly record struct OnAssetEventResult<TKey, TAsset>(in OnAssetEventResultData<TKey, TAsset> Previous, in OnAssetEventResultData<TKey, TAsset> Current)
+public readonly record struct OnAssetEventResult<TKey, TAsset>(in OnAssetEventResultData<TKey, TAsset> Original, in OnAssetEventResultData<TKey, TAsset> Current)
     where TAsset : class, IAsset<TKey>;
 
 public delegate OnAssetEventResult<TKey, TAsset> OnAssetEventNext<TKey, TAsset>(in OnAssetEventRequestData<TKey, TAsset> requestData)
