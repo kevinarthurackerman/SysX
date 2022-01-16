@@ -95,19 +95,19 @@ public static class EngineFactory
     }
 
     public readonly record struct CreateEngineResult(Engine Engine, IQueue ConfigQueue, IQueue MainQueue, IQueue ContouringQueue, IQueue BackgroundQueue1, IQueue BackgroundQueue2);
+}
 
-    public class ConfigQueue : Queue
-    {
-        public ConfigQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
-    }
+public class ConfigQueue : Queue
+{
+    public ConfigQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
+}
 
-    public class MainQueue : Queue
-    {
-        public MainQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
-    }
+public class MainQueue : Queue
+{
+    public MainQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
+}
 
-    public class ContouringQueue : Queue
-    {
-        public ContouringQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
-    }
+public class ContouringQueue : Queue
+{
+    public ContouringQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
 }

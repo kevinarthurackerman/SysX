@@ -12,6 +12,3 @@ global using Test_Sysx.JobEngine.VoxelEngine.Assets;
 global using Test_Sysx.JobEngine.VoxelEngine.Jobs;
 global using Test_Sysx.JobEngine.VoxelEngine.OnActionHandlers;
 global using Xunit;
-global using static Sysx.JobEngine.AssetContext;
-global using static Test_Sysx.JobEngine.VoxelEngine.AssetContextExtensions;
-global using static Test_Sysx.JobEngine.VoxelEngine.EngineFactory;
