@@ -20,6 +20,21 @@ public static class ParamExtensions
     /// <summary>
     /// Ensure that the <see cref="IEnumerable"/> <paramref name="param"/> value does not contain a <see langword="null"/> value.
     /// </summary>
+    public static void IsNotAsyncDisposed<T>(this Param<T> param, bool isDisposed) where T : IAsyncDisposable
+    {
+        EnsureArg.HasValue(param.Value, nameof(param));
+
+        if (!isDisposed) return;
+
+        throw ThrowException(
+            param,
+            $"Disposed object {param.Name} can no longer be used.",
+            message => new ObjectDisposedException(param.Value.GetType().FullName, message));
+    }
+
+    /// <summary>
+    /// Ensure that the <see cref="IEnumerable"/> <paramref name="param"/> value does not contain a <see langword="null"/> value.
+    /// </summary>
     public static void DoesNotContainNull<TEnumerable>(this Param<TEnumerable> param)
         where TEnumerable : IEnumerable
     {

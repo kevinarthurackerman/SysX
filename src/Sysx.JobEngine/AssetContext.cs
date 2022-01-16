@@ -620,7 +620,7 @@ public class AssetContext : ISinglePhaseNotification
         where TAsset : class, IAsset<TKey>
     {
         var assetSet = (AssetSet<TKey, TAsset>)assetSetCache[typeof(TAsset)];
-
+        
         foreach (var uncommitted in assetSet.UncommittedAssets)
         {
             assetSet.Assets.TryGetValue(uncommitted.Key, out var current);

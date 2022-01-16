@@ -1,6 +1,4 @@
-﻿using System.Transactions;
-
-namespace Sysx.JobEngine;
+﻿namespace Sysx.JobEngine;
 
 public interface IQueue
 {
@@ -8,19 +6,22 @@ public interface IQueue
         where TJob : IJob;
 }
 
-public class Queue : IQueue, IAsyncDisposable
+public class Queue : IQueue, ISinglePhaseNotification, IAsyncDisposable
 {
     private readonly IQueueServiceProvider queueServiceProvider;
     private readonly BlockingCollection<IJobRunner> coordinatingQueue;
+    private readonly List<IJobRunner> transactionCoordinatingQueue;
     private readonly Dictionary<Type, IJobRunner> jobRunners;
+    private Transaction? transaction;
     private bool disposed;
-    private TaskCompletionSource<object> coordinatingQueueCompletionSource;
+    private readonly TaskCompletionSource<object> coordinatingQueueCompletionSource;
     private List<Exception>? backgroundExceptions;
 
     public Queue(IQueueServiceProvider queueServiceProvider)
     {
         this.queueServiceProvider = queueServiceProvider;
         coordinatingQueue = new();
+        transactionCoordinatingQueue = new();
         jobRunners = new();
         disposed = false;
         coordinatingQueueCompletionSource = new();
@@ -32,7 +33,11 @@ public class Queue : IQueue, IAsyncDisposable
     public void SubmitJob<TJob>(TJob data)
         where TJob : IJob
     {
+        Ensure.That(this).IsNotAsyncDisposed(disposed);
+
         ThrowBackgroundExceptionIfAny();
+
+        EnlistTransaction();
 
         if (!jobRunners.TryGetValue(typeof(TJob), out var jobRunner))
         {
@@ -42,11 +47,20 @@ public class Queue : IQueue, IAsyncDisposable
 
         ((JobRunner<TJob>)jobRunner).AddJob(data);
 
-        coordinatingQueue.Add(jobRunner);
+        if(transaction == null)
+        {
+            coordinatingQueue.Add(jobRunner);
+        }
+        else
+        {
+            transactionCoordinatingQueue.Add(jobRunner);
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
+        EnsureArg.IsTrue(transaction == null, optsFn: x => x.WithMessage("Cannot dispose while enlisted in a transaction."));
+
         ThrowBackgroundExceptionIfAny();
 
         if (disposed)
@@ -107,16 +121,75 @@ public class Queue : IQueue, IAsyncDisposable
         }
     }
 
+    public void SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
+    {
+        Commit();
+        singlePhaseEnlistment.Committed();
+    }
+
+    public void Commit(Enlistment enlistment)
+    {
+        Commit();
+        enlistment.Done();
+    }
+
+    public void InDoubt(Enlistment enlistment)
+    {
+        enlistment.Done();
+    }
+
+    public void Prepare(PreparingEnlistment preparingEnlistment)
+    {
+        preparingEnlistment.Prepared();
+    }
+
+    public void Rollback(Enlistment enlistment)
+    {
+        transaction = null;
+
+        foreach (var jobRunner in jobRunners.Values)
+            jobRunner.Rollback();
+
+        transactionCoordinatingQueue.Clear();
+
+        enlistment.Done();
+    }
+
+    private void EnlistTransaction()
+    {
+        if (Transaction.Current != null && Transaction.Current != transaction)
+        {
+            transaction = Transaction.Current;
+            transaction.EnlistVolatile(this, EnlistmentOptions.None);
+        }
+    }
+
+    private void Commit()
+    {
+        transaction = null;
+
+        foreach (var jobRunner in jobRunners.Values)
+            jobRunner.Commit();
+
+        foreach(var jobRunner in transactionCoordinatingQueue)
+            coordinatingQueue.Add(jobRunner);
+
+        transactionCoordinatingQueue.Clear();
+    }
+
     private interface IJobRunner
     {
         internal Type GetJobType();
         internal void RunNext();
+        internal void Commit();
+        internal void Rollback();
     }
 
     private class JobRunner<TJob> : IJobRunner
         where TJob : IJob
     {
         private readonly Queue<TJob> jobs = new();
+        private readonly Queue<TJob> transactionJobs = new();
         private readonly IQueueServiceProvider queueServiceProvider;
 
         internal JobRunner(IQueueServiceProvider queueServiceProvider)
@@ -124,9 +197,30 @@ public class Queue : IQueue, IAsyncDisposable
             this.queueServiceProvider = queueServiceProvider;
         }
 
-        internal void AddJob(TJob job) => jobs.Enqueue(job);
+        internal void AddJob(TJob job)
+        {
+            if (Transaction.Current == null)
+            {
+                jobs.Enqueue(job);
+            }
+            else
+            {
+                transactionJobs.Enqueue(job);
+            }
+        }
 
         Type IJobRunner.GetJobType() => typeof(TJob);
+
+        void IJobRunner.Commit()
+        {
+            while(transactionJobs.TryDequeue(out var job))
+                jobs.Enqueue(job);
+        }
+
+        void IJobRunner.Rollback()
+        {
+            transactionJobs.Clear();
+        }
 
         void IJobRunner.RunNext()
         {
