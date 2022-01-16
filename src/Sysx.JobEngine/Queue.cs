@@ -130,17 +130,45 @@ public class Queue : IQueue, IAsyncDisposable
 
         void IJobRunner.RunNext()
         {
-            var data = jobs.Dequeue();
-
-            using var transactionScope = new TransactionScope();
+            var job = jobs.Dequeue();
 
             using var jobScope = queueServiceProvider.CreateScope();
 
             var executor = jobScope.ServiceProvider.GetRequiredService<IJobExecutor<TJob>>();
 
-            executor.Execute(data);
+            var initialRequestData = new OnJobExecuteRequestData<TJob, IJobExecutor<TJob>>(job, executor);
 
-            transactionScope.Complete();
+            var handler = RootHandler;
+
+            var eventHandlers = queueServiceProvider
+                .GetServices<IOnJobExecute<TJob, IJobExecutor<TJob>>>()
+                .Reverse()
+                .ToArray();
+
+            OnJobExecuteResultData<TJob, IJobExecutor<TJob>>? previousResultData = null;
+            OnJobExecuteResultData<TJob, IJobExecutor<TJob>>? currentResultData = null;
+
+            foreach (var eventHandler in eventHandlers)
+            {
+                var innerHandler = handler;
+                handler = (in OnJobExecuteRequestData<TJob, IJobExecutor<TJob>> currentRequestData) =>
+                {
+                    var request = new OnJobExecuteRequest<TJob, IJobExecutor<TJob>>(in initialRequestData, in currentRequestData);
+                    currentResultData = eventHandler.Execute(in request, (in OnJobExecuteRequestData<TJob, IJobExecutor<TJob>> requestData) => innerHandler(requestData));
+                    return new OnJobExecuteResult<TJob, IJobExecutor<TJob>>(previousResultData!.Value, currentResultData.Value);
+                };
+            }
+
+            var handlerResult = handler(initialRequestData);
+
+            OnJobExecuteResult<TJob, IJobExecutor<TJob>> RootHandler(in OnJobExecuteRequestData<TJob, IJobExecutor<TJob>> requestData)
+            {
+                requestData.JobExecutor.Execute(requestData.Job);
+
+                previousResultData = new OnJobExecuteResultData<TJob, IJobExecutor<TJob>>();
+                var currentResultData = new OnJobExecuteResultData<TJob, IJobExecutor<TJob>>();
+                return new OnJobExecuteResult<TJob, IJobExecutor<TJob>>(previousResultData.Value, currentResultData);
+            }
         }
     }
 }

@@ -40,7 +40,8 @@ public class Engine : IDisposable
             {
                 return queueServiceProvider.GetRequiredService<IEngineServiceProvider>()
                     .GetRequiredService<IQueueLocator>();
-            });
+            })
+            .AddSingleton(typeof(IOnJobExecute<,>), typeof(OnJobExecute_TransactionScope<,>));
 
         createEngineOptions.DefaultConfigureQueueServices(defaultQueueServices);
 
