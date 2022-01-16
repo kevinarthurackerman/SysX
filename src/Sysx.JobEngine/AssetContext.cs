@@ -629,29 +629,29 @@ public class AssetContext : ISinglePhaseNotification
         }
     }
 
-    public void SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
+    void ISinglePhaseNotification.SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
     {
         Commit();
         singlePhaseEnlistment.Committed();
     }
 
-    public void Commit(Enlistment enlistment)
+    void IEnlistmentNotification.Commit(Enlistment enlistment)
     {
         Commit();
         enlistment.Done();
     }
 
-    public void InDoubt(Enlistment enlistment)
+    void IEnlistmentNotification.InDoubt(Enlistment enlistment)
     {
         enlistment.Done();
     }
 
-    public void Prepare(PreparingEnlistment preparingEnlistment)
+    void IEnlistmentNotification.Prepare(PreparingEnlistment preparingEnlistment)
     {
         preparingEnlistment.Prepared();
     }
 
-    public void Rollback(Enlistment enlistment)
+    void IEnlistmentNotification.Rollback(Enlistment enlistment)
     {
         transaction = null;
 
