@@ -6,16 +6,16 @@ public static class PropagateCreatePallet
 
     public class Handler : IJobExecutor<Job>
     {
-        private readonly AssetContext assetContext;
+        private readonly ConfigurableAssetContext configurableAssetContext;
 
-        public Handler(AssetContext assetContext)
+        public Handler(ConfigurableAssetContext configurableAssetContext)
         {
-            this.assetContext = assetContext;
+            this.configurableAssetContext = configurableAssetContext;
         }
 
         public void Execute(in Job data)
         {
-            assetContext.Pallets().Upsert(data.Pallet);
+            configurableAssetContext.Pallets.Upsert(data.Pallet);
         }
     }
 }

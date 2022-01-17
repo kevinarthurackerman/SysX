@@ -6,16 +6,16 @@ public static class ReadMainManifest
 
     public class Handler : IJobExecutor<Job>
     {
-        private readonly AssetContext assetContext;
+        private readonly AppAssetContext appAssetContext;
 
-        public Handler(AssetContext assetContext)
+        public Handler(AppAssetContext appAssetContext)
         {
-            this.assetContext = assetContext;
+            this.appAssetContext = appAssetContext;
         }
 
         public void Execute(in Job data)
         {
-            var manifest = assetContext.Manifests().Get("main");
+            var manifest = appAssetContext.Manifests.Get("main");
         }
     }
 }

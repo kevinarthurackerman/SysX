@@ -6,18 +6,18 @@ public static class CreatePallet
 
     public class Handler : IJobExecutor<Job>
     {
-        private readonly AssetContext assetContext;
+        private readonly ConfigurationAssetContext configAssetContext;
 
-        public Handler(AssetContext assetContext)
+        public Handler(ConfigurationAssetContext configAssetContext)
         {
-            this.assetContext = assetContext;
+            this.configAssetContext = configAssetContext;
         }
 
         public void Execute(in Job data)
         {
             var voxelPallet = new Pallet(data.Id, data.VoxelCodeMappings);
 
-            assetContext.Pallets().Upsert(voxelPallet);
+            configAssetContext.Pallets.Upsert(voxelPallet);
         }
     }
 }

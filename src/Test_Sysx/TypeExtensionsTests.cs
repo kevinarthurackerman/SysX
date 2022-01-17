@@ -63,6 +63,30 @@ public class TypeExtensionsTests
         });
     }
 
+    [Fact]
+    public void Should_Be_Assignable()
+    {
+        Assert.True(typeof(TestInheritingGenericClass).IsAssignableToGenericType(typeof(TestGenericClass<>)));
+    }
+
+    [Fact]
+    public void Should_Not_Be_Assignable()
+    {
+        Assert.False(typeof(object).IsAssignableToGenericType(typeof(TestGenericClass<>)));
+    }
+
+    [Fact]
+    public void Should_Get_Generic_Argument()
+    {
+        Assert.Equal(typeof(int), typeof(TestInheritingGenericClass).GetGenericTypeArgument(typeof(TestGenericClass<>)));
+    }
+
+    [Fact]
+    public void Should_Not_Get_Generic_Argument()
+    {
+        Assert.Null(typeof(object).GetGenericTypeArgument(typeof(TestGenericClass<>)));
+    }
+
     public class TestParent
     {
         public class TestChild
@@ -72,4 +96,8 @@ public class TypeExtensionsTests
     }
 
     public struct TestStruct { }
+
+    public class TestGenericClass<T> { }
+
+    public class TestInheritingGenericClass : TestGenericClass<int> { }
 }

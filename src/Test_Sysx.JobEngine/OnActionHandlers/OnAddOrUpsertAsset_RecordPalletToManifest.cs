@@ -2,11 +2,11 @@
 
 public class OnAddOrUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Guid, Pallet>, IOnUpsertAssetEvent<Guid, Pallet>
 {
-    private readonly AssetContext assetContext;
+    private readonly AppAssetContext appAssetContext;
 
-    public OnAddOrUpsertAsset_RecordPalletToManifest(AssetContext assetContext)
+    public OnAddOrUpsertAsset_RecordPalletToManifest(AppAssetContext appAssetContext)
     {
-        this.assetContext = assetContext;
+        this.appAssetContext = appAssetContext;
     }
 
     public OnAssetEventResultData<Guid, Pallet> Execute(in OnAssetEventRequest<Guid, Pallet> request, OnAssetEventNext<Guid, Pallet> next)
@@ -15,11 +15,11 @@ public class OnAddOrUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Guid, 
 
         if (result.Current.Success && result.Current.Asset != null)
         {
-            var manifest = assetContext.Manifests().Get("main");
+            var manifest = appAssetContext.Manifests.Get("main");
 
             manifest = new Manifest(manifest.Key, manifest.PalletIds.Append(result.Current.Asset.Key).Distinct().ToArray());
 
-            assetContext.Manifests().Update(manifest);
+            appAssetContext.Manifests.Update(manifest);
         }
 
         return result.Current;

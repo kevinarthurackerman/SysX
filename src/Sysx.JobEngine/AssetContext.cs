@@ -18,6 +18,19 @@ public class AssetContext
                     .Single()
                     .Invoke(new object[] { assetMapping, queueServiceProvider });
             });
+
+        var assetSetProperties = GetType().GetProperties()
+            .Where(x => x.PropertyType.IsAssignableToGenericType(typeof(AssetSet<,>)))
+            .ToArray();
+
+        foreach(var property in GetType().GetProperties())
+        {
+            var assetType = property.PropertyType.GetGenericTypeArgument(typeof(AssetSet<,>), 1);
+
+            if (assetType == null) continue;
+
+            property.SetValue(this, assetSetCache[assetType]);
+        }
     }
 
     public AssetSet<TKey, TAsset> AssetSet<TKey, TAsset>()
