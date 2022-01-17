@@ -10,13 +10,12 @@ public class Tests
             configureDefaultQueueServices: services => { },
             configureConfigQueueServices: services =>
             {
-                services.AddTransient<IOnAddAssetEvent<Guid, Pallet>, OnAddOrUpsertAsset_RecordPalletToManifest>();
-                services.AddTransient<IOnUpsertAssetEvent<Guid, Pallet>, OnAddOrUpsertAsset_RecordPalletToManifest>();
+                services.AddOnAssetEvent(typeof(OnAddOrUpsertAsset_RecordPalletToManifest));
 
                 services.AddSingleton<AppAssetContext>();
                 services.AddSingleton<IAssetMapping>(new AssetMapping<string, Manifest>());
-                services.AddTransient<IJobExecutor<UpsertMainManifest.Job>, UpsertMainManifest.Handler>();
-                services.AddTransient<IJobExecutor<ReadMainManifest.Job>, ReadMainManifest.Handler>();
+                services.AddJobExecutor(typeof(UpsertMainManifest.Handler));
+                services.AddJobExecutor(typeof(ReadMainManifest.Handler));
             },
             configureMainQueueServices: services => { },
             configureContouringQueueServices: services => { });

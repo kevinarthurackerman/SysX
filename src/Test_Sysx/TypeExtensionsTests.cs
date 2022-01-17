@@ -64,13 +64,19 @@ public class TypeExtensionsTests
     }
 
     [Fact]
-    public void Should_Be_Assignable()
+    public void Generic_Should_Be_Assignable()
     {
         Assert.True(typeof(TestInheritingGenericClass).IsAssignableToGenericType(typeof(TestGenericClass<>)));
     }
 
     [Fact]
-    public void Should_Not_Be_Assignable()
+    public void Open_Generic_Should_Be_Assignable()
+    {
+        Assert.True(typeof(TestOpenGenericInheritingGenericClass<>).IsAssignableToGenericType(typeof(TestGenericClass<>)));
+    }
+
+    [Fact]
+    public void Generic_Should_Not_Be_Assignable()
     {
         Assert.False(typeof(object).IsAssignableToGenericType(typeof(TestGenericClass<>)));
     }
@@ -82,9 +88,35 @@ public class TypeExtensionsTests
     }
 
     [Fact]
+    public void Should_Get_Open_Generic_Argument()
+    {
+        var typeOfT = typeof(TestOpenGenericInheritingGenericClass<>).BaseType!.GetGenericArguments()[0];
+        Assert.Equal(typeOfT, typeof(TestOpenGenericInheritingGenericClass<>).GetGenericTypeArgument(typeof(TestGenericClass<>)));
+    }
+
+    [Fact]
     public void Should_Not_Get_Generic_Argument()
     {
         Assert.Null(typeof(object).GetGenericTypeArgument(typeof(TestGenericClass<>)));
+    }
+
+    [Fact]
+    public void Should_Get_Generic_Implementation()
+    {
+        Assert.Equal(typeof(TestGenericClass<int>), typeof(TestInheritingGenericClass).GetGenericTypeImplementation(typeof(TestGenericClass<>)));
+    }
+
+    [Fact]
+    public void Should_Get_Open_Generic_Implementation()
+    {
+        var typeImplementation = typeof(TestOpenGenericInheritingGenericClass<>).BaseType;
+        Assert.Equal(typeImplementation, typeof(TestOpenGenericInheritingGenericClass<>).GetGenericTypeImplementation(typeof(TestGenericClass<>)));
+    }
+
+    [Fact]
+    public void Should_Not_Get_Generic_Implementation()
+    {
+        Assert.Null(typeof(object).GetGenericTypeImplementation(typeof(TestGenericClass<>)));
     }
 
     public class TestParent
@@ -100,4 +132,6 @@ public class TypeExtensionsTests
     public class TestGenericClass<T> { }
 
     public class TestInheritingGenericClass : TestGenericClass<int> { }
+
+    public class TestOpenGenericInheritingGenericClass<T> : TestGenericClass<T> { }
 }

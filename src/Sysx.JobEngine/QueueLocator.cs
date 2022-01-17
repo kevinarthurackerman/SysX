@@ -1,49 +1,64 @@
 ﻿namespace Sysx.JobEngine;
 
+public static class IQueueLocatorExtensions
+{
+    public static IQueue Get(this IQueueLocator queueLocator)
+        => queueLocator.Get(typeof(IQueue), QueueLocator.DefaultQueueName);
+
+    public static IQueue Get(this IQueueLocator queueLocator, string name)
+        => queueLocator.Get(typeof(IQueue), name);
+
+    public static TQueue Get<TQueue>(this IQueueLocator queueLocator)
+        where TQueue : IQueue
+        => (TQueue)queueLocator.Get(typeof(TQueue), QueueLocator.DefaultQueueName);
+
+    public static TQueue Get<TQueue>(this IQueueLocator queueLocator, string name)
+        where TQueue : IQueue
+        => (TQueue)queueLocator.Get(typeof(TQueue), name);
+}
+
 public interface IQueueLocator
 {
-    public TQueue Get<TQueue>()
-        where TQueue : IQueue;
-
-    public TQueue Get<TQueue>(string name)
-        where TQueue : IQueue;
-
-    internal void RegisterQueue<TQueue>(TQueue queue)
-        where TQueue : IQueue;
-
-    internal void RegisterQueue<TQueue>(TQueue queue, string name)
-        where TQueue : IQueue;
-
-    internal void DeregisterQueue<TQueue>()
-        where TQueue : IQueue;
-
-    internal void DeregisterQueue<TQueue>(string name)
-        where TQueue : IQueue;
+    public IQueue Get(Type queueType, string name);
+    internal void Register(IQueue queue, string name);
+    internal void Deregister(Type queueType, string name);
 }
 
 public class QueueLocator : IQueueLocator
 {
     private readonly Dictionary<QueueKey, IQueue> queues = new();
 
-    public TQueue Get<TQueue>()
-        where TQueue : IQueue
-        => (TQueue)queues[new QueueKey(typeof(TQueue), "Default")];
+    public const string DefaultQueueName = "Default";
 
-    public TQueue Get<TQueue>(string name)
-        where TQueue : IQueue
-        => (TQueue)queues[new QueueKey(typeof(TQueue), name)];
+    public IQueue Get(Type queueType, string name)
+    {
+        EnsureArg.IsNotNull(queueType, nameof(queueType));
+        EnsureArg.IsTrue(
+            typeof(IQueue).IsAssignableFrom(queueType),
+            optsFn: x => x.WithMessage($"Type {nameof(queueType)} must be assignable to {typeof(IQueue)}"));
+        EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
 
-    void IQueueLocator.RegisterQueue<TQueue>(TQueue queue)
-        => queues.Add(new QueueKey(typeof(TQueue), "Default"), queue);
+        return queues[new QueueKey(queueType, name)];
+    }
 
-    void IQueueLocator.RegisterQueue<TQueue>(TQueue queue, string name)
-        => queues.Add(new QueueKey(typeof(TQueue), name), queue);
+    void IQueueLocator.Register(IQueue queue, string name)
+    {
+        EnsureArg.IsNotNull(queue, nameof(queue));
+        EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
 
-    void IQueueLocator.DeregisterQueue<TQueue>()
-        => queues.Remove(new QueueKey(typeof(TQueue), "Default"));
+        queues[new QueueKey(queue.GetType(), name)] = queue;
+    }
 
-    void IQueueLocator.DeregisterQueue<TQueue>(string name)
-        => queues.Remove(new QueueKey(typeof(TQueue), name));
+    void IQueueLocator.Deregister(Type queueType, string name)
+    {
+        EnsureArg.IsNotNull(queueType, nameof(queueType));
+        EnsureArg.IsTrue(
+            typeof(IQueue).IsAssignableFrom(queueType),
+            optsFn: x => x.WithMessage($"Type {nameof(queueType)} must be assignable to {typeof(IQueue)}"));
+        EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
+
+        queues.Remove(new QueueKey(queueType, name));
+    }
 
     private readonly record struct QueueKey(Type Type, string Name);
 }

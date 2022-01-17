@@ -156,4 +156,35 @@ public static class TypeExtensions
 
         return GetGenericTypeArgument(baseType, genericType, argumentIndex);
     }
+
+    /// <summary>
+    /// Gets a generic type implementation from type.
+    /// Returns null if the generic type is not implemented or inherited from.
+    /// </summary>
+    public static Type? GetGenericTypeImplementation(this Type type, Type genericType)
+    {
+        EnsureArg.IsNotNull(type);
+        EnsureArg.IsNotNull(genericType);
+        EnsureArg.IsTrue(genericType.IsGenericType, optsFn: x => x.WithMessage($"Type of {nameof(genericType)} must be a generic type"));
+        
+        var interfaceTypes = type.GetInterfaces();
+
+        foreach (var it in interfaceTypes)
+        {
+            if (it.IsGenericType && it.GetGenericTypeDefinition() == genericType)
+            {
+                return it;
+            }
+        }
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == genericType)
+        {
+            return type;
+        }
+
+        Type baseType = type.BaseType;
+        if (baseType == null) return null;
+
+        return GetGenericTypeImplementation(baseType, genericType);
+    }
 }

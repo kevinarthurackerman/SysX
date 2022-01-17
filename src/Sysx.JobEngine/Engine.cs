@@ -45,7 +45,9 @@ public class Engine : IDisposable
 
         createEngineOptions.DefaultConfigureQueueServices(defaultQueueServices);
 
-        this.defaultQueueServices = Copy(defaultQueueServices);
+        this.defaultQueueServices = new ServiceCollection();
+        foreach (var service in defaultQueueServices)
+            this.defaultQueueServices.Add(service);
     }
 
     public IQueue CreateQueue(in CreateQueueOptions createQueueOptions)
@@ -55,6 +57,8 @@ public class Engine : IDisposable
         where TQueue : IQueue
     {
         Ensure.That(this).IsNotDisposed(disposed);
+
+        createQueueOptions.Validate();
 
         var queueScope = engineServices.CreateScope();
 
@@ -81,40 +85,41 @@ public class Engine : IDisposable
         queues.Add(new QueueKey(typeof(TQueue), createQueueOptions.Name), new QueueInfo(queue, queueScope));
 
         engineServices.GetRequiredService<IQueueLocator>()
-            .RegisterQueue(queue, createQueueOptions.Name);
+            .Register(queue, createQueueOptions.Name);
 
         return queue;
     }
 
     public void RemoveQueue()
-        => RemoveQueue<IQueue>("Default");
+        => RemoveQueueInner(typeof(IQueue), QueueLocator.DefaultQueueName, checkDisposed: true);
 
     public void RemoveQueue(string name)
-        => RemoveQueue<IQueue>(name);
+        => RemoveQueueInner(typeof(IQueue), name, checkDisposed: true);
 
     public void RemoveQueue<TQueue>()
         where TQueue : IQueue
-        => RemoveQueue<TQueue>("Default");
+        => RemoveQueueInner(typeof(TQueue), QueueLocator.DefaultQueueName, checkDisposed: true);
 
     public void RemoveQueue<TQueue>(string name)
         where TQueue : IQueue
-    {
-        Ensure.That(this).IsNotDisposed(disposed);
+        => RemoveQueueInner(typeof(TQueue), name, checkDisposed: true);
 
-        RemoveQueueInner<TQueue>(name);
-    }
-
-    private void RemoveQueueInner<TQueue>(string name)
-        where TQueue : IQueue
+    private void RemoveQueueInner(Type queueType, string name, bool checkDisposed)
     {
-        var key = new QueueKey(typeof(TQueue), name);
+        if (checkDisposed) Ensure.That(this).IsNotDisposed(disposed);
+        EnsureArg.IsTrue(
+            typeof(IQueue).IsAssignableFrom(queueType),
+            optsFn: x => x.WithMessage($"Type {nameof(queueType)} must be assignable to {typeof(IQueue)}"));
+        EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
+
+        name ??= QueueLocator.DefaultQueueName;
+        var key = new QueueKey(queueType, name);
 
         var queue = queues[key];
 
-        queues.Remove(new QueueKey(typeof(TQueue), name));
+        queues.Remove(key);
 
-        engineServices.GetRequiredService<IQueueLocator>()
-            .DeregisterQueue<TQueue>(name);
+        engineServices.GetRequiredService<IQueueLocator>().Deregister(queueType, name);
 
         if (queue.Queue is IAsyncDisposable asyncDisposableQueue)
         {
@@ -142,21 +147,7 @@ public class Engine : IDisposable
         disposed = true;
 
         foreach (var queueKey in queues.Keys)
-        {
-            typeof(Engine).GetMethod(nameof(RemoveQueueInner), BindingFlags.NonPublic | BindingFlags.Instance)!
-                .MakeGenericMethod(queueKey.Type)
-                .Invoke(this, new object[] { queueKey.Name });
-        }
-    }
-
-    private static IServiceCollection Copy(IServiceCollection services)
-    {
-        var copy = new ServiceCollection();
-
-        foreach (var service in services)
-            copy.Add(service);
-
-        return copy;
+            RemoveQueueInner(queueKey.Type, queueKey.Name, checkDisposed: false);
     }
 
     public record struct CreateEngineOptions
@@ -182,7 +173,7 @@ public class Engine : IDisposable
     {
         public static CreateQueueOptions Default => new()
         {
-            Name = "Default",
+            Name = QueueLocator.DefaultQueueName,
             ConfigureQueueServices = x => { }
         };
 
