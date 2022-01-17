@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.OnActionHandlers;
+﻿namespace Test_Sysx.JobEngine.App.OnActionHandlers;
 
 internal class OnAddOrUpsertPallet_PropagatePallet : IOnAddAssetEvent<Guid, Pallet>, IOnUpsertAssetEvent<Guid, Pallet>
 {

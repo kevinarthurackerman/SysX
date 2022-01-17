@@ -1,6 +1,6 @@
-﻿namespace Test_Sysx.JobEngine.Jobs;
+﻿namespace Test_Sysx.JobEngine.App.Jobs;
 
-public static class ReadMainManifest
+public static class UpsertMainManifest
 {
     public readonly record struct Job : IJob { }
 
@@ -15,7 +15,10 @@ public static class ReadMainManifest
 
         public void Execute(in Job data)
         {
-            var manifest = appAssetContext.Manifests.Get("main");
+            if (!appAssetContext.Manifests.TryGet("main", out var _))
+            {
+                appAssetContext.Manifests.Add(new Manifest("main", Array.Empty<Guid>()));
+            }
         }
     }
 }

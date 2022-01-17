@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.Assets;
+﻿namespace Test_Sysx.JobEngine.App.Assets;
 
 public class Manifest : IAsset<string>
 {

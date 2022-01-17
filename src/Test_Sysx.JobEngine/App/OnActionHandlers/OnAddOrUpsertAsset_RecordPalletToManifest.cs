@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.OnActionHandlers;
+﻿namespace Test_Sysx.JobEngine.App.OnActionHandlers;
 
 public class OnAddOrUpsertAsset_RecordPalletToManifest : IOnAddAssetEvent<Guid, Pallet>, IOnUpsertAssetEvent<Guid, Pallet>
 {
