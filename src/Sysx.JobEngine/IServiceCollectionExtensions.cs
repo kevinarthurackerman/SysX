@@ -24,7 +24,7 @@ public static class IServiceCollectionExtensions
         ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
     {
         var isQueueType = typeof(IQueue).IsAssignableFrom(queueType);
-
+        
         if (!isQueueType)
             throw new InvalidOperationException($"Type {nameof(isQueueType)} {isQueueType} is not a Queue type.");
 

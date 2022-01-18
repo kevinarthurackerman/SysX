@@ -118,45 +118,6 @@ public static class TypeExtensions
         return IsAssignableToGenericType(baseType, genericType);
     }
 
-    /// <inheritdoc cref="GetGenericTypeArgument(Type, Type, int)"/>
-    public static Type? GetGenericTypeArgument(this Type type, Type genericType) =>
-        GetGenericTypeArgument(type, genericType, 0);
-
-    /// <summary>
-    /// Gets a generic type argument for a type implementing or inheriting from a generic type.
-    /// Returns null if the generic type is not implemented or inherited from.
-    /// </summary>
-    public static Type? GetGenericTypeArgument(this Type type, Type genericType, int argumentIndex)
-    {
-        EnsureArg.IsNotNull(type);
-        EnsureArg.IsNotNull(genericType);
-        EnsureArg.IsTrue(genericType.IsGenericType, optsFn: x => x.WithMessage($"Type of {nameof(genericType)} must be a generic type"));
-        EnsureArg.IsGte(argumentIndex, 0);
-        EnsureArg.IsTrue(
-            genericType.GetGenericArguments().Length > argumentIndex,
-            optsFn: x => x.WithMessage($"Generic type argument index {nameof(argumentIndex)} {argumentIndex} is out of bounds for {nameof(genericType)} {genericType}."));
-
-        var interfaceTypes = type.GetInterfaces();
-
-        foreach (var it in interfaceTypes)
-        {
-            if (it.IsGenericType && it.GetGenericTypeDefinition() == genericType)
-            {
-                return it.GetGenericArguments()[argumentIndex];
-            }
-        }
-
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == genericType)
-        {
-            return type.GetGenericArguments()[argumentIndex];
-        }
-
-        Type baseType = type.BaseType;
-        if (baseType == null) return null;
-
-        return GetGenericTypeArgument(baseType, genericType, argumentIndex);
-    }
-
     /// <summary>
     /// Gets a generic type implementation from type.
     /// Returns null if the generic type is not implemented or inherited from.

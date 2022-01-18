@@ -25,7 +25,9 @@ public class AssetContext
 
         foreach (var property in GetType().GetProperties())
         {
-            var assetType = property.PropertyType.GetGenericTypeArgument(typeof(IAssetSet<,>), 1);
+            var assetType = property.PropertyType
+                .GetGenericTypeImplementation(typeof(IAssetSet<,>))
+                .GenericTypeArguments[1];
 
             if (assetType == null) continue;
 

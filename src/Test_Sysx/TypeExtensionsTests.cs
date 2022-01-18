@@ -82,25 +82,6 @@ public class TypeExtensionsTests
     }
 
     [Fact]
-    public void Should_Get_Generic_Argument()
-    {
-        Assert.Equal(typeof(int), typeof(TestInheritingGenericClass).GetGenericTypeArgument(typeof(TestGenericClass<>)));
-    }
-
-    [Fact]
-    public void Should_Get_Open_Generic_Argument()
-    {
-        var typeOfT = typeof(TestOpenGenericInheritingGenericClass<>).BaseType!.GetGenericArguments()[0];
-        Assert.Equal(typeOfT, typeof(TestOpenGenericInheritingGenericClass<>).GetGenericTypeArgument(typeof(TestGenericClass<>)));
-    }
-
-    [Fact]
-    public void Should_Not_Get_Generic_Argument()
-    {
-        Assert.Null(typeof(object).GetGenericTypeArgument(typeof(TestGenericClass<>)));
-    }
-
-    [Fact]
     public void Should_Get_Generic_Implementation()
     {
         Assert.Equal(typeof(TestGenericClass<int>), typeof(TestInheritingGenericClass).GetGenericTypeImplementation(typeof(TestGenericClass<>)));
