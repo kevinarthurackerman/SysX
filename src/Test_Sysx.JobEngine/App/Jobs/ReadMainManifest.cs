@@ -2,9 +2,9 @@
 
 public static class ReadMainManifest
 {
-    public readonly record struct Job : IJob { }
+    public readonly record struct JobData : IJob { }
 
-    public class Executor : IJobExecutor<Job>
+    public class Executor : IJobExecutor<JobData>
     {
         private readonly AppAssetContext appAssetContext;
 
@@ -13,7 +13,7 @@ public static class ReadMainManifest
             this.appAssetContext = appAssetContext;
         }
 
-        public void Execute(in Job data)
+        public void Execute(in JobData data)
         {
             var manifest = appAssetContext.Manifests.Get("main");
         }

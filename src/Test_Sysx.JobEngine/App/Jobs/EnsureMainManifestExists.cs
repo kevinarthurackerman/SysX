@@ -1,10 +1,10 @@
 ﻿namespace Test_Sysx.JobEngine.App.Jobs;
 
-public static class UpsertMainManifest
+public static class EnsureMainManifestExists
 {
-    public readonly record struct Job : IJob { }
+    public readonly record struct JobData : IJob { }
 
-    public class Executor : IJobExecutor<Job>
+    public class Executor : IJobExecutor<JobData>
     {
         private readonly AppAssetContext appAssetContext;
 
@@ -13,7 +13,7 @@ public static class UpsertMainManifest
             this.appAssetContext = appAssetContext;
         }
 
-        public void Execute(in Job data)
+        public void Execute(in JobData data)
         {
             if (!appAssetContext.Manifests.TryGet("main", out var _))
             {

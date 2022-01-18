@@ -13,23 +13,21 @@ public class Tests
                 services.AddOnJobExecute(typeof(OnJobExecute_RecordPalletsToManifest<,>));
 
                 services.AddAssetContext(typeof(AppAssetContext), new[] { typeof(Manifest) });
-                services.AddJobExecutor(typeof(UpsertMainManifest.Executor));
+                services.AddJobExecutor(typeof(EnsureMainManifestExists.Executor));
                 services.AddJobExecutor(typeof(ReadMainManifest.Executor));
             },
             configureMainQueueServices: services => { },
             configureContouringQueueServices: services => { });
 
-        var voxelPalletId = Guid.NewGuid();
-
-        configuration.ConfigQueue.SubmitJob(new UpsertMainManifest.Job());
+        configuration.ConfigQueue.SubmitJob(new EnsureMainManifestExists.JobData());
             
-        configuration.ConfigQueue.SubmitJob(new CreatePallet.Job
+        configuration.ConfigQueue.SubmitJob(new CreatePallet.JobData
         { 
-            Id = voxelPalletId,
+            Id = Guid.NewGuid(),
             VoxelCodeMappings = ImmutableDictionary<int, Pallet.VoxelType>.Empty 
         });
 
-        configuration.ConfigQueue.SubmitJob(new ReadMainManifest.Job());
+        configuration.ConfigQueue.SubmitJob(new ReadMainManifest.JobData());
 
         configuration.Engine.Dispose();
     }

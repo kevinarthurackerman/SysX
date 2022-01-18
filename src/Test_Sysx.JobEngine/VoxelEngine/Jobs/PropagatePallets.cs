@@ -2,12 +2,12 @@
 
 public static class PropagatePallets
 {
-    public readonly record struct Job(IEnumerable<Job.PalletData> Pallets) : IJob
+    public readonly record struct JobData(IEnumerable<JobData.PalletData> Pallets) : IJob
     {
         public readonly record struct PalletData(Pallet? Old, Pallet? New);
     };
 
-    public class Executor : IJobExecutor<Job>
+    public class Executor : IJobExecutor<JobData>
     {
         private readonly ConfigurableAssetContext? configurableAssetContext;
 
@@ -16,7 +16,7 @@ public static class PropagatePallets
             this.configurableAssetContext = configurableAssetContext;
         }
 
-        public void Execute(in Job data)
+        public void Execute(in JobData data)
         {
             if (configurableAssetContext == null) return;
 

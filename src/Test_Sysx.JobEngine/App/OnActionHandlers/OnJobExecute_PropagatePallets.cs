@@ -33,10 +33,10 @@ public class OnJobExecute_PropagatePallets<TJob, TJobExecutor> : IOnJobExecuteEv
         foreach (var queue in queues)
         {
             var palletDatas = palletsModified
-                .Select(x => new PropagatePallets.Job.PalletData(x.Current, x.Uncommitted))
+                .Select(x => new PropagatePallets.JobData.PalletData(x.Current, x.Uncommitted))
                 .ToArray();
 
-            queue.SubmitJob(new PropagatePallets.Job(palletDatas));
+            queue.SubmitJob(new PropagatePallets.JobData(palletDatas));
         }
 
         return result.Current;
