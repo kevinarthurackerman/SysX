@@ -7,7 +7,7 @@ public class ConfigurationAssetContext : AssetContext
     {
     }
 
-    public AssetSet<Guid, Pallet> Pallets { get; set; } = null!;
+    public IAssetSet<Guid, Pallet> Pallets { get; set; } = null!;
 }
 
 public class ConfigurableAssetContext : AssetContext
@@ -17,7 +17,7 @@ public class ConfigurableAssetContext : AssetContext
     {
     }
 
-    public AssetSet<Guid, Pallet> Pallets { get; set; } = null!;
+    public IAssetSet<Guid, Pallet> Pallets { get; set; } = null!;
 }
 
 public class MainAssetContext : ConfigurableAssetContext
@@ -27,8 +27,8 @@ public class MainAssetContext : ConfigurableAssetContext
     {
     }
 
-    public AssetSet<Guid, Grid> Grids { get; set; } = null!;
-    public AssetSet<Guid, Chunk> Chunks { get; set; } = null!;
+    public IAssetSet<Guid, Grid> Grids { get; set; } = null!;
+    public IAssetSet<Guid, Chunk> Chunks { get; set; } = null!;
 }
 
 public class ContouringAssetContext : ConfigurableAssetContext
@@ -38,5 +38,5 @@ public class ContouringAssetContext : ConfigurableAssetContext
     {
     }
 
-    public AssetSet<Guid, Shape> Shapes { get; set; } = null!;
+    public IAssetSet<Guid, Shape> Shapes { get; set; } = null!;
 }

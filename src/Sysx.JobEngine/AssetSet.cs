@@ -1,6 +1,22 @@
 ﻿namespace Sysx.JobEngine;
 
-public class AssetSet<TKey, TAsset> : ISinglePhaseNotification
+public interface IAssetSet<TKey, TAsset>
+    where TAsset : class, IAsset<TKey>
+{
+    public TAsset Get(TKey key);
+    public bool TryGet(TKey key, out TAsset? result);
+    public TAsset Add(TAsset asset);
+    public bool TryAdd(TAsset asset, out TAsset? result);
+    public TAsset Upsert(TAsset asset);
+    public bool TryUpsert(TAsset asset, out TAsset? result);
+    public TAsset Update(TAsset asset);
+    public bool TryUpdate(TAsset asset, out TAsset? result);
+    public TAsset Delete(TKey key);
+    public bool TryDelete(TKey key, out TAsset? result);
+    public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommittedAssets();
+}
+
+public class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNotification
     where TAsset : class, IAsset<TKey>
 {
     private readonly IAssetMapping assetMapping;
@@ -525,13 +541,13 @@ public class AssetSet<TKey, TAsset> : ISinglePhaseNotification
         }
     }
 
-    public IEnumerable<UncommittedAsset> GetUncommittedAssets()
+    public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommittedAssets()
     {
         foreach (var uncommitted in uncommittedAssets)
         {
             assets.TryGetValue(uncommitted.Key, out var current);
 
-            yield return new UncommittedAsset(current, uncommitted.Value);
+            yield return new UncommittedAsset<TKey, TAsset>(current, uncommitted.Value);
         }
     }
 
@@ -625,6 +641,7 @@ public class AssetSet<TKey, TAsset> : ISinglePhaseNotification
 
         uncommittedAssets.Clear();
     }
-
-    public readonly record struct UncommittedAsset(TAsset? Current, TAsset? Uncommitted);
 }
+
+public readonly record struct UncommittedAsset<TKey, TAsset>(TAsset? Current, TAsset? Uncommitted)
+    where TAsset : class, IAsset<TKey>;

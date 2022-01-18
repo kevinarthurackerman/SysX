@@ -20,12 +20,12 @@ public class AssetContext
             });
 
         var assetSetProperties = GetType().GetProperties()
-            .Where(x => x.PropertyType.IsAssignableToGenericType(typeof(AssetSet<,>)))
+            .Where(x => x.PropertyType.IsAssignableToGenericType(typeof(IAssetSet<,>)))
             .ToArray();
 
-        foreach(var property in GetType().GetProperties())
+        foreach (var property in GetType().GetProperties())
         {
-            var assetType = property.PropertyType.GetGenericTypeArgument(typeof(AssetSet<,>), 1);
+            var assetType = property.PropertyType.GetGenericTypeArgument(typeof(IAssetSet<,>), 1);
 
             if (assetType == null) continue;
 
