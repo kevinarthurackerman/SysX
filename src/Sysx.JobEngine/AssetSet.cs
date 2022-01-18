@@ -1,5 +1,24 @@
 ﻿namespace Sysx.JobEngine;
 
+public static class IAssetSetExtensions
+{
+    public static TAsset Get<TKey, TAsset>(this IAssetSet<TKey, TAsset> assetSet, TAsset asset)
+        where TAsset : class, IAsset<TKey>
+        => assetSet.Get(asset.Key);
+
+    public static bool TryGet<TKey, TAsset>(this IAssetSet<TKey, TAsset> assetSet, TAsset asset, out TAsset? result)
+        where TAsset : class, IAsset<TKey>
+        => assetSet.TryGet(asset.Key, out result);
+
+    public static TAsset Delete<TKey, TAsset>(this IAssetSet<TKey, TAsset> assetSet, TAsset asset)
+        where TAsset : class, IAsset<TKey>
+        => assetSet.Delete(asset.Key);
+
+    public static bool TryDelete<TKey, TAsset>(this IAssetSet<TKey, TAsset> assetSet, TAsset asset, out TAsset? result)
+        where TAsset : class, IAsset<TKey>
+        => assetSet.TryDelete(asset.Key, out result);
+}
+
 public interface IAssetSet<TKey, TAsset>
     where TAsset : class, IAsset<TKey>
 {
