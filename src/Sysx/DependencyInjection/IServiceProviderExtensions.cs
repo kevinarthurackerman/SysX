@@ -2,9 +2,17 @@
 
 public static class IServiceProviderExtensions
 {
+    /// <inheritdoc cref="Activate(IServiceProvider, Type, object[])"/>
     public static TService Activate<TService>(this IServiceProvider serviceProvider, params object[] withParameters)
         => (TService)Activate(serviceProvider, typeof(TService), withParameters);
 
+
+    /// <summary>
+    /// Activates an instance of the service type using the parameters provided and the service provider.
+    /// This method can be used to activate types not registered to the services provider,
+    /// or it can be used when registering types with a service factory to provide some parameters
+    /// statically while getting others from the service provider.
+    /// </summary>
     public static object Activate(this IServiceProvider serviceProvider, Type serviceType, params object[] withParameters)
     {
         EnsureArg.IsNotNull(serviceProvider, nameof(serviceProvider));
