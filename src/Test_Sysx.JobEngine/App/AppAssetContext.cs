@@ -2,8 +2,8 @@
 
 public class AppAssetContext : AssetContext
 {
-    public AppAssetContext(IEnumerable<IAssetMapping> assetMappings, IQueueServiceProvider queueServiceProvider)
-        : base(assetMappings, queueServiceProvider)
+    public AppAssetContext(IEnumerable<Type> assetTypes, IQueueServiceProvider queueServiceProvider)
+        : base(assetTypes, queueServiceProvider)
     {
     }
 

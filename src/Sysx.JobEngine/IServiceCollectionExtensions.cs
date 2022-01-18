@@ -1,8 +1,10 @@
-﻿namespace Sysx.JobEngine;
+﻿using Sysx.DependencyInjection;
+
+namespace Sysx.JobEngine;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddQueueToEngine(
+    public static IServiceCollection AddQueueTypeToEngine(
         this IServiceCollection services,
         Type queueType,
         ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
@@ -17,7 +19,35 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddQueueToQueue(
+    public static IServiceCollection AddAssetContext(
+        this IServiceCollection services,
+        Type assetContextType,
+        IEnumerable<Type> assetTypes,
+        ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
+    {
+        var isAssetContextType = typeof(AssetContext).IsAssignableFrom(assetContextType);
+
+        if (!isAssetContextType)
+            throw new InvalidOperationException($"Type {nameof(isAssetContextType)} {isAssetContextType} is not an AssetContext type.");
+
+        services.Add(new ServiceDescriptor(assetContextType, services => services.Activate(assetContextType, assetTypes), serviceLifetime));
+
+        var ancestorContextType = assetContextType.BaseType;
+
+        while (ancestorContextType != null)
+        {
+            if (!ancestorContextType.IsAbstract && ancestorContextType.IsPublic)
+            {
+                services.Add(new ServiceDescriptor(ancestorContextType, services => services.GetRequiredService(assetContextType), serviceLifetime));
+            }
+
+            ancestorContextType = ancestorContextType.BaseType;
+        }
+
+        return services;
+    }
+
+    public static IServiceCollection AddQueueServiceToQueue(
         this IServiceCollection services,
         Type queueType,
         string name = QueueLocator.DefaultQueueName,
@@ -51,6 +81,7 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
+    [Obsolete("This API may be removed. Prefer IOnJobExecuteEvent instead.")]
     public static IServiceCollection AddOnAssetEvent(
         this IServiceCollection services,
         Type onAssetEventType,

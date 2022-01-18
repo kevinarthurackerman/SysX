@@ -1,37 +1,42 @@
 ﻿namespace Sysx.JobEngine;
 
-public class AssetContext
+public abstract class AssetContext
 {
     private readonly Dictionary<Type, object> assetSetCache;
 
-    public AssetContext(
-        IEnumerable<IAssetMapping> assetMappings,
-        IQueueServiceProvider queueServiceProvider)
+    public AssetContext(IEnumerable<Type> assetTypes, IQueueServiceProvider queueServiceProvider)
     {
-        assetSetCache = assetMappings.ToDictionary(
-            assetMapping => assetMapping.AssetType,
-            assetMapping =>
-            {
-                return typeof(AssetSet<,>)
-                    .MakeGenericType(assetMapping.AssetKeyType, assetMapping.AssetType)
-                    .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
-                    .Single()
-                    .Invoke(new object[] { assetMapping, queueServiceProvider });
-            });
-
-        var assetSetProperties = GetType().GetProperties()
-            .Where(x => x.PropertyType.IsAssignableToGenericType(typeof(IAssetSet<,>)))
-            .ToArray();
+        assetSetCache = assetTypes.ToDictionary(assetType => assetType, assetType => CreateAssetSet(assetType));
 
         foreach (var property in GetType().GetProperties())
         {
-            var assetType = property.PropertyType
-                .GetGenericTypeImplementation(typeof(IAssetSet<,>))!
-                .GenericTypeArguments[1];
+            var iassetSet = property.PropertyType
+                .GetGenericTypeImplementation(typeof(IAssetSet<,>));
 
-            if (assetType == null) continue;
+            if (iassetSet == null) continue;
+
+            var assetType = iassetSet.GenericTypeArguments[1];
+
+            if (!assetSetCache.TryGetValue(assetType, out var assetSet))
+                assetSetCache[assetType] = assetSet = CreateAssetSet(assetType);
 
             property.SetValue(this, assetSetCache[assetType]);
+        }
+
+        object CreateAssetSet(Type assetType)
+        {
+            var iasset = assetType.GetGenericTypeImplementation(typeof(IAsset<>));
+
+            if (iasset == null)
+                throw new InvalidCastException($"Type {assetType} does not implement {typeof(IAsset<>)}.");
+
+            var assetKeyType = iasset.GenericTypeArguments[0];
+
+            return typeof(AssetSet<,>)
+                .MakeGenericType(assetKeyType, assetType)
+                .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Single()
+                .Invoke(new object[] { queueServiceProvider });
         }
     }
 

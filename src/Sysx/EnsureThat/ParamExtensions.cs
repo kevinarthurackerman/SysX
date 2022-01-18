@@ -38,6 +38,8 @@ public static class ParamExtensions
     public static void DoesNotContainNull<TEnumerable>(this Param<TEnumerable> param)
         where TEnumerable : IEnumerable
     {
+        if (param.Value == null) return;
+
         foreach(var value in param.Value)
         {
             if (value == null)
@@ -56,6 +58,8 @@ public static class ParamExtensions
     public static void DoesNotContain<T, TEnumerable>(this Param<TEnumerable> param, T value)
         where TEnumerable : IEnumerable
     {
+        if (param.Value == null) return;
+
         if (value == null)
         {
             foreach (var val in param.Value)
@@ -83,6 +87,8 @@ public static class ParamExtensions
     /// </summary>
     public static void DoesNotContain(this StringParam param, char value)
     {
+        if (param.Value == null) return;
+
         if (param.Value.All(x => x != value)) return;
 
         throw ThrowException(
@@ -97,6 +103,8 @@ public static class ParamExtensions
     public static void IsNotContainedIn<T, TEnumerable>(this Param<T> param, TEnumerable value)
         where TEnumerable : IEnumerable<T>
     {
+        if (value == null) return;
+
         if (param.Value == null)
         {
             foreach (var val in value)

@@ -13,17 +13,17 @@ public static class EngineFactory
         {
             ConfigureEngineServices = services =>
             {
-                services.AddQueueToEngine(typeof(ConfigQueue));
-                services.AddQueueToEngine(typeof(MainQueue));
-                services.AddQueueToEngine(typeof(ContouringQueue));
+                services.AddQueueTypeToEngine(typeof(ConfigQueue));
+                services.AddQueueTypeToEngine(typeof(MainQueue));
+                services.AddQueueTypeToEngine(typeof(ContouringQueue));
                 configureEngineServices(services);
             },
             DefaultConfigureQueueServices = services =>
             {
-                services.AddOnAssetEvent(typeof(OnAssetEvent_Log<,>), ServiceLifetime.Singleton);
-                services.AddQueueToQueue(typeof(ConfigQueue));
-                services.AddQueueToQueue(typeof(MainQueue));
-                services.AddQueueToQueue(typeof(ContouringQueue));
+                services.AddOnJobExecute(typeof(OnJobExecute_Log<,>));
+                services.AddQueueServiceToQueue(typeof(ConfigQueue));
+                services.AddQueueServiceToQueue(typeof(MainQueue));
+                services.AddQueueServiceToQueue(typeof(ContouringQueue));
                 configureDefaultQueueServices(services);
             }
         });
@@ -32,10 +32,9 @@ public static class EngineFactory
         {
             ConfigureQueueServices = services =>
             {
-                services.AddSingleton<ConfigurationAssetContext>();
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
+                services.AddAssetContext(typeof(ConfigurationAssetContext), new[] { typeof(Pallet) });
                 services.AddJobExecutor(typeof(CreatePallet.Executor));
-                services.AddOnAssetEvent(typeof(OnAddOrUpsertPallet_PropagatePallet), ServiceLifetime.Singleton);
+                services.AddOnJobExecute(typeof(OnJobExecute_PropagatePallets<,>));
                 configureConfigQueueServices(services);
             }
         });
@@ -44,12 +43,8 @@ public static class EngineFactory
         {
             ConfigureQueueServices = services =>
             {
-                services.AddSingleton<MainAssetContext>();
-                services.AddSingleton<ConfigurableAssetContext>(serviceProvider => serviceProvider.GetRequiredService<MainAssetContext>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Grid>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Chunk>());
-                services.AddJobExecutor(typeof(PropagateCreatePallet.Executor));
+                services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
+                services.AddJobExecutor(typeof(PropagatePallet.Executor));
                 configureMainQueueServices(services);
             }
         });
@@ -58,11 +53,8 @@ public static class EngineFactory
         {
             ConfigureQueueServices = services =>
             {
-                services.AddSingleton<ContouringAssetContext>();
-                services.AddSingleton<ConfigurableAssetContext>(serviceProvider => serviceProvider.GetRequiredService<ContouringAssetContext>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Shape>());
-                services.AddJobExecutor(typeof(PropagateCreatePallet.Executor));
+                services.AddAssetContext(typeof(ContouringAssetContext), new[] { typeof(Pallet), typeof(Shape) });
+                services.AddJobExecutor(typeof(PropagatePallet.Executor));
                 configureContouringQueueServices(services);
             }
         });
@@ -72,12 +64,8 @@ public static class EngineFactory
             Name = "Background 1",
             ConfigureQueueServices = services =>
             {
-                services.AddSingleton<MainAssetContext>();
-                services.AddSingleton<ConfigurableAssetContext>(serviceProvider => serviceProvider.GetRequiredService<MainAssetContext>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Grid>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Chunk>());
-                services.AddJobExecutor(typeof(PropagateCreatePallet.Executor));
+                services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
+                services.AddJobExecutor(typeof(PropagatePallet.Executor));
                 configureMainQueueServices(services);
             }
         });
@@ -87,12 +75,8 @@ public static class EngineFactory
             Name = "Background 2",
             ConfigureQueueServices = services =>
             {
-                services.AddSingleton<MainAssetContext>();
-                services.AddSingleton<ConfigurableAssetContext>(serviceProvider => serviceProvider.GetRequiredService<MainAssetContext>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Grid>());
-                services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Chunk>());
-                services.AddJobExecutor(typeof(PropagateCreatePallet.Executor));
+                services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
+                services.AddJobExecutor(typeof(PropagatePallet.Executor));
                 configureMainQueueServices(services);
             }
         });

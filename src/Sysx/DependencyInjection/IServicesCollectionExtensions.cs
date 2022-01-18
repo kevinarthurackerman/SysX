@@ -122,7 +122,7 @@ public static class IServicesCollectionExtensions
         EnsureArg.IsNotNull(reflectionSource, nameof(reflectionSource));
 
         var implementationTypes = reflectionSource
-            .Where(x => (x.IsClass || x.IsValueType) && !x.IsAbstract && serviceType.IsAssignableFrom(x))
+            .Where(x => (x.IsClass || x.IsValueType) && !x.IsAbstract && x.IsAssignableToGenericType(serviceType))
             .ToArray();
 
         foreach (var implementationType in implementationTypes)

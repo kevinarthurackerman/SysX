@@ -2,8 +2,8 @@
 
 public class ConfigurationAssetContext : AssetContext
 {
-    public ConfigurationAssetContext(IEnumerable<IAssetMapping> assetMappings, IQueueServiceProvider queueServiceProvider)
-        : base(assetMappings, queueServiceProvider)
+    public ConfigurationAssetContext(IEnumerable<Type> assetTypes, IQueueServiceProvider queueServiceProvider)
+        : base(assetTypes, queueServiceProvider)
     {
     }
 
@@ -12,8 +12,8 @@ public class ConfigurationAssetContext : AssetContext
 
 public class ConfigurableAssetContext : AssetContext
 {
-    public ConfigurableAssetContext(IEnumerable<IAssetMapping> assetMappings, IQueueServiceProvider queueServiceProvider)
-        : base(assetMappings, queueServiceProvider)
+    public ConfigurableAssetContext(IEnumerable<Type> assetTypes, IQueueServiceProvider queueServiceProvider)
+        : base(assetTypes, queueServiceProvider)
     {
     }
 
@@ -22,8 +22,8 @@ public class ConfigurableAssetContext : AssetContext
 
 public class MainAssetContext : ConfigurableAssetContext
 {
-    public MainAssetContext(IEnumerable<IAssetMapping> assetMappings, IQueueServiceProvider queueServiceProvider)
-        : base(assetMappings, queueServiceProvider)
+    public MainAssetContext(IEnumerable<Type> assetTypes, IQueueServiceProvider queueServiceProvider)
+        : base(assetTypes, queueServiceProvider)
     {
     }
 
@@ -33,8 +33,8 @@ public class MainAssetContext : ConfigurableAssetContext
 
 public class ContouringAssetContext : ConfigurableAssetContext
 {
-    public ContouringAssetContext(IEnumerable<IAssetMapping> assetMappings, IQueueServiceProvider queueServiceProvider)
-        : base(assetMappings, queueServiceProvider)
+    public ContouringAssetContext(IEnumerable<Type> assetTypes, IQueueServiceProvider queueServiceProvider)
+        : base(assetTypes, queueServiceProvider)
     {
     }
 

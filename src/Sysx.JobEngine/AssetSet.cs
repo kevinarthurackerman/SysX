@@ -32,21 +32,19 @@ public interface IAssetSet<TKey, TAsset>
     public bool TryUpdate(TAsset asset, out TAsset? result);
     public TAsset Delete(TKey key);
     public bool TryDelete(TKey key, out TAsset? result);
-    public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommittedAssets();
+    public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommitted();
 }
 
 public class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNotification
     where TAsset : class, IAsset<TKey>
 {
-    private readonly IAssetMapping assetMapping;
     private readonly IQueueServiceProvider queueServiceProvider;
     private readonly IDictionary<TKey, TAsset> assets;
     private readonly IDictionary<TKey, TAsset?> uncommittedAssets;
     private Transaction? transaction;
 
-    internal AssetSet(IAssetMapping assetMapping, IQueueServiceProvider queueServiceProvider)
+    internal AssetSet(IQueueServiceProvider queueServiceProvider)
     {
-        this.assetMapping = assetMapping;
         this.queueServiceProvider = queueServiceProvider;
 #pragma warning disable CS8714 // Key can be nullable in order to match asset key, but null will never be passed in as a key.
         assets = new Dictionary<TKey, TAsset>();
@@ -560,7 +558,7 @@ public class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNotif
         }
     }
 
-    public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommittedAssets()
+    public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommitted()
     {
         foreach (var uncommitted in uncommittedAssets)
         {
@@ -663,4 +661,16 @@ public class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNotif
 }
 
 public readonly record struct UncommittedAsset<TKey, TAsset>(TAsset? Current, TAsset? Uncommitted)
-    where TAsset : class, IAsset<TKey>;
+    where TAsset : class, IAsset<TKey>
+{
+    public TKey Key
+    {
+        get
+        {
+            if (Uncommitted != null) return Uncommitted.Key;
+            if (Current != null) return Current.Key;
+
+            throw new Exception($"An unexpected exception occurred. Both {nameof(Uncommitted)} and {nameof(Current)} were null.");
+        }
+    }
+};

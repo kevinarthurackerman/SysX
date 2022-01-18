@@ -10,10 +10,9 @@ public class Tests
             configureDefaultQueueServices: services => { },
             configureConfigQueueServices: services =>
             {
-                services.AddOnAssetEvent(typeof(OnAddOrUpsertAsset_RecordPalletToManifest));
+                services.AddOnJobExecute(typeof(OnJobExecute_RecordPalletsToManifest<,>));
 
-                services.AddSingleton<AppAssetContext>();
-                services.AddSingleton<IAssetMapping>(new AssetMapping<string, Manifest>());
+                services.AddAssetContext(typeof(AppAssetContext), new[] { typeof(Manifest) });
                 services.AddJobExecutor(typeof(UpsertMainManifest.Executor));
                 services.AddJobExecutor(typeof(ReadMainManifest.Executor));
             },

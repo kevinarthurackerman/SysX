@@ -1,8 +1,8 @@
 ﻿namespace Test_Sysx.JobEngine.VoxelEngine.Jobs;
 
-public static class PropagateCreatePallet
+public static class PropagatePallet
 {
-    public readonly record struct Job(Pallet Pallet) : IJob;
+    public readonly record struct Job(Guid PalletId, Pallet? Pallet) : IJob;
 
     public class Executor : IJobExecutor<Job>
     {
@@ -15,7 +15,14 @@ public static class PropagateCreatePallet
 
         public void Execute(in Job data)
         {
-            configurableAssetContext.Pallets.Upsert(data.Pallet);
+            if (data.Pallet == null)
+            {
+                configurableAssetContext.Pallets.Delete(data.PalletId);
+            }
+            else
+            {
+                configurableAssetContext.Pallets.Upsert(data.Pallet);
+            }
         }
     }
 }
