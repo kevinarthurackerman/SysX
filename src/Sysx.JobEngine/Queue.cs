@@ -230,38 +230,38 @@ public class Queue : IQueue, ISinglePhaseNotification, IAsyncDisposable
 
             var executor = jobScope.ServiceProvider.GetRequiredService<IJobExecutor<TJob>>();
 
-            var initialRequestData = new OnJobExecuteRequestData<TJob, IJobExecutor<TJob>>(job, executor);
+            var initialRequestData = new OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>>(job, executor);
 
             var handler = RootHandler;
 
             var eventHandlers = queueServiceProvider
-                .GetServices<IOnJobExecute<TJob, IJobExecutor<TJob>>>()
+                .GetServices<IOnJobExecuteEvent<TJob, IJobExecutor<TJob>>>()
                 .Reverse()
                 .ToArray();
 
-            OnJobExecuteResultData<TJob, IJobExecutor<TJob>>? previousResultData = null;
-            OnJobExecuteResultData<TJob, IJobExecutor<TJob>>? currentResultData = null;
+            OnJobExecuteEventResultData<TJob, IJobExecutor<TJob>>? previousResultData = null;
+            OnJobExecuteEventResultData<TJob, IJobExecutor<TJob>>? currentResultData = null;
 
             foreach (var eventHandler in eventHandlers)
             {
                 var innerHandler = handler;
-                handler = (in OnJobExecuteRequestData<TJob, IJobExecutor<TJob>> currentRequestData) =>
+                handler = (in OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>> currentRequestData) =>
                 {
-                    var request = new OnJobExecuteRequest<TJob, IJobExecutor<TJob>>(in initialRequestData, in currentRequestData);
-                    currentResultData = eventHandler.Execute(in request, (in OnJobExecuteRequestData<TJob, IJobExecutor<TJob>> requestData) => innerHandler(requestData));
-                    return new OnJobExecuteResult<TJob, IJobExecutor<TJob>>(previousResultData!.Value, currentResultData.Value);
+                    var request = new OnJobExecuteEventRequest<TJob, IJobExecutor<TJob>>(in initialRequestData, in currentRequestData);
+                    currentResultData = eventHandler.Execute(in request, (in OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>> requestData) => innerHandler(requestData));
+                    return new OnJobExecuteEventResult<TJob, IJobExecutor<TJob>>(previousResultData!.Value, currentResultData.Value);
                 };
             }
 
             var handlerResult = handler(initialRequestData);
 
-            OnJobExecuteResult<TJob, IJobExecutor<TJob>> RootHandler(in OnJobExecuteRequestData<TJob, IJobExecutor<TJob>> requestData)
+            OnJobExecuteEventResult<TJob, IJobExecutor<TJob>> RootHandler(in OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>> requestData)
             {
                 requestData.JobExecutor.Execute(requestData.Job);
 
-                previousResultData = new OnJobExecuteResultData<TJob, IJobExecutor<TJob>>();
-                var currentResultData = new OnJobExecuteResultData<TJob, IJobExecutor<TJob>>();
-                return new OnJobExecuteResult<TJob, IJobExecutor<TJob>>(previousResultData.Value, currentResultData);
+                previousResultData = new OnJobExecuteEventResultData<TJob, IJobExecutor<TJob>>();
+                var currentResultData = new OnJobExecuteEventResultData<TJob, IJobExecutor<TJob>>();
+                return new OnJobExecuteEventResult<TJob, IJobExecutor<TJob>>(previousResultData.Value, currentResultData);
             }
         }
     }

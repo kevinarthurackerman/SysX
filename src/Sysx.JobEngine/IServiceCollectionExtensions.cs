@@ -87,12 +87,12 @@ public static class IServiceCollectionExtensions
         Type onJobExecuteType,
         ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
     {
-        var isOnJobExecute = onJobExecuteType.IsAssignableToGenericType(typeof(IOnJobExecute<,>));
+        var isOnJobExecute = onJobExecuteType.IsAssignableToGenericType(typeof(IOnJobExecuteEvent<,>));
 
         if (!isOnJobExecute)
             throw new InvalidOperationException($"Type {nameof(onJobExecuteType)} {onJobExecuteType} is not an OnJobExecute type.");
 
-        services.AddOpenOrClosedType(typeof(IOnJobExecute<,>), onJobExecuteType, serviceLifetime);
+        services.AddOpenOrClosedType(typeof(IOnJobExecuteEvent<,>), onJobExecuteType, serviceLifetime);
 
         return services;
     }

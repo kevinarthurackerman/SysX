@@ -4,11 +4,11 @@ public static class PropagateCreatePallet
 {
     public readonly record struct Job(Pallet Pallet) : IJob;
 
-    public class Handler : IJobExecutor<Job>
+    public class Executor : IJobExecutor<Job>
     {
         private readonly ConfigurableAssetContext configurableAssetContext;
 
-        public Handler(ConfigurableAssetContext configurableAssetContext)
+        public Executor(ConfigurableAssetContext configurableAssetContext)
         {
             this.configurableAssetContext = configurableAssetContext;
         }

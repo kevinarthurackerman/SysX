@@ -7,7 +7,7 @@ public class Engine : IDisposable
     private readonly IServiceProvider engineServices;
     private bool disposed;
 
-    public Engine(in CreateEngineOptions createEngineOptions)
+    public Engine(in EngineOptions createEngineOptions)
     {
         createEngineOptions.Validate();
 
@@ -15,14 +15,12 @@ public class Engine : IDisposable
         disposed = false;
 
         var engineServices = new ServiceCollection()
-            .AddSingleton(engineServices =>
-            {
-                var internalServiceProvider = (IEngineServiceProvider)new InternalServiceProvider();
-                internalServiceProvider.SetServiceProvider(engineServices);
-                return internalServiceProvider;
+            .AddScoped(engineServices => {
+                var engineServiceProvider = (IEngineServiceProvider)new InternalServiceProvider();
+                engineServiceProvider.SetServiceProvider(engineServices);
+                return engineServiceProvider;
             })
             .AddScoped<IQueueServiceProvider>(_ => new InternalServiceProvider())
-            .AddScoped<IQueue, Queue>()
             .AddSingleton<IQueueLocator, QueueLocator>();
 
         createEngineOptions.ConfigureEngineServices(engineServices);
@@ -30,18 +28,10 @@ public class Engine : IDisposable
         this.engineServices = engineServices.BuildServiceProvider();
 
         var defaultQueueServices = new ServiceCollection()
-            .AddSingleton(queueServiceProvider =>
-            {
-                var internalServiceProvider = (IQueueServiceProvider)new InternalServiceProvider();
-                internalServiceProvider.SetServiceProvider(queueServiceProvider);
-                return internalServiceProvider;
-            })
-            .AddSingleton(queueServiceProvider =>
-            {
-                return queueServiceProvider.GetRequiredService<IEngineServiceProvider>()
-                    .GetRequiredService<IQueueLocator>();
-            })
-            .AddSingleton(typeof(IOnJobExecute<,>), typeof(OnJobExecute_TransactionScope<,>));
+            .AddSingleton(typeof(IOnJobExecuteEvent<,>), typeof(OnJobExecute_TransactionScope<,>))
+            .AddSingleton(queueServices => queueServices
+                .GetRequiredService<IEngineServiceProvider>()
+                .GetRequiredService<IQueueLocator>());
 
         createEngineOptions.DefaultConfigureQueueServices(defaultQueueServices);
 
@@ -63,12 +53,17 @@ public class Engine : IDisposable
         var queueScope = engineServices.CreateScope();
 
         var queueServices = new ServiceCollection()
-            .AddSingleton(_ => 
-            {
-                var internalServiceProvider = (IEngineServiceProvider)new InternalServiceProvider();
-                internalServiceProvider.SetServiceProvider(queueScope.ServiceProvider);
-                return internalServiceProvider;
-            });
+            .AddSingleton(_ => {
+                var engineServiceProvider = (IEngineServiceProvider)new InternalServiceProvider();
+                engineServiceProvider.SetServiceProvider(queueScope.ServiceProvider);
+                return engineServiceProvider;
+            })
+            .AddSingleton(queueServices => {
+                var queueServiceProvider = (IQueueServiceProvider)new InternalServiceProvider();
+                queueServiceProvider.SetServiceProvider(queueServices);
+                return queueServiceProvider;
+            })
+            .AddSingleton<IQueueContext, QueueContext>();
 
         foreach (var service in defaultQueueServices)
             queueServices.Add(service);
@@ -81,6 +76,8 @@ public class Engine : IDisposable
             .SetServiceProvider(queueServiceProvider);
 
         var queue = queueScope.ServiceProvider.GetRequiredService<TQueue>();
+
+        queueServiceProvider.GetRequiredService<IQueueContext>().SetCurrent(queue);
 
         queues.Add(new QueueKey(typeof(TQueue), createQueueOptions.Name), new QueueInfo(queue, queueScope));
 
@@ -150,14 +147,13 @@ public class Engine : IDisposable
             RemoveQueueInner(queueKey.Type, queueKey.Name, checkDisposed: false);
     }
 
-    public record struct CreateEngineOptions
+    public record struct EngineOptions
     {
-        public static CreateEngineOptions Default => new()
+        public static EngineOptions Default => new()
         {
             ConfigureEngineServices = x => { },
             DefaultConfigureQueueServices = x => { }
         };
-
 
         public Action<IServiceCollection> ConfigureEngineServices { get; set; }
         public Action<IServiceCollection> DefaultConfigureQueueServices { get; set; }

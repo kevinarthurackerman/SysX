@@ -14,8 +14,8 @@ public class Tests
 
                 services.AddSingleton<AppAssetContext>();
                 services.AddSingleton<IAssetMapping>(new AssetMapping<string, Manifest>());
-                services.AddJobExecutor(typeof(UpsertMainManifest.Handler));
-                services.AddJobExecutor(typeof(ReadMainManifest.Handler));
+                services.AddJobExecutor(typeof(UpsertMainManifest.Executor));
+                services.AddJobExecutor(typeof(ReadMainManifest.Executor));
             },
             configureMainQueueServices: services => { },
             configureContouringQueueServices: services => { });

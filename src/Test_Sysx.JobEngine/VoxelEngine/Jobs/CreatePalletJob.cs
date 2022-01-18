@@ -4,11 +4,11 @@ public static class CreatePallet
 {
     public readonly record struct Job(Guid Id, ImmutableDictionary<int, Pallet.VoxelType> VoxelCodeMappings) : IJob;
 
-    public class Handler : IJobExecutor<Job>
+    public class Executor : IJobExecutor<Job>
     {
         private readonly ConfigurationAssetContext configAssetContext;
 
-        public Handler(ConfigurationAssetContext configAssetContext)
+        public Executor(ConfigurationAssetContext configAssetContext)
         {
             this.configAssetContext = configAssetContext;
         }

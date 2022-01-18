@@ -1,10 +1,10 @@
 ﻿namespace Sysx.JobEngine;
 
-public class OnJobExecute_TransactionScope<TJob, TJobExecutor> : IOnJobExecute<TJob, TJobExecutor>
+public class OnJobExecute_TransactionScope<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJobExecutor>
     where TJob : IJob
     where TJobExecutor : IJobExecutor<TJob>
 {
-    public OnJobExecuteResultData<TJob, TJobExecutor> Execute(in OnJobExecuteRequest<TJob, TJobExecutor> request, OnJobExecuteNext<TJob, TJobExecutor> next)
+    public OnJobExecuteEventResultData<TJob, TJobExecutor> Execute(in OnJobExecuteEventRequest<TJob, TJobExecutor> request, OnJobExecuteEventNext<TJob, TJobExecutor> next)
     {
         using var transactionScope = new TransactionScope();
 

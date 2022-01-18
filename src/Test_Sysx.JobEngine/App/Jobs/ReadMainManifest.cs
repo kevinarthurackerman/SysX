@@ -4,11 +4,11 @@ public static class ReadMainManifest
 {
     public readonly record struct Job : IJob { }
 
-    public class Handler : IJobExecutor<Job>
+    public class Executor : IJobExecutor<Job>
     {
         private readonly AppAssetContext appAssetContext;
 
-        public Handler(AppAssetContext appAssetContext)
+        public Executor(AppAssetContext appAssetContext)
         {
             this.appAssetContext = appAssetContext;
         }

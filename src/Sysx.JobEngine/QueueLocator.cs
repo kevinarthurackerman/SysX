@@ -15,11 +15,16 @@ public static class IQueueLocatorExtensions
     public static TQueue Get<TQueue>(this IQueueLocator queueLocator, string name)
         where TQueue : IQueue
         => (TQueue)queueLocator.Get(typeof(TQueue), name);
+
+    public static IEnumerable<TQueue> GetAll<TQueue>(this IQueueLocator queueLocator)
+        where TQueue : IQueue
+        => queueLocator.GetAll().OfType<TQueue>();
 }
 
 public interface IQueueLocator
 {
     public IQueue Get(Type queueType, string name);
+    public IEnumerable<IQueue> GetAll();
     internal void Register(IQueue queue, string name);
     internal void Deregister(Type queueType, string name);
 }
@@ -40,6 +45,8 @@ public class QueueLocator : IQueueLocator
 
         return queues[new QueueKey(queueType, name)];
     }
+
+    public IEnumerable<IQueue> GetAll() => queues.Values.ToArray();
 
     void IQueueLocator.Register(IQueue queue, string name)
     {

@@ -9,7 +9,7 @@ public static class EngineFactory
         Action<IServiceCollection> configureMainQueueServices,
         Action<IServiceCollection> configureContouringQueueServices)
     {
-        var engine = new Engine(Engine.CreateEngineOptions.Default with
+        var engine = new Engine(Engine.EngineOptions.Default with
         {
             ConfigureEngineServices = services =>
             {
@@ -34,7 +34,7 @@ public static class EngineFactory
             {
                 services.AddSingleton<ConfigurationAssetContext>();
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
-                services.AddJobExecutor(typeof(CreatePallet.Handler));
+                services.AddJobExecutor(typeof(CreatePallet.Executor));
                 services.AddOnAssetEvent(typeof(OnAddOrUpsertPallet_PropagatePallet), ServiceLifetime.Singleton);
                 configureConfigQueueServices(services);
             }
@@ -49,7 +49,7 @@ public static class EngineFactory
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Grid>());
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Chunk>());
-                services.AddJobExecutor(typeof(PropagateCreatePallet.Handler));
+                services.AddJobExecutor(typeof(PropagateCreatePallet.Executor));
                 configureMainQueueServices(services);
             }
         });
@@ -62,7 +62,7 @@ public static class EngineFactory
                 services.AddSingleton<ConfigurableAssetContext>(serviceProvider => serviceProvider.GetRequiredService<ContouringAssetContext>());
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Shape>());
-                services.AddJobExecutor(typeof(PropagateCreatePallet.Handler));
+                services.AddJobExecutor(typeof(PropagateCreatePallet.Executor));
                 configureContouringQueueServices(services);
             }
         });
@@ -77,7 +77,7 @@ public static class EngineFactory
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Grid>());
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Chunk>());
-                services.AddJobExecutor(typeof(PropagateCreatePallet.Handler));
+                services.AddJobExecutor(typeof(PropagateCreatePallet.Executor));
                 configureMainQueueServices(services);
             }
         });
@@ -92,7 +92,7 @@ public static class EngineFactory
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Pallet>());
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Grid>());
                 services.AddSingleton<IAssetMapping>(new AssetMapping<Guid, Chunk>());
-                services.AddJobExecutor(typeof(PropagateCreatePallet.Handler));
+                services.AddJobExecutor(typeof(PropagateCreatePallet.Executor));
                 configureMainQueueServices(services);
             }
         });
