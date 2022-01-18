@@ -4,20 +4,17 @@ public class OnJobExecute_PropagatePallets<TJob, TJobExecutor> : IOnJobExecuteEv
     where TJob : IJob
     where TJobExecutor : IJobExecutor<TJob>
 {
+    private readonly IQueueContext queueContext;
     private readonly ConfigurationAssetContext configurationAssetContext;
-    private readonly MainQueue mainQueue;
-    private readonly ContouringQueue contouringQueue;
     private readonly IQueueLocator queueLocator;
 
     public OnJobExecute_PropagatePallets(
+        IQueueContext queueContext,
         ConfigurationAssetContext configurationAssetContext,
-        MainQueue mainQueue,
-        ContouringQueue contouringQueue,
         IQueueLocator queueLocator)
     {
+        this.queueContext = queueContext;
         this.configurationAssetContext = configurationAssetContext;
-        this.mainQueue = mainQueue;
-        this.contouringQueue = contouringQueue;
         this.queueLocator = queueLocator;
     }
 
@@ -25,12 +22,21 @@ public class OnJobExecute_PropagatePallets<TJob, TJobExecutor> : IOnJobExecuteEv
     {
         var result = next(request.Current);
 
-        foreach (var palletModified in configurationAssetContext.Pallets.GetUncommitted())
+        var palletsModified = configurationAssetContext.Pallets.GetUncommitted();
+
+        if (!palletsModified.Any()) return result.Current;
+
+        var queues = queueLocator.GetAll()
+            .Where(x => x != queueContext.Current)
+            .ToArray();
+
+        foreach (var queue in queues)
         {
-            mainQueue.SubmitJob(new PropagatePallet.Job(palletModified.Key, palletModified.Uncommitted));
-            contouringQueue.SubmitJob(new PropagatePallet.Job(palletModified.Key, palletModified.Uncommitted));
-            queueLocator.Get<MainQueue>("Background 1").SubmitJob(new PropagatePallet.Job(palletModified.Key, palletModified.Uncommitted));
-            queueLocator.Get<MainQueue>("Background 2").SubmitJob(new PropagatePallet.Job(palletModified.Key, palletModified.Uncommitted));
+            var palletDatas = palletsModified
+                .Select(x => new PropagatePallets.Job.PalletData(x.Current, x.Uncommitted))
+                .ToArray();
+
+            queue.SubmitJob(new PropagatePallets.Job(palletDatas));
         }
 
         return result.Current;

@@ -44,7 +44,7 @@ public static class EngineFactory
             ConfigureQueueServices = services =>
             {
                 services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
-                services.AddJobExecutor(typeof(PropagatePallet.Executor));
+                services.AddJobExecutor(typeof(PropagatePallets.Executor));
                 configureMainQueueServices(services);
             }
         });
@@ -54,7 +54,7 @@ public static class EngineFactory
             ConfigureQueueServices = services =>
             {
                 services.AddAssetContext(typeof(ContouringAssetContext), new[] { typeof(Pallet), typeof(Shape) });
-                services.AddJobExecutor(typeof(PropagatePallet.Executor));
+                services.AddJobExecutor(typeof(PropagatePallets.Executor));
                 configureContouringQueueServices(services);
             }
         });
@@ -65,7 +65,7 @@ public static class EngineFactory
             ConfigureQueueServices = services =>
             {
                 services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
-                services.AddJobExecutor(typeof(PropagatePallet.Executor));
+                services.AddJobExecutor(typeof(PropagatePallets.Executor));
                 configureMainQueueServices(services);
             }
         });
@@ -76,7 +76,7 @@ public static class EngineFactory
             ConfigureQueueServices = services =>
             {
                 services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
-                services.AddJobExecutor(typeof(PropagatePallet.Executor));
+                services.AddJobExecutor(typeof(PropagatePallets.Executor));
                 configureMainQueueServices(services);
             }
         });
