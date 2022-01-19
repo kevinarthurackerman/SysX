@@ -20,11 +20,6 @@ public static class IServiceProviderExtensions
 
         var eligibleConstructors = new List<(ConstructorInfo Constructor, object[] Parameters)>();
 
-        var publicParameterlessConstructor = serviceType.GetConstructor(Type.EmptyTypes);
-
-        if (publicParameterlessConstructor != null)
-            return publicParameterlessConstructor.Invoke(Array.Empty<object>());
-
         foreach (var ctor in serviceType.GetConstructors())
         {
             var ctorParamInfos = ctor.GetParameters();
