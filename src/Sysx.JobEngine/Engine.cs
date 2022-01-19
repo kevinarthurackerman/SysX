@@ -75,7 +75,7 @@ public class Engine : IDisposable
         queueScope.ServiceProvider.GetRequiredService<IQueueServiceProvider>()
             .SetServiceProvider(queueServiceProvider);
 
-        var queue = queueScope.ServiceProvider.GetRequiredService<TQueue>();
+        var queue = queueScope.ServiceProvider.Activate<TQueue>();
 
         queueServiceProvider.GetRequiredService<IQueueContext>().SetCurrent(queue);
 

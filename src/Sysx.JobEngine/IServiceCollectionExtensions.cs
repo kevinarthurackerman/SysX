@@ -4,21 +4,6 @@ namespace Sysx.JobEngine;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddQueueTypeToEngine(
-        this IServiceCollection services,
-        Type queueType,
-        ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
-    {
-        var isQueueType = typeof(IQueue).IsAssignableFrom(queueType);
-
-        if (!isQueueType)
-            throw new InvalidOperationException($"Type {nameof(isQueueType)} {isQueueType} is not a Queue type.");
-
-        services.Add(new ServiceDescriptor(queueType, queueType, serviceLifetime));
-
-        return services;
-    }
-
     public static IServiceCollection AddAssetContext(
         this IServiceCollection services,
         Type assetContextType,

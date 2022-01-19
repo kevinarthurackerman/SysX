@@ -1,4 +1,8 @@
-﻿global using System;
+﻿global using EnsureThat;
+global using Microsoft.CodeAnalysis.CSharp.Scripting;
+global using Microsoft.CodeAnalysis.Scripting;
+global using Microsoft.Extensions.DependencyInjection;
+global using System;
 global using System.Buffers;
 global using System.Collections;
 global using System.Collections.Concurrent;
@@ -20,15 +24,11 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using System.Threading;
 global using System.Threading.Tasks;
-global using EnsureThat;
-global using Microsoft.CodeAnalysis.CSharp.Scripting;
-global using Microsoft.CodeAnalysis.Scripting;
 global using Sysx.EnsureThat;
 global using Sysx.Enums;
 global using Sysx.Linq;
 global using Sysx.Linq.Expressions;
 global using Sysx.Reflection;
-global using Microsoft.Extensions.DependencyInjection;
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1
 global using System.Runtime.Loader;

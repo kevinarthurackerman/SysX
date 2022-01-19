@@ -13,9 +13,6 @@ public static class EngineFactory
         {
             ConfigureEngineServices = services =>
             {
-                services.AddQueueTypeToEngine(typeof(ConfigQueue));
-                services.AddQueueTypeToEngine(typeof(MainQueue));
-                services.AddQueueTypeToEngine(typeof(ContouringQueue));
                 configureEngineServices(services);
             },
             DefaultConfigureQueueServices = services =>
