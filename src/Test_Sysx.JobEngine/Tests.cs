@@ -12,7 +12,7 @@ public class Tests
             {
                 services.AddOnJobExecute(typeof(OnJobExecute_RecordPalletsToManifest<,>));
 
-                services.AddAssetContext(typeof(AppAssetContext), new[] { typeof(Manifest) });
+                services.AddAssetContext(typeof(AppAssetContext));
                 services.AddJobExecutor(typeof(EnsureMainManifestExists.Executor));
                 services.AddJobExecutor(typeof(ReadMainManifest.Executor));
             },
