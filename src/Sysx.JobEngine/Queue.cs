@@ -14,6 +14,7 @@ public class Queue : IQueue, IDisposable
     private static int queueInstanceNumber = 0;
 
     private readonly IQueueServiceProvider queueServiceProvider;
+    // todo: Replace this list with a circular buffer type to improve performance when adding or removing from the front of the collection.
     private readonly List<IJobRunner> jobRunnersToRun = new();
     private readonly Dictionary<Transaction, TransactionJobRunners> transactionJobRunners = new();
     private readonly Action<Transaction> rollback;
