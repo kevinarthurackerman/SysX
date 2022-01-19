@@ -4,113 +4,133 @@ public interface IQueue
 {
     public void SubmitJob<TJob>(TJob data)
         where TJob : IJob;
+
+    public void SubmitChildJob<TJob>(TJob jobData)
+        where TJob : IJob;
 }
 
-public class Queue : IQueue, ISinglePhaseNotification, IAsyncDisposable
+public class Queue : IQueue, IDisposable
 {
+    private static int queueInstanceNumber = 0;
+
     private readonly IQueueServiceProvider queueServiceProvider;
-    private readonly BlockingCollection<IJobRunner> coordinatingQueue;
-    private readonly List<IJobRunner> transactionCoordinatingQueue;
-    private readonly Dictionary<Type, IJobRunner> jobRunners;
-    private Transaction? transaction;
-    private bool disposed;
-    private readonly TaskCompletionSource<object> coordinatingQueueCompletionSource;
+    private readonly Dictionary<Type, object> jobRunnerObjectPools = new();
+    private readonly List<IJobRunner> jobRunnersToRun = new();
+    private readonly Dictionary<Transaction, TransactionJobRunners> transactionJobRunners = new();
+    private readonly Action<Transaction> rollback;
+    private readonly Action<Transaction, TransactionJobRunners> commit;
     private List<Exception>? backgroundExceptions;
+    private bool disposed = false;
+    private readonly object jobRunnersUpdateLock = new { };
 
     public Queue(IQueueServiceProvider queueServiceProvider)
     {
         this.queueServiceProvider = queueServiceProvider;
-        coordinatingQueue = new();
-        transactionCoordinatingQueue = new();
-        jobRunners = new();
-        disposed = false;
-        coordinatingQueueCompletionSource = new();
-        backgroundExceptions = null;
 
-        new Thread(RunJobs) { Name = GetType().Name }.Start();
+        rollback = transaction => Rollback(transaction);
+        commit = (transaction, runners) => Commit(transaction, runners);
+
+        new Thread(RunJobs) { Name = $"{nameof(Queue)} {queueInstanceNumber++} '{GetType().Name}'" }.Start();
     }
 
-    public void SubmitJob<TJob>(TJob data)
+    public void SubmitJob<TJob>(TJob jobData)
         where TJob : IJob
     {
-        Ensure.That(this).IsNotAsyncDisposed(disposed);
-
-        ThrowBackgroundExceptionIfAny();
-
-        EnlistTransaction();
-
-        if (!jobRunners.TryGetValue(typeof(TJob), out var jobRunner))
+        lock (jobRunnersUpdateLock)
         {
-            jobRunner = new JobRunner<TJob>(queueServiceProvider);
-            jobRunners[typeof(TJob)] = jobRunner;
-        }
+            Ensure.That(this).IsNotDisposed(disposed);
 
-        ((JobRunner<TJob>)jobRunner).AddJob(data);
+            ThrowBackgroundExceptionIfAny();
 
-        if(transaction == null)
-        {
-            coordinatingQueue.Add(jobRunner);
-        }
-        else
-        {
-            transactionCoordinatingQueue.Add(jobRunner);
-        }
-    }
+            var jobRunner = CreateJobRunner(jobData);
 
-    public async ValueTask DisposeAsync()
-    {
-        EnsureArg.IsTrue(transaction == null, optsFn: x => x.WithMessage("Cannot dispose while enlisted in a transaction."));
-
-        ThrowBackgroundExceptionIfAny();
-
-        if (disposed)
-        {
-            await coordinatingQueueCompletionSource.Task;
-            return;
-        }
-
-        disposed = true;
-
-        coordinatingQueue.CompleteAdding();
-
-        await coordinatingQueueCompletionSource.Task;
-
-        coordinatingQueue.Dispose();
-
-        ThrowBackgroundExceptionIfAny();
-    }
-
-    private void RunJobs()
-    {
-        IJobRunner? nextJobRunner = null;
-        try
-        {
-            foreach (var jobRunner in coordinatingQueue.GetConsumingEnumerable())
+            if (Transaction.Current == null)
             {
-                nextJobRunner = jobRunner;
-                jobRunner.RunNext();
-                nextJobRunner = null;
-            }
-        }
-        catch (Exception ex)
-        {
-            if (backgroundExceptions == null)
-                backgroundExceptions = new List<Exception>();
-            
+                jobRunnersToRun.Add(jobRunner);
 
-            if (nextJobRunner == null)
-            {
-                backgroundExceptions.Add(new AggregateException($"Exception thrown before job type could be resolved. See inner exceptions for details.", ex));
+                JobRunnersUpdated();
             }
             else
             {
-                backgroundExceptions.Add(new AggregateException($"Exception throw while running job type {nextJobRunner.GetJobType()}. See inner exceptions for details.", ex));
+                var jobRunners = GetTransactionJobRunners(Transaction.Current);
+                jobRunners.Jobs.Add(jobRunner);
             }
         }
-        finally
+    }
+
+    public void SubmitChildJob<TJob>(TJob jobData)
+        where TJob : IJob
+    {
+        lock (jobRunnersUpdateLock)
         {
-            coordinatingQueueCompletionSource.SetResult(new { });
+            Ensure.That(this).IsNotDisposed(disposed);
+            EnsureArg.IsNotNull(Transaction.Current, optsFn: x => x.WithMessage($"{nameof(SubmitChildJob)} must be executed within the scope of a {nameof(Transaction)}."));
+
+            ThrowBackgroundExceptionIfAny();
+
+            var jobRunner = CreateJobRunner(jobData);
+
+            var jobRunners = GetTransactionJobRunners(Transaction.Current);
+            jobRunners.ChildJobs.Add(jobRunner);
         }
+    }
+
+    public void Dispose()
+    {
+        ThrowBackgroundExceptionIfAny();
+
+        if (disposed) return;
+
+        disposed = true;
+
+        while (true)
+        {
+            try
+            {
+                Monitor.Enter(jobRunnersUpdateLock);
+
+                if (!jobRunnersToRun.Any())
+                {
+                    ThrowBackgroundExceptionIfAny();
+
+                    return;
+                }
+                else
+                {
+                    Monitor.Wait(jobRunnersUpdateLock);
+                }
+            }
+            finally
+            { 
+                Monitor.Exit(jobRunnersUpdateLock);
+            }
+        }
+    }
+
+    private JobRunner<TJob> CreateJobRunner<TJob>(TJob jobData)
+        where TJob : IJob
+    {
+        if (!jobRunnerObjectPools.TryGetValue(typeof(TJob), out var jobRunnerObjectPool))
+        {
+            jobRunnerObjectPool = ObjectPool.Create<JobRunner<TJob>>();
+            jobRunnerObjectPools[typeof(TJob)] = jobRunnerObjectPool;
+        }
+
+        var jobRunner = ((ObjectPool<JobRunner<TJob>>)jobRunnerObjectPool).Get();
+        jobRunner.Prepare(jobData, queueServiceProvider);
+
+        return jobRunner;
+    }
+
+    private TransactionJobRunners GetTransactionJobRunners(Transaction transaction)
+    {
+        if (!transactionJobRunners.TryGetValue(transaction, out var jobRunners))
+        {
+            jobRunners = new TransactionJobRunners(transaction, commit, rollback);
+            transactionJobRunners[transaction] = jobRunners;
+        }
+
+        return jobRunners;
     }
 
     private void ThrowBackgroundExceptionIfAny()
@@ -121,133 +141,98 @@ public class Queue : IQueue, ISinglePhaseNotification, IAsyncDisposable
         }
     }
 
-    void ISinglePhaseNotification.SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
+    private void RunJobs()
     {
-        Commit();
-        singlePhaseEnlistment.Committed();
-    }
-
-    void IEnlistmentNotification.Commit(Enlistment enlistment)
-    {
-        Commit();
-        enlistment.Done();
-    }
-
-    void IEnlistmentNotification.InDoubt(Enlistment enlistment)
-    {
-        enlistment.Done();
-    }
-
-    void IEnlistmentNotification.Prepare(PreparingEnlistment preparingEnlistment)
-    {
-        preparingEnlistment.Prepared();
-    }
-
-    void IEnlistmentNotification.Rollback(Enlistment enlistment)
-    {
-        transaction = null;
-
-        foreach (var jobRunner in jobRunners.Values)
-            jobRunner.Rollback();
-
-        transactionCoordinatingQueue.Clear();
-
-        enlistment.Done();
-    }
-
-    private void EnlistTransaction()
-    {
-        if (Transaction.Current != null && Transaction.Current != transaction)
+        while (true)
         {
-            transaction = Transaction.Current;
-            transaction.EnlistVolatile(this, EnlistmentOptions.None);
+            try
+            {
+                IJobRunner? nextJobRunner = null;
+
+                try
+                {
+                    Monitor.Enter(jobRunnersUpdateLock);
+
+                    if (!jobRunnersToRun.Any())
+                    {
+                        if (disposed && !transactionJobRunners.Any()) return;
+
+                        Monitor.Wait(jobRunnersUpdateLock);
+                    }
+
+                    nextJobRunner = jobRunnersToRun.First();
+                    jobRunnersToRun.RemoveAt(0);
+                    JobRunnersUpdated();
+                }
+                finally
+                {
+                    Monitor.Exit(jobRunnersUpdateLock);
+                }
+
+                nextJobRunner.Execute();
+            }
+            catch (Exception ex)
+            {
+                if (backgroundExceptions == null)
+                    backgroundExceptions = new List<Exception>();
+
+                backgroundExceptions.Add(ex);
+            }
         }
     }
 
-    private void Commit()
+    private void Rollback(Transaction transaction)
     {
-        transaction = null;
-
-        foreach (var jobRunner in jobRunners.Values)
-            jobRunner.Commit();
-
-        foreach(var jobRunner in transactionCoordinatingQueue)
-            coordinatingQueue.Add(jobRunner);
-
-        transactionCoordinatingQueue.Clear();
+        lock (jobRunnersUpdateLock)
+        {
+            transactionJobRunners.Remove(transaction);
+        }
     }
+
+    private void Commit(Transaction transaction, TransactionJobRunners transactionJobRunners)
+    {
+        lock (jobRunnersUpdateLock)
+        {
+            jobRunnersToRun.InsertRange(0, transactionJobRunners.ChildJobs);
+            jobRunnersToRun.AddRange(transactionJobRunners.Jobs);
+            this.transactionJobRunners.Remove(transaction);
+
+            JobRunnersUpdated();
+        }
+    }
+
+    private void JobRunnersUpdated() => Monitor.PulseAll(jobRunnersUpdateLock);
 
     private interface IJobRunner
     {
-        internal Type GetJobType();
-        internal void RunNext();
-        internal void Commit();
-        internal void Rollback();
+        internal Type JobType { get; }
+        internal void Execute();
     }
 
     private class JobRunner<TJob> : IJobRunner
         where TJob : IJob
     {
-        private readonly LinkedList<TJob> jobs = new();
-        private readonly List<TJob> transactionJobs = new();
-        private readonly IQueueServiceProvider queueServiceProvider;
-        private readonly object @lock = new { };
+        private TJob? jobData;
+        private IQueueServiceProvider? queueServiceProvider;
 
-        internal JobRunner(IQueueServiceProvider queueServiceProvider)
+        Type IJobRunner.JobType { get; } = typeof(TJob);
+
+        internal void Prepare(TJob jobData, IQueueServiceProvider queueServiceProvider)
         {
+            this.jobData = jobData;
             this.queueServiceProvider = queueServiceProvider;
         }
 
-        internal void AddJob(TJob job)
+        void IJobRunner.Execute()
         {
-            lock (@lock)
-            {
-                if (Transaction.Current == null)
-                {
-                    jobs.AddLast(job);
-                }
-                else
-                {
-                    transactionJobs.Add(job);
-                }
-            }
-        }
-
-        Type IJobRunner.GetJobType() => typeof(TJob);
-
-        void IJobRunner.Commit()
-        {
-            lock (@lock)
-            {
-                foreach (var job in transactionJobs)
-                    jobs.AddLast(job);
-
-                transactionJobs.Clear();
-            }
-        }
-
-        void IJobRunner.Rollback()
-        {
-            lock (@lock)
-            {
-                transactionJobs.Clear();
-            }
-        }
-
-        void IJobRunner.RunNext()
-        {
-            TJob? job;
-            lock (@lock)
-            {
-                job = jobs.First();
-                jobs.RemoveFirst();
-            }
+            EnsureArg.HasValue(jobData, nameof(jobData));
+            EnsureArg.IsNotNull(queueServiceProvider, nameof(queueServiceProvider));
 
             using var jobScope = queueServiceProvider.CreateScope();
 
             var executor = jobScope.ServiceProvider.GetRequiredService<IJobExecutor<TJob>>();
 
-            var initialRequestData = new OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>>(job, executor);
+            var initialRequestData = new OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>>(jobData, executor);
 
             var handler = RootHandler;
 
@@ -265,21 +250,88 @@ public class Queue : IQueue, ISinglePhaseNotification, IAsyncDisposable
                 handler = (in OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>> currentRequestData) =>
                 {
                     var request = new OnJobExecuteEventRequest<TJob, IJobExecutor<TJob>>(in initialRequestData, in currentRequestData);
-                    currentResultData = eventHandler.Execute(in request, (in OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>> requestData) => innerHandler(requestData));
+                    try
+                    {
+                        currentResultData = eventHandler.Execute(in request, (in OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>> requestData) => innerHandler(requestData));
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is OnJobExecuteEventException || ex is JobExecuteException) throw;
+
+                        throw new OnJobExecuteEventException($"An exception was thrown calling {nameof(eventHandler.Execute)} on {eventHandler.GetType()}. See inner exception for details.", ex);
+                    }
+
                     return new OnJobExecuteEventResult<TJob, IJobExecutor<TJob>>(previousResultData!.Value, currentResultData.Value);
                 };
             }
 
             var handlerResult = handler(initialRequestData);
 
+            jobData = default;
+            queueServiceProvider = null;
+
             OnJobExecuteEventResult<TJob, IJobExecutor<TJob>> RootHandler(in OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>> requestData)
             {
-                requestData.JobExecutor.Execute(requestData.Job);
+                try
+                {
+                    requestData.JobExecutor.Execute(requestData.Job);
 
-                previousResultData = new OnJobExecuteEventResultData<TJob, IJobExecutor<TJob>>();
-                var currentResultData = new OnJobExecuteEventResultData<TJob, IJobExecutor<TJob>>();
-                return new OnJobExecuteEventResult<TJob, IJobExecutor<TJob>>(previousResultData.Value, currentResultData);
+                    previousResultData = new OnJobExecuteEventResultData<TJob, IJobExecutor<TJob>>();
+                    var currentResultData = new OnJobExecuteEventResultData<TJob, IJobExecutor<TJob>>();
+                    return new OnJobExecuteEventResult<TJob, IJobExecutor<TJob>>(previousResultData.Value, currentResultData);
+                }
+                catch (Exception ex)
+                {
+                    throw new JobExecuteException($"An exception was thrown calling {nameof(IJobRunner.Execute)} on {executor.GetType()}. See inner exception for details.", ex);
+                }
             }
+        }
+    }
+
+    private class TransactionJobRunners : ISinglePhaseNotification
+    {
+        private readonly Transaction transaction;
+        private readonly Action<Transaction, TransactionJobRunners> commit;
+        private readonly Action<Transaction> rollback;
+
+        internal List<IJobRunner> Jobs = new();
+        internal List<IJobRunner> ChildJobs = new();
+
+        internal TransactionJobRunners(Transaction transaction, Action<Transaction, TransactionJobRunners> commit, Action<Transaction> rollback)
+        {
+            this.transaction = transaction;
+            this.commit = commit;
+            this.rollback = rollback;
+
+            transaction.EnlistVolatile(this, EnlistmentOptions.None);
+        }
+
+        void ISinglePhaseNotification.SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
+        {
+            commit(transaction, this);
+            singlePhaseEnlistment.Committed();
+        }
+
+        void IEnlistmentNotification.Commit(Enlistment enlistment)
+        {
+            commit(transaction, this);
+            enlistment.Done();
+        }
+
+        void IEnlistmentNotification.InDoubt(Enlistment enlistment)
+        {
+            enlistment.Done();
+        }
+
+        void IEnlistmentNotification.Prepare(PreparingEnlistment preparingEnlistment)
+        {
+            preparingEnlistment.Prepared();
+        }
+
+        void IEnlistmentNotification.Rollback(Enlistment enlistment)
+        {
+            rollback(transaction);
+            enlistment.Done();
         }
     }
 }

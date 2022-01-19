@@ -1,12 +1,11 @@
 ﻿global using EnsureThat;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.ObjectPool;
 global using System;
-global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.Linq;
 global using System.Reflection;
 global using System.Threading;
-global using System.Threading.Tasks;
 global using System.Transactions;
 global using Sysx.DependencyInjection;
 global using Sysx.EnsureThat;
