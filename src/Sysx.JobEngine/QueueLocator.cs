@@ -29,6 +29,8 @@ public interface IQueueLocator
     internal void Deregister(Type queueType, string name);
 }
 
+// todo: Something needs to be done to make this thread safe since it can be accessed by multiple jobs on different threads at the same time.
+// A possible solution is to present the same Queues for the duration of a Transaction and prevent those Queues from being disposed until it closes.
 public class QueueLocator : IQueueLocator
 {
     private readonly Dictionary<QueueKey, IQueue> queues = new();

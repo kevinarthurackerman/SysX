@@ -14,7 +14,6 @@ public class Queue : IQueue, IDisposable
     private static int queueInstanceNumber = 0;
 
     private readonly IQueueServiceProvider queueServiceProvider;
-    private readonly Dictionary<Type, object> jobRunnerObjectPools = new();
     private readonly List<IJobRunner> jobRunnersToRun = new();
     private readonly Dictionary<Transaction, TransactionJobRunners> transactionJobRunners = new();
     private readonly Action<Transaction> rollback;
@@ -42,7 +41,7 @@ public class Queue : IQueue, IDisposable
 
             ThrowBackgroundExceptionIfAny();
 
-            var jobRunner = CreateJobRunner(jobData);
+            var jobRunner = JobRunner<TJob>.Create(jobData, queueServiceProvider);
 
             if (Transaction.Current == null)
             {
@@ -68,13 +67,16 @@ public class Queue : IQueue, IDisposable
 
             ThrowBackgroundExceptionIfAny();
 
-            var jobRunner = CreateJobRunner(jobData);
+            var jobRunner = JobRunner<TJob>.Create(jobData, queueServiceProvider);
 
             var jobRunners = GetTransactionJobRunners(Transaction.Current);
             jobRunners.ChildJobs.Add(jobRunner);
         }
     }
 
+    // todo: Dispose blocks the thread until all jobs are done, and doesn't check for if there is an open Transaction.
+    // There should probably be a way to do a fast shut down and cancel the remaining jobs, and/or a way to shutdown
+    // without blocking the thread.
     public void Dispose()
     {
         ThrowBackgroundExceptionIfAny();
@@ -107,26 +109,11 @@ public class Queue : IQueue, IDisposable
         }
     }
 
-    private JobRunner<TJob> CreateJobRunner<TJob>(TJob jobData)
-        where TJob : IJob
-    {
-        if (!jobRunnerObjectPools.TryGetValue(typeof(TJob), out var jobRunnerObjectPool))
-        {
-            jobRunnerObjectPool = ObjectPool.Create<JobRunner<TJob>>();
-            jobRunnerObjectPools[typeof(TJob)] = jobRunnerObjectPool;
-        }
-
-        var jobRunner = ((ObjectPool<JobRunner<TJob>>)jobRunnerObjectPool).Get();
-        jobRunner.Prepare(jobData, queueServiceProvider);
-
-        return jobRunner;
-    }
-
     private TransactionJobRunners GetTransactionJobRunners(Transaction transaction)
     {
         if (!transactionJobRunners.TryGetValue(transaction, out var jobRunners))
         {
-            jobRunners = new TransactionJobRunners(transaction, commit, rollback);
+            jobRunners = TransactionJobRunners.Create(transaction, commit, rollback);
             transactionJobRunners[transaction] = jobRunners;
         }
 
@@ -212,31 +199,38 @@ public class Queue : IQueue, IDisposable
     private class JobRunner<TJob> : IJobRunner
         where TJob : IJob
     {
+        private static readonly ObjectPool<JobRunner<TJob>> pool = ObjectPool.Create<JobRunner<TJob>>();
+
         private TJob? jobData;
         private IQueueServiceProvider? queueServiceProvider;
+        private bool executed = true;
 
         Type IJobRunner.JobType { get; } = typeof(TJob);
 
-        internal void Prepare(TJob jobData, IQueueServiceProvider queueServiceProvider)
+        internal static JobRunner<TJob> Create(TJob jobData, IQueueServiceProvider queueServiceProvider)
         {
-            this.jobData = jobData;
-            this.queueServiceProvider = queueServiceProvider;
+            var jobRunner = pool.Get();
+            jobRunner.jobData = jobData;
+            jobRunner.queueServiceProvider = queueServiceProvider;
+            jobRunner.executed = false;
+            return jobRunner;
         }
 
         void IJobRunner.Execute()
         {
-            EnsureArg.HasValue(jobData, nameof(jobData));
-            EnsureArg.IsNotNull(queueServiceProvider, nameof(queueServiceProvider));
+            EnsureArg.IsFalse(executed, nameof(executed));
 
-            using var jobScope = queueServiceProvider.CreateScope();
+            executed = true;
+
+            using var jobScope = queueServiceProvider!.CreateScope();
 
             var executor = jobScope.ServiceProvider.GetRequiredService<IJobExecutor<TJob>>();
 
-            var initialRequestData = new OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>>(jobData, executor);
+            var initialRequestData = new OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>>(jobData!, executor);
 
             var handler = RootHandler;
 
-            var eventHandlers = queueServiceProvider
+            var eventHandlers = queueServiceProvider!
                 .GetServices<IOnJobExecuteEvent<TJob, IJobExecutor<TJob>>>()
                 .Reverse()
                 .ToArray();
@@ -270,6 +264,8 @@ public class Queue : IQueue, IDisposable
             jobData = default;
             queueServiceProvider = null;
 
+            pool.Return(this);
+
             OnJobExecuteEventResult<TJob, IJobExecutor<TJob>> RootHandler(in OnJobExecuteEventRequestData<TJob, IJobExecutor<TJob>> requestData)
             {
                 try
@@ -290,48 +286,84 @@ public class Queue : IQueue, IDisposable
 
     private class TransactionJobRunners : ISinglePhaseNotification
     {
-        private readonly Transaction transaction;
-        private readonly Action<Transaction, TransactionJobRunners> commit;
-        private readonly Action<Transaction> rollback;
+        private static readonly ObjectPool<TransactionJobRunners> pool = ObjectPool.Create<TransactionJobRunners>();
+
+        private Transaction? transaction;
+        private Action<Transaction, TransactionJobRunners>? commit;
+        private Action<Transaction>? rollback;
+
+        private bool transactionCompleted = true;
 
         internal List<IJobRunner> Jobs = new();
         internal List<IJobRunner> ChildJobs = new();
 
-        internal TransactionJobRunners(Transaction transaction, Action<Transaction, TransactionJobRunners> commit, Action<Transaction> rollback)
+        internal static TransactionJobRunners Create(
+            Transaction transaction,
+            Action<Transaction, TransactionJobRunners> commit,
+            Action<Transaction> rollback)
         {
-            this.transaction = transaction;
-            this.commit = commit;
-            this.rollback = rollback;
-
-            transaction.EnlistVolatile(this, EnlistmentOptions.None);
+            var transactionJobRunner = pool.Get();
+            transactionJobRunner.transaction = transaction;
+            transactionJobRunner.commit = commit;
+            transactionJobRunner.rollback = rollback;
+            transactionJobRunner.transactionCompleted = false;
+            return transactionJobRunner;
         }
 
         void ISinglePhaseNotification.SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
         {
-            commit(transaction, this);
+            EnsureArg.IsFalse(transactionCompleted, nameof(transactionCompleted));
+
+            transactionCompleted = true;
+
+            commit!(transaction!, this);
             singlePhaseEnlistment.Committed();
+            Cleanup();
         }
 
         void IEnlistmentNotification.Commit(Enlistment enlistment)
         {
-            commit(transaction, this);
+            EnsureArg.IsFalse(transactionCompleted, nameof(transactionCompleted));
+
+            transactionCompleted = true;
+
+            commit!(transaction!, this);
             enlistment.Done();
+            Cleanup();
         }
 
         void IEnlistmentNotification.InDoubt(Enlistment enlistment)
         {
+            EnsureArg.IsFalse(transactionCompleted, nameof(transactionCompleted));
+
             enlistment.Done();
         }
 
         void IEnlistmentNotification.Prepare(PreparingEnlistment preparingEnlistment)
         {
+            EnsureArg.IsFalse(transactionCompleted, nameof(transactionCompleted));
+
             preparingEnlistment.Prepared();
         }
 
         void IEnlistmentNotification.Rollback(Enlistment enlistment)
         {
-            rollback(transaction);
+            EnsureArg.IsFalse(transactionCompleted, nameof(transactionCompleted));
+
+            transactionCompleted = true;
+
+            rollback!(transaction!);
             enlistment.Done();
+            Cleanup();
+        }
+
+        private void Cleanup()
+        {
+            Jobs.Capacity = 4;
+            Jobs.Clear();
+            ChildJobs.Capacity = 4;
+            ChildJobs.Clear();
+            pool.Return(this);
         }
     }
 }
