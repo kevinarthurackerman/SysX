@@ -2,7 +2,7 @@
 
 public abstract class AssetContext
 {
-    private readonly Dictionary<Type, object> assetSetCache;
+    private readonly Dictionary<Type, IAssetSet> assetSetCache;
 
     public AssetContext(IEnumerable<Type> assetTypes, IQueueServiceProvider queueServiceProvider)
     {
@@ -23,7 +23,7 @@ public abstract class AssetContext
             property.SetValue(this, assetSetCache[assetType]);
         }
 
-        object CreateAssetSet(Type assetType)
+        IAssetSet CreateAssetSet(Type assetType)
         {
             var iasset = assetType.GetGenericTypeImplementation(typeof(IAsset<>));
 
@@ -32,7 +32,7 @@ public abstract class AssetContext
 
             var assetKeyType = iasset.GenericTypeArguments[0];
 
-            return typeof(AssetSet<,>)
+            return (IAssetSet)typeof(AssetSet<,>)
                 .MakeGenericType(assetKeyType, assetType)
                 .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
                 .Single()
@@ -40,7 +40,7 @@ public abstract class AssetContext
         }
     }
 
-    public AssetSet<TKey, TAsset> AssetSet<TKey, TAsset>()
+    public IAssetSet<TKey, TAsset> AssetSet<TKey, TAsset>()
         where TAsset : class, IAsset<TKey>
-        => (AssetSet<TKey, TAsset>)assetSetCache[typeof(TAsset)];
+        => (IAssetSet<TKey, TAsset>)assetSetCache[typeof(TAsset)];
 }

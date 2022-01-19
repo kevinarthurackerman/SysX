@@ -19,7 +19,9 @@ public static class IAssetSetExtensions
         => assetSet.TryDelete(asset.Key, out result);
 }
 
-public interface IAssetSet<TKey, TAsset>
+public interface IAssetSet { }
+
+public interface IAssetSet<TKey, TAsset> : IAssetSet
     where TAsset : class, IAsset<TKey>
 {
     public TAsset Get(TKey key);
@@ -35,7 +37,7 @@ public interface IAssetSet<TKey, TAsset>
     public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommitted();
 }
 
-public class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNotification
+internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNotification
     where TAsset : class, IAsset<TKey>
 {
     private readonly IQueueServiceProvider queueServiceProvider;

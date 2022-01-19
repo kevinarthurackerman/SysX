@@ -1,6 +1,4 @@
-﻿using Sysx.DependencyInjection;
-
-namespace Sysx.JobEngine;
+﻿namespace Sysx.JobEngine;
 
 public static class IServiceCollectionExtensions
 {
