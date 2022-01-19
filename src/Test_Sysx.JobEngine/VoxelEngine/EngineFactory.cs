@@ -29,7 +29,7 @@ public static class EngineFactory
         {
             ConfigureQueueServices = services =>
             {
-                services.AddAssetContext(typeof(ConfigurationAssetContext), new[] { typeof(Pallet) });
+                services.AddAssetContext(typeof(ConfigurationAssetContext));
                 services.AddJobExecutor(typeof(CreatePallet.Executor));
                 services.AddOnJobExecute(typeof(OnJobExecute_PropagatePallets<,>));
                 configureConfigQueueServices(services);
@@ -40,7 +40,7 @@ public static class EngineFactory
         {
             ConfigureQueueServices = services =>
             {
-                services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
+                services.AddAssetContext(typeof(MainAssetContext));
                 services.AddJobExecutor(typeof(PropagatePallets.Executor));
                 configureMainQueueServices(services);
             }
@@ -50,7 +50,7 @@ public static class EngineFactory
         {
             ConfigureQueueServices = services =>
             {
-                services.AddAssetContext(typeof(ContouringAssetContext), new[] { typeof(Pallet), typeof(Shape) });
+                services.AddAssetContext(typeof(ContouringAssetContext));
                 services.AddJobExecutor(typeof(PropagatePallets.Executor));
                 configureContouringQueueServices(services);
             }
@@ -61,7 +61,7 @@ public static class EngineFactory
             Name = "Background 1",
             ConfigureQueueServices = services =>
             {
-                services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
+                services.AddAssetContext(typeof(MainAssetContext));
                 services.AddJobExecutor(typeof(PropagatePallets.Executor));
                 configureMainQueueServices(services);
             }
@@ -72,7 +72,7 @@ public static class EngineFactory
             Name = "Background 2",
             ConfigureQueueServices = services =>
             {
-                services.AddAssetContext(typeof(MainAssetContext), new[] { typeof(Pallet), typeof(Grid), typeof(Chunk) });
+                services.AddAssetContext(typeof(MainAssetContext));
                 services.AddJobExecutor(typeof(PropagatePallets.Executor));
                 configureMainQueueServices(services);
             }

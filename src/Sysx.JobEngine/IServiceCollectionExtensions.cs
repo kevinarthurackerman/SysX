@@ -7,7 +7,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddAssetContext(
         this IServiceCollection services,
         Type assetContextType,
-        IEnumerable<Type> assetTypes,
+        IEnumerable<Type>? assetTypes = null,
         ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
     {
         var isAssetContextType = typeof(AssetContext).IsAssignableFrom(assetContextType);
@@ -15,7 +15,7 @@ public static class IServiceCollectionExtensions
         if (!isAssetContextType)
             throw new InvalidOperationException($"Type {nameof(isAssetContextType)} {isAssetContextType} is not an AssetContext type.");
 
-        services.Add(new ServiceDescriptor(assetContextType, services => services.Activate(assetContextType, assetTypes), serviceLifetime));
+        services.Add(new ServiceDescriptor(assetContextType, services => services.Activate(assetContextType, assetTypes ?? Type.EmptyTypes), serviceLifetime));
 
         var ancestorContextType = assetContextType.BaseType;
 
