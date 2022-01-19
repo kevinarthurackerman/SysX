@@ -14,6 +14,13 @@ public class InternalServiceProvider : IEngineServiceProvider, IQueueServiceProv
 {
     private IServiceProvider? serviceProvider;
 
+    public InternalServiceProvider() { }
+
+    public InternalServiceProvider(IServiceProvider serviceProvider)
+    {
+        this.serviceProvider = serviceProvider;
+    }
+
     public object? GetService(Type serviceType)
     {
         if (serviceProvider == null)

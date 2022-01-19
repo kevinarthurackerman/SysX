@@ -15,12 +15,7 @@ public class Engine : IDisposable
         disposed = false;
 
         var engineServices = new ServiceCollection()
-            .AddScoped(engineServices => {
-                var engineServiceProvider = (IEngineServiceProvider)new InternalServiceProvider();
-                engineServiceProvider.SetServiceProvider(engineServices);
-                return engineServiceProvider;
-            })
-            .AddScoped<IQueueServiceProvider>(_ => new InternalServiceProvider())
+            .AddScoped<IEngineServiceProvider>(engineServices => new InternalServiceProvider(engineServices))
             .AddSingleton<IQueueLocator, QueueLocator>();
 
         createEngineOptions.ConfigureEngineServices(engineServices);
@@ -53,16 +48,8 @@ public class Engine : IDisposable
         var queueScope = engineServices.CreateScope();
 
         var queueServices = new ServiceCollection()
-            .AddSingleton(_ => {
-                var engineServiceProvider = (IEngineServiceProvider)new InternalServiceProvider();
-                engineServiceProvider.SetServiceProvider(queueScope.ServiceProvider);
-                return engineServiceProvider;
-            })
-            .AddSingleton(queueServices => {
-                var queueServiceProvider = (IQueueServiceProvider)new InternalServiceProvider();
-                queueServiceProvider.SetServiceProvider(queueServices);
-                return queueServiceProvider;
-            })
+            .AddSingleton<IEngineServiceProvider>(_ => new InternalServiceProvider(queueScope.ServiceProvider))
+            .AddScoped<IQueueServiceProvider>(queueServices => new InternalServiceProvider(queueServices))
             .AddSingleton<IQueueContext, QueueContext>();
 
         foreach (var service in defaultQueueServices)
@@ -72,10 +59,9 @@ public class Engine : IDisposable
 
         var queueServiceProvider = queueServices.BuildServiceProvider();
 
-        queueScope.ServiceProvider.GetRequiredService<IQueueServiceProvider>()
-            .SetServiceProvider(queueServiceProvider);
-
-        var queue = queueScope.ServiceProvider.Activate<TQueue>();
+        // todo: It needs to be determined if the queue should resolve it's dependencies from the enginer service provider
+        // or from the queue's own service provider.
+        var queue = queueScope.ServiceProvider.Activate<TQueue>(new InternalServiceProvider(queueServiceProvider));
 
         queueServiceProvider.GetRequiredService<IQueueContext>().SetCurrent(queue);
 
