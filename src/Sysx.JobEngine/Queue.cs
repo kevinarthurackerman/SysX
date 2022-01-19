@@ -188,9 +188,10 @@ public class Queue : IQueue, ISinglePhaseNotification, IAsyncDisposable
     private class JobRunner<TJob> : IJobRunner
         where TJob : IJob
     {
-        private readonly Queue<TJob> jobs = new();
-        private readonly Queue<TJob> transactionJobs = new();
+        private readonly LinkedList<TJob> jobs = new();
+        private readonly List<TJob> transactionJobs = new();
         private readonly IQueueServiceProvider queueServiceProvider;
+        private readonly object @lock = new { };
 
         internal JobRunner(IQueueServiceProvider queueServiceProvider)
         {
@@ -199,13 +200,16 @@ public class Queue : IQueue, ISinglePhaseNotification, IAsyncDisposable
 
         internal void AddJob(TJob job)
         {
-            if (Transaction.Current == null)
+            lock (@lock)
             {
-                jobs.Enqueue(job);
-            }
-            else
-            {
-                transactionJobs.Enqueue(job);
+                if (Transaction.Current == null)
+                {
+                    jobs.AddLast(job);
+                }
+                else
+                {
+                    transactionJobs.Add(job);
+                }
             }
         }
 
@@ -213,18 +217,31 @@ public class Queue : IQueue, ISinglePhaseNotification, IAsyncDisposable
 
         void IJobRunner.Commit()
         {
-            while(transactionJobs.TryDequeue(out var job))
-                jobs.Enqueue(job);
+            lock (@lock)
+            {
+                foreach (var job in transactionJobs)
+                    jobs.AddLast(job);
+
+                transactionJobs.Clear();
+            }
         }
 
         void IJobRunner.Rollback()
         {
-            transactionJobs.Clear();
+            lock (@lock)
+            {
+                transactionJobs.Clear();
+            }
         }
 
         void IJobRunner.RunNext()
         {
-            var job = jobs.Dequeue();
+            TJob? job;
+            lock (@lock)
+            {
+                job = jobs.First();
+                jobs.RemoveFirst();
+            }
 
             using var jobScope = queueServiceProvider.CreateScope();
 
