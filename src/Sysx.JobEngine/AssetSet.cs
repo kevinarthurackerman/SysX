@@ -40,14 +40,14 @@ public interface IAssetSet<TKey, TAsset> : IAssetSet
 internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNotification
     where TAsset : class, IAsset<TKey>
 {
-    private readonly IQueueServiceProvider queueServiceProvider;
+#pragma warning disable CS8714 // Key can be nullable in order to match asset key, but null will never be passed in as a key.
     private readonly IDictionary<TKey, TAsset> assets;
     private readonly IDictionary<TKey, TAsset?> uncommittedAssets;
+#pragma warning restore CS8714 // Key can be nullable in order to match asset key, but null will never be passed in as a key.
     private Transaction? transaction;
 
-    internal AssetSet(IQueueServiceProvider queueServiceProvider)
+    internal AssetSet()
     {
-        this.queueServiceProvider = queueServiceProvider;
 #pragma warning disable CS8714 // Key can be nullable in order to match asset key, but null will never be passed in as a key.
         assets = new Dictionary<TKey, TAsset>();
         uncommittedAssets = new Dictionary<TKey, TAsset?>();
@@ -58,43 +58,15 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
     {
         EnsureArg.HasValue(key, nameof(key));
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
+        var asset = Find(key);
 
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnGetAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
+        if (asset == null)
         {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
+            throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
         }
-
-        var handlerResult = handler(initialRequestData);
-
-        return handlerResult.Current.Asset!;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        else
         {
-            var asset = Find(key);
-
-            if (asset == null)
-                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
-
-            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, asset, true);
-            var currentResultData = previousResultData.Value;
-            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            return asset;
         }
     }
 
@@ -102,52 +74,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
     {
         EnsureArg.HasValue(key, nameof(key));
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
+        result = Find(key);
 
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnGetAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = handlerResult.Current.Asset;
-
-        return handlerResult.Current.Success;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
-        {
-            var asset = Find(key);
-
-            if (asset == null)
-            {
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
-            else
-            {
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, asset, true);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
-        }
+        return result != null;
     }
 
     public TAsset Add(TAsset asset)
@@ -157,45 +86,16 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 
         EnlistTransaction();
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
+        var existingAsset = Find(asset.Key);
 
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnAddAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
+        if (existingAsset == null)
         {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        return handlerResult.Current.Asset!;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
-        {
-            var existingAsset = Find(asset.Key);
-
-            if (existingAsset != null)
-                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' already exists.");
-
             Set(asset.Key, asset);
-
-            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, true);
-            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            return asset;
+        }
+        else
+        {
+            throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' already exists.");
         }
     }
 
@@ -206,53 +106,18 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 
         EnlistTransaction();
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
+        var existingAsset = Find(asset.Key);
 
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnAddAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
+        if (existingAsset == null)
         {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
+            Set(asset.Key, asset);
+            result = asset;
+            return true;
         }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = handlerResult.Current.Asset;
-
-        return handlerResult.Current.Success;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        else
         {
-            var existingAsset = Find(asset.Key);
-
-            if (existingAsset != null)
-            {
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
-            else
-            {
-                Set(asset.Key, asset);
-
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, true);
-                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
+            result = null;
+            return false;
         }
     }
 
@@ -263,43 +128,8 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 
         EnlistTransaction();
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
-
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnUpsertAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        return handlerResult.Current.Asset!;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
-        {
-            var existingAsset = Find(asset.Key);
-
-            Set(asset.Key, asset);
-
-            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, existingAsset, true);
-            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-        }
+        Set(asset.Key, asset);
+        return asset;
     }
 
     public bool TryUpsert(TAsset asset, out TAsset? result)
@@ -309,45 +139,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 
         EnlistTransaction();
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
-
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnUpsertAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
-        {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
-        }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = handlerResult.Current.Asset;
-
-        return handlerResult.Current.Success;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
-        {
-            var existingAsset = Find(asset.Key);
-
-            Set(asset.Key, asset);
-
-            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, existingAsset, true);
-            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-        }
+        Set(asset.Key, asset);
+        result = asset;
+        return true;
     }
 
     public TAsset Update(TAsset asset)
@@ -357,45 +151,16 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 
         EnlistTransaction();
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
+        var existingAsset = Find(asset.Key);
 
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnUpdateAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
+        if (existingAsset == null)
         {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
+            throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' was not found.");
         }
-
-        var handlerResult = handler(initialRequestData);
-
-        return handlerResult.Current.Asset!;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        else
         {
-            var existingAsset = Find(asset.Key);
-
-            if (existingAsset == null)
-                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{asset.Key}' was not found.");
-
             Set(asset.Key, asset);
-
-            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, existingAsset, true);
-            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            return asset;
         }
     }
 
@@ -406,53 +171,18 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 
         EnlistTransaction();
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), asset.Key, asset);
+        var existingAsset = Find(asset.Key);
 
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnUpdateAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
+        if (existingAsset == null)
         {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
+            result = null;
+            return false;
         }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = handlerResult.Current.Asset;
-
-        return handlerResult.Current.Success;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        else
         {
-            var existingAsset = Find(asset.Key);
-
-            if (existingAsset == null)
-            {
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
-            else
-            {
-                Set(asset.Key, asset);
-
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, existingAsset, true);
-                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), asset.Key, asset, true);
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
+            Set(asset.Key, asset);
+            result = asset;
+            return true;
         }
     }
 
@@ -462,45 +192,16 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 
         EnlistTransaction();
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
+        var asset = Find(key);
 
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnDeleteAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
+        if (asset == null)
         {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
+            throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
         }
-
-        var handlerResult = handler(initialRequestData);
-
-        return handlerResult.Current.Asset!;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        else
         {
-            var asset = Find(key);
-
-            if (asset == null)
-                throw new KeyNotFoundException($"An asset with type {typeof(TAsset)} and key '{key}' was not found.");
-
             Set(asset.Key, null);
-
-            previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, asset, true);
-            var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, true);
-            return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
+            return asset;
         }
     }
 
@@ -510,53 +211,16 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 
         EnlistTransaction();
 
-        var initialRequestData = new OnAssetEventRequestData<TKey, TAsset>(typeof(TAsset), key, null);
+        result = Find(key);
 
-        var handler = RootHandler;
-
-        OnAssetEventResultData<TKey, TAsset>? previousResultData = null;
-        OnAssetEventResultData<TKey, TAsset>? currentResultData = null;
-
-        var eventHandlers = queueServiceProvider
-            .GetServices<IOnDeleteAssetEvent<TKey, TAsset>>()
-            .Reverse()
-            .ToArray();
-
-        foreach (var eventHandler in eventHandlers)
+        if (result == null)
         {
-            var innerHandler = handler;
-            handler = (in OnAssetEventRequestData<TKey, TAsset> currentRequestData) =>
-            {
-                var request = new OnAssetEventRequest<TKey, TAsset>(in initialRequestData, in currentRequestData);
-                currentResultData = eventHandler.Execute(in request, (in OnAssetEventRequestData<TKey, TAsset> requestData) => innerHandler(requestData));
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData!.Value, currentResultData.Value);
-            };
+            return false;
         }
-
-        var handlerResult = handler(initialRequestData);
-
-        result = handlerResult.Current.Asset;
-
-        return handlerResult.Current.Success;
-
-        OnAssetEventResult<TKey, TAsset> RootHandler(in OnAssetEventRequestData<TKey, TAsset> requestData)
+        else
         {
-            var asset = Find(key);
-
-            if (asset == null)
-            {
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, false);
-                var currentResultData = previousResultData.Value;
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
-            else
-            {
-                Set(asset.Key, null);
-
-                previousResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, asset, true);
-                var currentResultData = new OnAssetEventResultData<TKey, TAsset>(typeof(TAsset), key, null, true);
-                return new OnAssetEventResult<TKey, TAsset>(previousResultData.Value, currentResultData);
-            }
+            Set(result.Key, null);
+            return true;
         }
     }
 

@@ -4,7 +4,9 @@ public abstract class AssetContext
 {
     private readonly Dictionary<Type, IAssetSet> assetSetCache;
 
-    public AssetContext(IEnumerable<Type> assetTypes, IQueueServiceProvider queueServiceProvider)
+    public AssetContext() : this(Type.EmptyTypes) { }
+
+    public AssetContext(IEnumerable<Type> assetTypes)
     {
         assetSetCache = assetTypes.ToDictionary(assetType => assetType, assetType => CreateAssetSet(assetType));
 
@@ -36,7 +38,7 @@ public abstract class AssetContext
                 .MakeGenericType(assetKeyType, assetType)
                 .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
                 .Single()
-                .Invoke(new object[] { queueServiceProvider });
+                .Invoke(null);
         }
     }
 

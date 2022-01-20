@@ -24,7 +24,7 @@ public static class IServiceProviderExtensions
         {
             var ctorParamInfos = ctor.GetParameters();
 
-            var ctorParams = new object[ctorParamInfos.Length];
+            var ctorParams = new object?[ctorParamInfos.Length];
 
             for (var i = 0; i < ctorParamInfos.Length; i++)
             {
@@ -37,9 +37,11 @@ public static class IServiceProviderExtensions
                 if (ctorParams[i] == null) break;
             }
 
-            if (ctorParams.Last() == null) continue;
+            if (ctorParams.Any() && ctorParams.Last() == null) continue;
 
+#pragma warning disable CS8620 // All values in ctorParams are not null here.
             eligibleConstructors.Add((ctor, ctorParams));
+#pragma warning restore CS8620 // All values in ctorParams are not null here.
         }
 
         if (eligibleConstructors.Count == 0)

@@ -64,38 +64,6 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
-    [Obsolete("This API may be removed. Prefer IOnJobExecuteEvent instead.")]
-    public static IServiceCollection AddOnAssetEvent(
-        this IServiceCollection services,
-        Type onAssetEventType,
-        ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
-    {
-        var isOnGetAssetEvent = onAssetEventType.IsAssignableToGenericType(typeof(IOnGetAssetEvent<,>));
-        var isOnAddAssetEvent = onAssetEventType.IsAssignableToGenericType(typeof(IOnAddAssetEvent<,>));
-        var isOnUpsertAssetEvent = onAssetEventType.IsAssignableToGenericType(typeof(IOnUpsertAssetEvent<,>));
-        var isOnUpdateAssetEvent = onAssetEventType.IsAssignableToGenericType(typeof(IOnUpdateAssetEvent<,>));
-        var isOnDeleteAssetEvent = onAssetEventType.IsAssignableToGenericType(typeof(IOnDeleteAssetEvent<,>));
-
-        if (!isOnGetAssetEvent
-            && !isOnAddAssetEvent
-            && !isOnUpsertAssetEvent
-            && !isOnUpdateAssetEvent
-            && !isOnDeleteAssetEvent)
-            throw new InvalidOperationException($"Type {nameof(onAssetEventType)} {onAssetEventType} is not an OnAssetEvent type.");
-
-        if (isOnGetAssetEvent) services.AddOpenOrClosedType(typeof(IOnGetAssetEvent<,>), onAssetEventType, serviceLifetime);
-
-        if (isOnAddAssetEvent) services.AddOpenOrClosedType(typeof(IOnAddAssetEvent<,>), onAssetEventType, serviceLifetime);
-
-        if (isOnUpsertAssetEvent) services.AddOpenOrClosedType(typeof(IOnUpsertAssetEvent<,>), onAssetEventType, serviceLifetime);
-
-        if (isOnUpdateAssetEvent) services.AddOpenOrClosedType(typeof(IOnUpdateAssetEvent<,>), onAssetEventType, serviceLifetime);
-
-        if (isOnDeleteAssetEvent) services.AddOpenOrClosedType(typeof(IOnDeleteAssetEvent<,>), onAssetEventType, serviceLifetime);
-
-        return services;
-    }
-
     public static IServiceCollection AddOnJobExecute(
         this IServiceCollection services,
         Type onJobExecuteType,

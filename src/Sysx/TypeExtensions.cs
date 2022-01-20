@@ -112,7 +112,7 @@ public static class TypeExtensions
         if (type.IsGenericType && type.GetGenericTypeDefinition() == genericType)
             return true;
 
-        Type baseType = type.BaseType;
+        Type? baseType = type.BaseType;
         if (baseType == null) return false;
 
         return IsAssignableToGenericType(baseType, genericType);
@@ -143,7 +143,7 @@ public static class TypeExtensions
             return type;
         }
 
-        Type baseType = type.BaseType;
+        Type? baseType = type.BaseType;
         if (baseType == null) return null;
 
         return GetGenericTypeImplementation(baseType, genericType);
