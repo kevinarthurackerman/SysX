@@ -31,6 +31,7 @@ public static class EngineFactory
             {
                 services.AddAssetContext(typeof(ConfigurationAssetContext));
                 services.AddJobExecutor(typeof(CreatePallet.Executor));
+                //services.AddOnJobExecute(typeof(OnJobExecute_PropagatePallets<,>));
                 services.AddOnJobExecute(typeof(OnJobExecute_PropagatePallets<,>));
                 configureConfigQueueServices(services);
             }
@@ -41,7 +42,8 @@ public static class EngineFactory
             ConfigureQueueServices = services =>
             {
                 services.AddAssetContext(typeof(MainAssetContext));
-                services.AddJobExecutor(typeof(PropagatePallets.Executor));
+                //services.AddJobExecutor(typeof(PropagatePallets.Executor));
+                services.AddJobExecutor(typeof(PropagateAssets<Guid,Pallet>.Executor));
                 configureMainQueueServices(services);
             }
         });
@@ -51,7 +53,8 @@ public static class EngineFactory
             ConfigureQueueServices = services =>
             {
                 services.AddAssetContext(typeof(ContouringAssetContext));
-                services.AddJobExecutor(typeof(PropagatePallets.Executor));
+                //services.AddJobExecutor(typeof(PropagatePallets.Executor));
+                services.AddJobExecutor(typeof(PropagateAssets<Guid, Pallet>.Executor));
                 configureContouringQueueServices(services);
             }
         });
@@ -62,7 +65,8 @@ public static class EngineFactory
             ConfigureQueueServices = services =>
             {
                 services.AddAssetContext(typeof(MainAssetContext));
-                services.AddJobExecutor(typeof(PropagatePallets.Executor));
+                //services.AddJobExecutor(typeof(PropagatePallets.Executor));
+                services.AddJobExecutor(typeof(PropagateAssets<Guid, Pallet>.Executor));
                 configureMainQueueServices(services);
             }
         });
@@ -73,7 +77,8 @@ public static class EngineFactory
             ConfigureQueueServices = services =>
             {
                 services.AddAssetContext(typeof(MainAssetContext));
-                services.AddJobExecutor(typeof(PropagatePallets.Executor));
+                //services.AddJobExecutor(typeof(PropagatePallets.Executor));
+                services.AddJobExecutor(typeof(PropagateAssets<Guid, Pallet>.Executor));
                 configureMainQueueServices(services);
             }
         });

@@ -566,7 +566,8 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         {
             assets.TryGetValue(uncommitted.Key, out var current);
 
-            yield return new UncommittedAsset<TKey, TAsset>(current, uncommitted.Value);
+            if (current != uncommitted.Value)
+                yield return new UncommittedAsset<TKey, TAsset>(current, uncommitted.Value);
         }
     }
 
