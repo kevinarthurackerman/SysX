@@ -10,6 +10,6 @@ public class OnJobExecute_Log<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJo
     {
         // do some logging
 
-        return next (request.Current).Current;
+        return next(request.Current).Current;
     }
 }

@@ -30,7 +30,7 @@ public abstract class AssetContext
             if (!assetSetCache.TryGetValue(assetType, out var assetSet))
                 assetSetCache[assetType] = assetSet = CreateAssetSet(assetType);
 
-            property.SetValue(this, assetSetCache[assetType]);
+            property.SetBackingValue(this, assetSetCache[assetType]);
         }
 
         IAssetSet CreateAssetSet(Type assetType)
