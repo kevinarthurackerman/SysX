@@ -8,5 +8,6 @@ global using System.Linq;
 global using System.Reflection;
 global using System.Threading;
 global using System.Transactions;
+global using Sysx.Collections.Generic;
 global using Sysx.DependencyInjection;
 global using Sysx.EnsureThat;

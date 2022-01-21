@@ -14,8 +14,7 @@ public class Queue : IQueue, IDisposable
     private static int queueInstanceNumber = 0;
 
     private readonly IQueueServiceProvider queueServiceProvider;
-    // todo: Replace this list with a circular buffer type to improve performance when adding or removing from the front of the collection.
-    private readonly List<IJobRunner> jobRunnersToRun = new();
+    private readonly CircularBuffer<IJobRunner> jobRunnersToRun = new();
     private readonly Dictionary<Transaction, TransactionJobRunners> transactionJobRunners = new();
     private readonly Action<Transaction> rollback;
     private readonly Action<Transaction, TransactionJobRunners> commit;
@@ -46,7 +45,7 @@ public class Queue : IQueue, IDisposable
 
             if (Transaction.Current == null)
             {
-                jobRunnersToRun.Add(jobRunner);
+                jobRunnersToRun.PushLast(jobRunner);
 
                 JobRunnersUpdated();
             }
@@ -148,8 +147,7 @@ public class Queue : IQueue, IDisposable
                         Monitor.Wait(jobRunnersUpdateLock);
                     }
 
-                    nextJobRunner = jobRunnersToRun.First();
-                    jobRunnersToRun.RemoveAt(0);
+                    nextJobRunner = jobRunnersToRun.PopFirst();
                     JobRunnersUpdated();
                 }
                 finally
@@ -181,8 +179,8 @@ public class Queue : IQueue, IDisposable
     {
         lock (jobRunnersUpdateLock)
         {
-            jobRunnersToRun.InsertRange(0, transactionJobRunners.ChildJobs);
-            jobRunnersToRun.AddRange(transactionJobRunners.Jobs);
+            jobRunnersToRun.PushFirst(transactionJobRunners.ChildJobs);
+            jobRunnersToRun.PushLast(transactionJobRunners.Jobs);
             this.transactionJobRunners.Remove(transaction);
 
             JobRunnersUpdated();
