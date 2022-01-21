@@ -2,12 +2,19 @@
 
 public static class IServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds an asset context to the service collection.
+    /// Asset contexts should only be added to the queue services.
+    /// </summary>
     public static IServiceCollection AddAssetContext(
         this IServiceCollection services,
         Type assetContextType,
         IEnumerable<Type>? assetTypes = null,
         ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
     {
+        EnsureArg.HasValue(services, nameof(services));
+        EnsureArg.HasValue(assetContextType, nameof(assetContextType));
+
         var isAssetContextType = typeof(AssetContext).IsAssignableFrom(assetContextType);
 
         if (!isAssetContextType)
@@ -30,12 +37,20 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Adds a queue type as a service to a queue.
+    /// Queue types should only be added to the queue services.
+    /// The queue must be created by the engine before it can be referenced by a job.
+    /// </summary>
     public static IServiceCollection AddQueueServiceToQueue(
         this IServiceCollection services,
         Type queueType,
         string name = QueueLocator.DefaultQueueName,
         ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
     {
+        EnsureArg.HasValue(services, nameof(services));
+        EnsureArg.HasValue(queueType, nameof(queueType));
+
         var isQueueType = typeof(IQueue).IsAssignableFrom(queueType);
         
         if (!isQueueType)
@@ -49,11 +64,18 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Adds a job executor to the service collection.
+    /// Job executors should only be added to the queue services.
+    /// </summary>
     public static IServiceCollection AddJobExecutor(
         this IServiceCollection services,
         Type jobExecutorType,
         ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        EnsureArg.HasValue(services, nameof(services));
+        EnsureArg.HasValue(jobExecutorType, nameof(jobExecutorType));
+
         var isJobExecutor = jobExecutorType.IsAssignableToGenericType(typeof(IJobExecutor<>));
 
         if (!isJobExecutor)
@@ -64,11 +86,18 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Adds an on job execute event to the service collection.
+    /// On job execute events should only be added to the queue services.
+    /// </summary>
     public static IServiceCollection AddOnJobExecute(
         this IServiceCollection services,
         Type onJobExecuteType,
         ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
     {
+        EnsureArg.HasValue(services, nameof(services));
+        EnsureArg.HasValue(onJobExecuteType, nameof(onJobExecuteType));
+
         var isOnJobExecute = onJobExecuteType.IsAssignableToGenericType(typeof(IOnJobExecuteEvent<,>));
 
         if (!isOnJobExecute)

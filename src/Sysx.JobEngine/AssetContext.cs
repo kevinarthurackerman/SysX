@@ -1,5 +1,11 @@
 ﻿namespace Sysx.JobEngine;
 
+/// <summary>
+/// Acts as an in-memory repository for assets that are accessed by jobs.
+/// 
+/// Assets can either be accessed by calling the AssetSet method with the type of asset, 
+/// or by adding a property to the class of type IAssetSet with a public getter and setter.
+/// </summary>
 public abstract class AssetContext
 {
     private readonly Dictionary<Type, IAssetSet> assetSetCache;
@@ -8,6 +14,8 @@ public abstract class AssetContext
 
     public AssetContext(IEnumerable<Type> assetTypes)
     {
+        EnsureArg.IsNotNull(assetTypes, nameof(assetTypes));
+
         assetSetCache = assetTypes.ToDictionary(assetType => assetType, assetType => CreateAssetSet(assetType));
 
         foreach (var property in GetType().GetProperties())
@@ -42,6 +50,9 @@ public abstract class AssetContext
         }
     }
 
+    /// <summary>
+    /// Used to access assets of the given type stored in this context.
+    /// </summary>
     public IAssetSet<TKey, TAsset> AssetSet<TKey, TAsset>()
         where TAsset : class, IAsset<TKey>
         => (IAssetSet<TKey, TAsset>)assetSetCache[typeof(TAsset)];

@@ -1,5 +1,10 @@
 ﻿namespace Sysx.JobEngine;
 
+/// <summary>
+/// A convenience service for propagating changes to assets in one queue to other queues.
+/// An implementation of this must be registered in the queue from which asset changes will propagate.
+/// A propagate assets job executor should be registered to all queues receiving propagated assets.
+/// </summary>
 public abstract class OnJobExecute_PropagateAssets<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJobExecutor>
     where TJob : IJob
     where TJobExecutor : IJobExecutor<TJob>
@@ -60,6 +65,9 @@ public abstract class OnJobExecute_PropagateAssets<TJob, TJobExecutor> : IOnJobE
 
     public OnJobExecuteEventResultData<TJob, TJobExecutor> Execute(in OnJobExecuteEventRequest<TJob, TJobExecutor> request, OnJobExecuteEventNext<TJob, TJobExecutor> next)
     {
+        EnsureArg.HasValue(request, nameof(request));
+        EnsureArg.IsNotNull(next, nameof(next));
+
         var result = next(request.Current);
 
         if (!assetContexts.Any()) return result.Current;
@@ -105,6 +113,11 @@ public abstract class OnJobExecute_PropagateAssets<TJob, TJobExecutor> : IOnJobE
     }
 }
 
+/// <summary>
+/// A convenience job for propagating changes to assets in one queue to other queues.
+/// This executor should be registered to all queues receiving propagated assets.
+/// An implementation of OnJobExecute_PropagateAssets must be registered in the queue from which asset changes will propagate.
+/// </summary>
 public static class PropagateAssets<TKey, TAsset>
     where TAsset : class, IAsset<TKey>
 {
@@ -126,6 +139,8 @@ public static class PropagateAssets<TKey, TAsset>
 
         public void Execute(in JobData data)
         {
+            EnsureArg.HasValue(data, nameof(data));
+
             var assetContexts = data.ToAssetContextTypes
                 .Select(x => queueServiceProvider.GetService(x))
                 .Where(x => x != null)

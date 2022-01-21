@@ -1,5 +1,8 @@
 ﻿namespace Sysx.JobEngine;
 
+/// <summary>
+/// Creates and manages queues for running jobs.
+/// </summary>
 public class Engine : IDisposable
 {
     private readonly Dictionary<QueueKey, QueueInfo> queues;
@@ -9,6 +12,8 @@ public class Engine : IDisposable
 
     public Engine(in EngineOptions createEngineOptions)
     {
+        EnsureArg.HasValue(createEngineOptions, nameof(createEngineOptions));
+
         createEngineOptions.Validate();
 
         queues = new();
@@ -35,12 +40,17 @@ public class Engine : IDisposable
             this.defaultQueueServices.Add(service);
     }
 
+    /// <inheritdoc cref="CreateQueue{TQueue}(in CreateQueueOptions)" />
     public IQueue CreateQueue(in CreateQueueOptions createQueueOptions)
         => CreateQueue<IQueue>(in createQueueOptions);
 
+    /// <summary>
+    /// Creates a queue.
+    /// </summary>
     public TQueue CreateQueue<TQueue>(in CreateQueueOptions createQueueOptions)
         where TQueue : IQueue
     {
+        EnsureArg.HasValue(createQueueOptions, nameof(createQueueOptions));
         Ensure.That(this).IsNotDisposed(disposed);
 
         createQueueOptions.Validate();
@@ -73,29 +83,36 @@ public class Engine : IDisposable
         return queue;
     }
 
+    /// <inheritdoc cref="RemoveQueueInner(Type, string, bool)" />
     public void RemoveQueue()
         => RemoveQueueInner(typeof(IQueue), QueueLocator.DefaultQueueName, checkDisposed: true);
 
+    /// <inheritdoc cref="RemoveQueueInner(Type, string, bool)" />
     public void RemoveQueue(string name)
         => RemoveQueueInner(typeof(IQueue), name, checkDisposed: true);
 
+    /// <inheritdoc cref="RemoveQueueInner(Type, string, bool)" />
     public void RemoveQueue<TQueue>()
         where TQueue : IQueue
         => RemoveQueueInner(typeof(TQueue), QueueLocator.DefaultQueueName, checkDisposed: true);
 
+    /// <inheritdoc cref="RemoveQueueInner(Type, string, bool)" />
     public void RemoveQueue<TQueue>(string name)
         where TQueue : IQueue
         => RemoveQueueInner(typeof(TQueue), name, checkDisposed: true);
 
+    /// <summary>
+    /// Removes a queue, waits for pending jobs to complete, and disposes of it's services.
+    /// </summary>
     private void RemoveQueueInner(Type queueType, string name, bool checkDisposed)
     {
         if (checkDisposed) Ensure.That(this).IsNotDisposed(disposed);
+        EnsureArg.IsNotNull(queueType, nameof(queueType));
         EnsureArg.IsTrue(
             typeof(IQueue).IsAssignableFrom(queueType),
             optsFn: x => x.WithMessage($"Type {nameof(queueType)} must be assignable to {typeof(IQueue)}"));
         EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
 
-        name ??= QueueLocator.DefaultQueueName;
         var key = new QueueKey(queueType, name);
 
         var queue = queues[key];
@@ -141,7 +158,18 @@ public class Engine : IDisposable
             DefaultConfigureQueueServices = x => { }
         };
 
+        /// <summary>
+        /// Manipultes services registered for the engine. These services are primarily used to 
+        /// make new queues or to share state between queues. Note that the scope is per queue
+        /// and stays over until the queue is removed and finishes shutting down.
+        /// </summary>
         public Action<IServiceCollection> ConfigureEngineServices { get; set; }
+
+        /// <summary>
+        /// Manipultes the default services registered for created queues. These services are primarily 
+        /// used in the execution of job. Note that the scope is per job and stays open until the job
+        /// and all wrapping handlers finish executing.
+        /// </summary>
         public Action<IServiceCollection> DefaultConfigureQueueServices { get; set; }
 
         public void Validate()
@@ -159,7 +187,17 @@ public class Engine : IDisposable
             ConfigureQueueServices = x => { }
         };
 
+        /// <summary>
+        /// The name of the queue, primarily used to identify the queue when multiple queues of 
+        /// the same type have been added.
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Manipultes the services registered for created queues. These services are primarily 
+        /// used in the execution of job. Note that the scope is per job and stays open until the job
+        /// and all wrapping handlers finish executing.
+        /// </summary>
         public Action<IServiceCollection> ConfigureQueueServices { get; set; }
 
         public void Validate()

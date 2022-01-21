@@ -2,41 +2,104 @@
 
 public static class IAssetSetExtensions
 {
+    /// <summary>
+    /// Gets the version of the given asset that is stored in this context.
+    /// </summary>
     public static TAsset Get<TKey, TAsset>(this IAssetSet<TKey, TAsset> assetSet, TAsset asset)
         where TAsset : class, IAsset<TKey>
         => assetSet.Get(asset.Key);
 
+    /// <summary>
+    /// Tries to get the version of the given asset that is stored in this context.
+    /// </summary>
     public static bool TryGet<TKey, TAsset>(this IAssetSet<TKey, TAsset> assetSet, TAsset asset, out TAsset? result)
         where TAsset : class, IAsset<TKey>
         => assetSet.TryGet(asset.Key, out result);
 
+    /// <summary>
+    /// Removes the asset from this context.
+    /// </summary>
     public static TAsset Delete<TKey, TAsset>(this IAssetSet<TKey, TAsset> assetSet, TAsset asset)
         where TAsset : class, IAsset<TKey>
         => assetSet.Delete(asset.Key);
 
+    /// <summary>
+    /// Tries to remove the asset from this context.
+    /// </summary>
     public static bool TryDelete<TKey, TAsset>(this IAssetSet<TKey, TAsset> assetSet, TAsset asset, out TAsset? result)
         where TAsset : class, IAsset<TKey>
         => assetSet.TryDelete(asset.Key, out result);
 }
 
+/// <inheritdoc cref="IAssetSet{TKey, TAsset}" />
 public interface IAssetSet { }
 
+/// <summary>
+/// A collection of assets that can be accessed within a job.
+/// </summary>
 public interface IAssetSet<TKey, TAsset> : IAssetSet
     where TAsset : class, IAsset<TKey>
 {
+    /// <summary>
+    /// Gets the asset from this context.
+    /// </summary>
     public TAsset Get(TKey key);
+
+    /// <summary>
+    /// Tries to get the asset from this context.
+    /// </summary>
     public bool TryGet(TKey key, out TAsset? result);
+
+    /// <summary>
+    /// Adds the asset to this context.
+    /// </summary>
     public TAsset Add(TAsset asset);
+
+    /// <summary>
+    /// Tries to add the asset to this context.
+    /// </summary>
     public bool TryAdd(TAsset asset, out TAsset? result);
+
+    /// <summary>
+    /// Upserts the asset to this context.
+    /// </summary>
     public TAsset Upsert(TAsset asset);
+
+    /// <summary>
+    /// Tries to upsert the asset to this context.
+    /// </summary>
     public bool TryUpsert(TAsset asset, out TAsset? result);
+
+    /// <summary>
+    /// Updates the asset in this context.
+    /// </summary>
     public TAsset Update(TAsset asset);
+
+    /// <summary>
+    /// Tries to update the asset in this context.
+    /// </summary>
     public bool TryUpdate(TAsset asset, out TAsset? result);
+
+    /// <summary>
+    /// Removes the asset from this context.
+    /// </summary>
     public TAsset Delete(TKey key);
+
+    /// <summary>
+    /// Tries to remove the asset from this context.
+    /// </summary>
     public bool TryDelete(TKey key, out TAsset? result);
+
+    /// <summary>
+    /// Gets an enumerable of assets with uncommitted changes which includes both
+    /// the current version of the asset and the uncommitted change.
+    /// </summary>
     public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommitted();
 }
 
+/// <summary>
+/// A collection of assets that can be accessed within a job.
+/// </summary>
 internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNotification
     where TAsset : class, IAsset<TKey>
 {
@@ -54,6 +117,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
 #pragma warning restore CS8714 // Key can be nullable in order to match asset key, but null will never be passed in as a key.
     }
 
+    /// <summary>
+    /// Gets the asset from this context.
+    /// </summary>
     public TAsset Get(TKey key)
     {
         EnsureArg.HasValue(key, nameof(key));
@@ -70,6 +136,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         }
     }
 
+    /// <summary>
+    /// Tries to get the asset from this context.
+    /// </summary>
     public bool TryGet(TKey key, out TAsset? result)
     {
         EnsureArg.HasValue(key, nameof(key));
@@ -79,6 +148,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         return result != null;
     }
 
+    /// <summary>
+    /// Adds the asset to this context.
+    /// </summary>
     public TAsset Add(TAsset asset)
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
@@ -99,6 +171,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         }
     }
 
+    /// <summary>
+    /// Tries to add the asset to this context.
+    /// </summary>
     public bool TryAdd(TAsset asset, out TAsset? result)
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
@@ -121,6 +196,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         }
     }
 
+    /// <summary>
+    /// Upserts the asset to this context.
+    /// </summary>
     public TAsset Upsert(TAsset asset)
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
@@ -132,6 +210,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         return asset;
     }
 
+    /// <summary>
+    /// Tries to upsert the asset to this context.
+    /// </summary>
     public bool TryUpsert(TAsset asset, out TAsset? result)
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
@@ -144,6 +225,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         return true;
     }
 
+    /// <summary>
+    /// Updates the asset in this context.
+    /// </summary>
     public TAsset Update(TAsset asset)
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
@@ -164,6 +248,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         }
     }
 
+    /// <summary>
+    /// Tries to update the asset in this context.
+    /// </summary>
     public bool TryUpdate(TAsset asset, out TAsset? result)
     {
         EnsureArg.IsNotNull(asset, nameof(asset));
@@ -186,6 +273,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         }
     }
 
+    /// <summary>
+    /// Removes the asset from this context.
+    /// </summary>
     public TAsset Delete(TKey key)
     {
         EnsureArg.HasValue(key, nameof(key));
@@ -205,6 +295,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         }
     }
 
+    /// <summary>
+    /// Tries to remove the asset from this context.
+    /// </summary>
     public bool TryDelete(TKey key, out TAsset? result)
     {
         EnsureArg.HasValue(key, nameof(key));
@@ -224,6 +317,10 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
         }
     }
 
+    /// <summary>
+    /// Gets an enumerable of assets with uncommitted changes which includes both
+    /// the current version of the asset and the uncommitted change.
+    /// </summary>
     public IEnumerable<UncommittedAsset<TKey, TAsset>> GetUncommitted()
     {
         foreach (var uncommitted in uncommittedAssets)
@@ -327,6 +424,9 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
     }
 }
 
+/// <summary>
+/// The current and uncommitted versions of an uncommitted asset.
+/// </summary>
 public readonly record struct UncommittedAsset<TKey, TAsset>(TAsset? Current, TAsset? Uncommitted)
     where TAsset : class, IAsset<TKey>
 {
