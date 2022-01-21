@@ -66,7 +66,7 @@ public interface IAssetSet<TKey, TAsset> : IAssetSet
     public TAsset AddOrUpdate(TAsset asset);
 
     /// <summary>
-    /// Tries to upsert the asset to this context.
+    /// Tries to add or update the asset to this context.
     /// </summary>
     public bool TryAddOrUpdate(TAsset asset, out TAsset? result);
 
@@ -197,7 +197,7 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
     }
 
     /// <summary>
-    /// Upserts the asset to this context.
+    /// Adds or updates the asset to this context.
     /// </summary>
     public TAsset AddOrUpdate(TAsset asset)
     {
@@ -211,7 +211,7 @@ internal class AssetSet<TKey, TAsset> : IAssetSet<TKey, TAsset>, ISinglePhaseNot
     }
 
     /// <summary>
-    /// Tries to upsert the asset to this context.
+    /// Tries to add or update the asset to this context.
     /// </summary>
     public bool TryAddOrUpdate(TAsset asset, out TAsset? result)
     {

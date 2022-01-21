@@ -2,5 +2,5 @@
 
 public class AppAssetContext : AssetContext
 {
-    public IAssetSet<string, Manifest> Manifests { get; set; } = null!;
+    public IAssetSet<string, Manifest> Manifests { get; private set; } = null!;
 }

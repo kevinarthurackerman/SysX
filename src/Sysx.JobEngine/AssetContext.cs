@@ -4,7 +4,7 @@
 /// Acts as an in-memory repository for assets that are accessed by jobs.
 /// 
 /// Assets can either be accessed by calling the AssetSet method with the type of asset, 
-/// or by adding a property to the class of type IAssetSet with a public getter and setter.
+/// or by adding a property to the class of type IAssetSet with a public getter and public or private setter.
 /// </summary>
 public abstract class AssetContext
 {
