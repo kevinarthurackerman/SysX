@@ -12,8 +12,7 @@ public class ContainerTypesRelationalTypeMappingSourcePlugin : IRelationalTypeMa
         EnsureArg.IsNotNull(relationalTypeMappings, nameof(relationalTypeMappings));
 
         var baseRelationalMappingForTypes = relationalTypeMappings
-            .Where(x => x is BaseRelationalMappingForType)
-            .Cast<BaseRelationalMappingForType>()
+            .OfType<BaseRelationalMappingForType>()
             .ToDictionary(x => x.ForType, x => (RelationalTypeMapping)x);
 
         var otherRelationalTypeMappings = relationalTypeMappings

@@ -10,8 +10,7 @@ public class ContainerTypesMethodCallTranslatorPlugin : IMethodCallTranslatorPlu
         EnsureArg.IsNotNull(methodCallTranslators, nameof(methodCallTranslators));
 
         var baseCallTranslatorForMethods = methodCallTranslators
-            .Where(x => x is BaseCallTranslatorForMethod)
-            .Cast<BaseCallTranslatorForMethod>()
+            .OfType<BaseCallTranslatorForMethod>()
             .ToArray();
 
         var callTranslatorForMethods = new CallTranslatorForMethods(baseCallTranslatorForMethods);

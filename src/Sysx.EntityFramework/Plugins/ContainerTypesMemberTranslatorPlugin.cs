@@ -10,8 +10,7 @@ public class ContainerTypesMemberTranslatorPlugin : IMemberTranslatorPlugin
         EnsureArg.IsNotNull(memberTranslators, nameof(memberTranslators));
 
         var baseTranslatorForMembers = memberTranslators
-            .Where(x => x is BaseTranslatorForMember)
-            .Cast<BaseTranslatorForMember>()
+            .OfType<BaseTranslatorForMember>()
             .ToArray();
 
         var translatorForMembers = new TranslatorForMembers(baseTranslatorForMembers);
