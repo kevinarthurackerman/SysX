@@ -159,7 +159,7 @@ public static class PropagateAssets<TKey, TAsset>
                 else
                 {
                     foreach (var assetContext in assetContexts)
-                        assetContext.AssetSet<TKey, TAsset>().Upsert(assetData.New!);
+                        assetContext.AssetSet<TKey, TAsset>().AddOrUpdate(assetData.New!);
                 }
             }
         }
