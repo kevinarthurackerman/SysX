@@ -2,6 +2,9 @@
 
 public static class ParamExtensions
 {
+    /// <summary>
+    /// Ensures that the <see cref="IDisposable"/> <paramref name="param"/> value is not disposed.
+    /// </summary>
     public static void IsNotDisposed<T>(this Param<T> param, bool isDisposed) where T : IDisposable
     {
         EnsureArg.HasValue(param.Value, nameof(param));
@@ -14,6 +17,9 @@ public static class ParamExtensions
             message => new ObjectDisposedException(param.Value.GetType().FullName, message));
     }
 
+    /// <summary>
+    /// Ensure that the <see cref="IEnumerable"/> <paramref name="param"/> value does not contain a <see langword="null"/> value.
+    /// </summary>
     public static void DoesNotContainNull<TEnumerable>(this Param<TEnumerable> param)
         where TEnumerable : IEnumerable
     {
@@ -29,6 +35,9 @@ public static class ParamExtensions
         }
     }
 
+    /// <summary>
+    /// Ensure that the <see cref="IEnumerable"/> <paramref name="param"/> value does not contain a given value.
+    /// </summary>
     public static void DoesNotContain<T, TEnumerable>(this Param<TEnumerable> param, T value)
         where TEnumerable : IEnumerable
     {
@@ -54,6 +63,9 @@ public static class ParamExtensions
         }
     }
 
+    /// <summary>
+    /// Ensure that the <see cref="string"/> <paramref name="param"/> does not contain a given <see cref="char"/>.
+    /// </summary>
     public static void DoesNotContain(this StringParam param, char value)
     {
         if (param.Value.All(x => x != value)) return;
@@ -64,6 +76,9 @@ public static class ParamExtensions
             message => new ArgumentException(param.Name, message));
     }
 
+    /// <summary>
+    /// Ensure that the <paramref name="param"/> value in not contained in the given <see cref="IEnumerable"/>.
+    /// </summary>
     public static void IsNotContainedIn<T, TEnumerable>(this Param<T> param, TEnumerable value)
         where TEnumerable : IEnumerable<T>
     {

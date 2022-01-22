@@ -4,7 +4,7 @@ public static class MethodInfoExtensions
 {
     /// <summary>
     /// Checks if the other method matches the signature of this one.
-    /// Signatures match when they have the same name, the same return type, and the same parameter types in the same order.
+    /// Signatures match when they have the same name, the same return <see cref="Type"/>, and the same parameter <see cref="Type"/>s in the same order.
     /// </summary>
     public static bool MatchesSignature(this MethodInfo? methodInfo, MethodInfo? otherMethodInfo)
     {

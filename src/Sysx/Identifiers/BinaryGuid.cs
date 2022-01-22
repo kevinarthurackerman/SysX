@@ -1,7 +1,7 @@
 ﻿namespace Sysx.Identifiers;
 
 /// <summary>
-/// This type is a thin wrapper over Guid to create semi-sequential values by overriding the comparison methods to use binary sort order.
+/// A thin wrapper over <see cref="Guid"/> to create semi-sequential values by overriding the comparison methods to use binary sort order.
 /// Using this type is appropriate when the database field is a raw or binary type.
 /// </summary>
 public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<BinaryGuid>, IFormattable
@@ -10,6 +10,9 @@ public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<Bina
 
     private readonly Guid innerGuid;
 
+    /// <summary>
+    /// Initializes a new <see cref="BinaryGuid"/> with the given <see cref="Guid"/> value.
+    /// </summary>
     public BinaryGuid(Guid guid)
     {
         innerGuid = guid;

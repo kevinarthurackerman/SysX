@@ -1,12 +1,12 @@
 ﻿namespace Sysx.Linq.Expressions;
 
 /// <summary>
-/// Helper to generate functions during class initialization that if valid will only throw an exception if called.
+/// Helper to generate functions during <see langword="class"/> initialization that if valid will only <see langword="throw" /> an <see cref="Exception"/> if called.
 /// </summary>
 public static class ExpressionX
 {
     /// <summary>
-    /// Creates a nullary function
+    /// Creates a nullary <see cref="Func{TResult}"/>.
     /// </summary>
     public static Func<TResult> Function<TResult>(Func<Expression> func, string? operatorName = null)
     {
@@ -25,7 +25,7 @@ public static class ExpressionX
     }
 
     /// <summary>
-    /// Creates a unary function
+    /// Creates a unary <see cref="Func{TResult}"/>.
     /// </summary>
     public static Func<TValue, TResult> Function<TValue, TResult>(Func<ParameterExpression, Expression> func, string? operatorName = null)
     {
@@ -58,7 +58,7 @@ public static class ExpressionX
     }
 
     /// <summary>
-    /// Creates a binary function
+    /// Creates a binary <see cref="Func{TResult}"/>.
     /// </summary>
     public static Func<TLeft, TRight, TResult> Function<TLeft, TRight, TResult>(Func<ParameterExpression, ParameterExpression, Expression> func, string? operatorName = null)
     {

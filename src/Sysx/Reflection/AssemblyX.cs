@@ -1,7 +1,7 @@
 ﻿namespace Sysx.Reflection;
 
 /// <summary>
-/// Used to recursively load the dependencies of an assembly.
+/// Used to recursively load the dependencies of an <see cref="Assembly"/>.
 /// </summary>
 public static class AssemblyX
 {
@@ -25,7 +25,7 @@ public static class AssemblyX
     public static IEnumerable<Assembly> Load() => Load(in defaultLoadOptions);
 
     /// <summary>
-    /// Recursively loads the dependencies of an assembly.
+    /// Recursively loads the dependencies of an <see cref="Assembly"/>.
     /// </summary>
     public static IEnumerable<Assembly> Load(in LoadOptions options)
     {
@@ -66,14 +66,26 @@ public static class AssemblyX
         }
     }
 
+    /// <summary>
+    /// Options for loading <see cref="Assembly"/>s.
+    /// </summary>
     public record struct LoadOptions
     {
+        /// <summary>
+        /// A <see cref="AssemblyDependencyResolver"/> framework types.
+        /// </summary>
         public static readonly AssemblyDependencyResolver FrameworkDependencyResolver =
             new (typeof(object).Assembly.Location);
 
+        /// <summary>
+        /// A <see cref="AssemblyDependencyResolver"/> for the current domain.
+        /// </summary>
         public static readonly AssemblyDependencyResolver CurrentDomainAssemblyDependencyResolver =
             new (AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory ?? AppDomain.CurrentDomain.SetupInformation.ApplicationBase!);
 
+        /// <summary>
+        /// Default value to use for <see cref="LoadOptions"/>.
+        /// </summary>
         public static LoadOptions Default => new()
         {
             IncludeRootAssembly = true,
@@ -83,12 +95,34 @@ public static class AssemblyX
             LoadDepth = LoadDepth.LoadRootOnly
         };
 
+        /// <summary>
+        /// The output will include the root <see cref="Assembly"/> value when <see langword="true"/>.
+        /// </summary>
         public bool IncludeRootAssembly { get; set; }
+
+        /// <summary>
+        /// The root <see cref="AssemblyName"/> to use when resolving <see cref="Assembly"/>s.
+        /// </summary>
         public AssemblyName? RootAssemblyName { get; set; }
+
+        /// <summary>
+        /// <see cref="AssemblyDependencyResolver"/>s to use when resolving the dependencies of an <see cref="Assembly"/>.
+        /// </summary>
         public IList<AssemblyDependencyResolver>? AssemblyDependencyResolvers { get; set; }
+
+        /// <summary>
+        /// <see cref="AssemblyLoadContext"/> to use when loading an <see cref="Assembly"/>.
+        /// </summary>
         public AssemblyLoadContext? AssemblyLoadContext { get; set; }
+
+        /// <summary>
+        /// Indicates if the root, it's immediate children, or all descendants should be loaded.
+        /// </summary>
         public LoadDepth LoadDepth { get; set; }
 
+        /// <summary>
+        /// Validates this options configuration.
+        /// </summary>
         public void Validate()
         {
             EnsureArg.IsNotNull(RootAssemblyName, nameof(RootAssemblyName));
@@ -99,6 +133,9 @@ public static class AssemblyX
         }
     }
 
+    /// <summary>
+    /// Indicates if the root, it's immediate children, or all descendants should be loaded.
+    /// </summary>
     public enum LoadDepth
     {
         LoadRootOnly = 1,

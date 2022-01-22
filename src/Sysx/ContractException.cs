@@ -1,7 +1,7 @@
 ﻿namespace Sysx;
 
 /// <summary>
-/// Exception that is thrown when a contract is violated.
+/// An <see cref="Exception"/> that is thrown when a contract is violated.
 /// </summary>
 /// <remarks>
 /// Contract violations indicate a bug in the code which should always be fixed.
@@ -11,23 +11,19 @@
 public class ContractException : Exception
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ContractException"/> class.
+    /// Initializes a new instance of <see cref="ContractException"/>.
     /// </summary>
-    public ContractException()
-    {
-    }
+    public ContractException() { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ContractException"/> class.
+    /// Initializes a new instance of <see cref="ContractException"/>.
     /// </summary>
     /// <param name="message">The message that describes the error.</param>
     public ContractException(string message)
-        : base(message)
-    {
-    }
+        : base(message) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ContractException"/> class.
+    /// Initializes a new instance of <see cref="ContractException"/>.
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>
     /// <param name="innerException">
@@ -35,12 +31,10 @@ public class ContractException : Exception
     /// if no inner exception is specified.
     /// </param>
     public ContractException(string message, Exception innerException)
-        : base(message, innerException)
-    {
-    }
+        : base(message, innerException) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ContractException"/> class.
+    /// Initializes a new instance of <see cref="ContractException"/>.
     /// </summary>
     /// <param name="info">
     /// The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.
@@ -49,7 +43,5 @@ public class ContractException : Exception
     /// The <see cref="StreamingContext"/> that contains contextual information about the source or destination.
     /// </param>
     protected ContractException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
+        : base(info, context) { }
 }

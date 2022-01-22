@@ -1,9 +1,9 @@
 ﻿namespace Sysx.Threading;
 
 /// <summary>
-/// Creates a debounce action that will execute after the invoke method has been
-/// called and the timeout period has passed without calling the invoke method again.
-/// Each call to the invoke method resets the timeout and may change the execute action
+/// Creates a debounce action that will execute after the <see cref="Invoke"/> method has been
+/// called and the timeout period has passed without calling <see cref="Invoke"/> again.
+/// Each call to <see cref="Invoke"/> method resets the timeout and may change the execute action
 /// or the timeout duration.
 /// </summary>
 public class Debounce
@@ -16,8 +16,15 @@ public class Debounce
     private DateTime nextInvoke = DateTime.MinValue;
     private Task? delayTask;
 
+    /// <summary>
+    /// Initializes a <see cref="Debounce"/> with the default options.
+    /// </summary>
     public Debounce() : this(defaultOptions) { }
 
+    /// <summary>
+    /// Initializes a <see cref="Debounce"/> with the given options.
+    /// </summary>
+    /// <param name="options"></param>
     public Debounce(in DebounceOptions options)
     {
         options.Validate();
@@ -48,9 +55,9 @@ public class Debounce
     public void Invoke(Action execute) => Invoke(execute, options.DefaultDelay);
 
     /// <summary>
-    /// Invokes the Debounce, beginning or resetting the timeout until the execute action will be called.
-    /// Execute and delay must either be provided at the call site or in the constructor. Providing
-    /// execute and delay at the call site will override the values from the constructor.
+    /// Invokes the <see cref="Debounce"/>, beginning or resetting the timeout until the execute action will be called.
+    /// Parameters <paramref name="execute"/> and <paramref name="delay"/> must either be provided at the call site or in the constructor. Providing
+    /// <paramref name="execute"/> and <paramref name="delay"/> at the call site will override the values from the constructor.
     /// </summary>
     public void Invoke(Action? execute, TimeSpan? delay)
     {
@@ -105,8 +112,14 @@ public class Debounce
             });
     }
 
+    /// <summary>
+    /// Options for initializing a <see cref="Debouce"/>.
+    /// </summary>
     public record struct DebounceOptions
     {
+        /// <summary>
+        /// The default options for initializing a <see cref="Debouce"/>.
+        /// </summary>
         public static DebounceOptions Default => new()
         {
             GetNow = () => DateTime.UtcNow,
@@ -115,11 +128,29 @@ public class Debounce
             DefaultDelay = null
         };
 
+        /// <summary>
+        /// Gets the current "now" time.
+        /// </summary>
         public Func<DateTime> GetNow { get; set; }
+
+        /// <summary>
+        /// <see cref="Func{T, TResult}"/> that creates a delay <see cref="Task"/> given a <see cref="TimeSpan"/>.
+        /// </summary>
         public Func<TimeSpan,Task> CreateDelay { get; set; }
+
+        /// <summary>
+        /// The default <see cref="Action{T1}"/> to execute after the delay.
+        /// </summary>
         public Action? DefaultExecute { get; set; }
+
+        /// <summary>
+        /// The default amount of time to wait before executing.
+        /// </summary>
         public TimeSpan? DefaultDelay { get; set; }
 
+        /// <summary>
+        /// Validates this options configuration.
+        /// </summary>
         public void Validate()
         {
             EnsureArg.IsNotNull(GetNow, nameof(GetNow));

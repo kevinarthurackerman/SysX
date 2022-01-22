@@ -1,8 +1,8 @@
 ﻿namespace Sysx.Reflection;
 
 /// <summary>
-/// Used to cast a value from one type to another.
-/// Supports casting to the same type, from an inherited type, to an implemented interface, IConvertible casts, explicitly, and implicitly.
+/// Used to cast a value from one <see cref="Type"/> to another.
+/// Supports casting to the same <see cref="Type"/>, from an inherited <see cref="Type"/>, to an implemented <see langword="interface"/>, <see cref="IConvertible"/> casts, <see langword="explicit"/>y, and <see langword="implicit"/>y.
 /// </summary>
 public static class Cast<TFrom, TTo>
 {
@@ -54,8 +54,8 @@ public static class Cast<TFrom, TTo>
     public static bool CanCast() => canCast;
 
     /// <summary>
-    /// Casts from one type to another.
-    /// Supports casting to the same type, from an inherited type, to an implemented interface, IConvertible casts, explicitly, and implicitly.
+    /// Casts from one <see cref="Type"/> to another.
+    /// Supports casting to the same <see cref="Type"/>, from an inherited <see cref="Type"/>, to an implemented <see langword="interface"/>, <see cref="IConvertible"/> casts, <see langword="explicit"/>y, and <see langword="implicit"/>y.
     /// </summary>
     public static TTo? Value(TFrom? from) => castValue(from);
 }

@@ -1,7 +1,7 @@
 ﻿namespace Sysx.Identifiers;
 
 /// <summary>
-/// This type is a thin wrapper over Guid to create semi-sequential values by overriding the comparison methods to use string sort order.
+/// A thin wrapper over <see cref="Guid"/> to create semi-sequential values by overriding the comparison methods to use string sort order.
 /// Using this type is appropriate when the database field is a character string or text type.
 /// </summary>
 public struct StringGuid : IComparable, IComparable<StringGuid>, IEquatable<StringGuid>, IFormattable
@@ -10,6 +10,9 @@ public struct StringGuid : IComparable, IComparable<StringGuid>, IEquatable<Stri
 
     private readonly Guid innerGuid;
 
+    /// <summary>
+    /// Initializes a new <see cref="StringGuid"/> with the given <see cref="Guid"/> value.
+    /// </summary>
     public StringGuid(Guid guid)
     {
         innerGuid = guid;

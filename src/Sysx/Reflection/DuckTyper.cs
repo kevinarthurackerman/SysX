@@ -75,8 +75,8 @@ public static class DuckTyper
 }
 
 /// <summary>
-/// Wraps values with interfaces so that they can be used in a duck-typed way.
-/// By including private members the interface wrapper can also be used to access the type as a "friended" class.
+/// Wraps values with <see langword="interface"/>s so that they can be used in a duck-typed way.
+/// By including <see langword="private"/> members the <see langword="interface"/> wrapper can also be used to access the <see cref="Type"/> as a "friended" <see langword="class"/>.
 /// </summary>
 public static class DuckTyper<TValue, TWithInterface>
 {
@@ -119,9 +119,9 @@ public static class DuckTyper<TValue, TWithInterface>
         Wrap(value, includePrivateMembers: false);
 
     /// <summary>
-    /// Wraps the target value with an interface so that it can be used in a duck-typed way.
-    /// By including private members the interface wrapper can also be used to access the type as a "friended" class.
-    /// Members that cannot be mapped to the target value will result in an InvalidOperationException when called.
+    /// Wraps values with <see langword="interface"/>s so that they can be used in a duck-typed way.
+    /// By including <see langword="private"/> members the <see langword="interface"/> wrapper can also be used to access the <see cref="Type"/> as a "friended" <see langword="class"/>.
+    /// Members that cannot be mapped to the target value will result in an <see cref="InvalidOperationException"/> when called.
     /// </summary>
     public static TWithInterface Wrap(TValue value, bool includePrivateMembers)
     {
@@ -143,9 +143,9 @@ public static class DuckTyper<TValue, TWithInterface>
         TryWrap(value, out withInterface, includePrivateMembers: false);
 
     /// <summary>
-    /// Tries to wrap the target value with an interface so that it can be used in a duck-typed way.
-    /// By including private members the interface wrapper can also be used to access the type as a "friended" class.
-    /// Will only return true when all members of the target value can be wrapped by the interface.
+    /// Tries to wrap the target value with an <see langword="interface"/> so that it can be used in a duck-typed way.
+    /// By including <see langword="private"/> members the <see langword="interface"/> wrapper can also be used to access the <see cref="Type"/> as a "friended" <see langword="class"/>.
+    /// Will only return <see langword="true"/> when all members of the target value can be wrapped by the <see langword="interface"/>.
     /// </summary>
     public static bool TryWrap(TValue value, out TWithInterface? withInterface, bool includePrivateMembers)
     {

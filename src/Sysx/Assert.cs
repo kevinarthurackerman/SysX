@@ -1,23 +1,25 @@
 ﻿namespace Sysx;
 
+/// <summary>
+/// Static class used to assert that certain conditions should always be met, but to only check for them during debugging.
+/// </summary>
 public static class Assert
 {
+    /// <summary>
+    /// The compilation symbol to declare in order to include <see cref="Assert"/> checks in the compiled code.
+    /// </summary>
     public const string CompilationSymbol = "ASSERTIONS";
 
+    /// <summary>
+    /// The context in which <see cref="Assert.That(bool, Func{Context, string}?, string?, int?, string?, string?)"/> is being called.
+    /// </summary>
     public readonly record struct Context(string? FilePath, int? LineNumber, string? MemberName, string? Expression);
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1
     /// <summary>
-    ///  Specifies a contract that must be met and throws an exception if violated
+    ///  Specifies a contract that must be met and throws a <see cref="ContractException"/> if violated.
+    ///  Check is only included in the source when the ASSERTIONS compilation symbol is included.
     /// </summary>
-    /// <param name="condition"></param>
-    /// <param name="message"></param>
-    /// <param name="callerFilePath">Automatically provided</param>
-    /// <param name="callerLineNumber">Automatically provided</param>
-    /// <param name="callerMemberName">Automatically provided</param>
-    /// <param name="conditionArgumentExpression">Automatically provided</param>
-    /// <exception cref="ContractException"></exception>
-
     [Conditional(CompilationSymbol)]
     public static void That(
         bool condition,
@@ -40,15 +42,9 @@ public static class Assert
 
 #if NETSTANDARD2_1 || NET48
     /// <summary>
-    ///  Specifies a contract that must be met and throws an exception if violated
+    ///  Specifies a contract that must be met and throws a <see cref="ContractException"/> if violated.
+    ///  Check is only included in the source when the ASSERTIONS compilation symbol is included.
     /// </summary>
-    /// <param name="condition"></param>
-    /// <param name="message"></param>
-    /// <param name="callerFilePath">Automatically provided</param>
-    /// <param name="callerLineNumber">Automatically provided</param>
-    /// <param name="callerMemberName">Automatically provided</param>
-    /// <param name="conditionArgumentExpression">This argument is not supported in net4.8 or netstandard2.1</param>
-    /// <exception cref="ContractException"></exception>
     [Conditional(CompilationSymbol)]
     public static void That(
         bool condition,

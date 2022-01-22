@@ -1,7 +1,7 @@
 ﻿namespace Sysx.Identifiers;
 
 /// <summary>
-/// This type is a thin wrapper over Guid to create semi-sequential values by overriding the comparison methods to use SQL Server's unique sort order.
+/// A thin wrapper over <see cref="Guid"/> to create semi-sequential values by overriding the comparison methods to use SQL Server's unique sort order.
 /// Using this type is appropriate when the field is a UNIQUEIDENTIFIER field in a SQL Server database.
 /// </summary>
 public struct SqlServerGuid : IComparable, IComparable<SqlServerGuid>, IEquatable<SqlServerGuid>, IFormattable
@@ -10,6 +10,9 @@ public struct SqlServerGuid : IComparable, IComparable<SqlServerGuid>, IEquatabl
 
     private readonly Guid innerGuid;
 
+    /// <summary>
+    /// Initializes a new <see cref="SqlServerGuid"/> with the given <see cref="Guid"/> value.
+    /// </summary>
     public SqlServerGuid(Guid guid)
     {
         innerGuid = guid;

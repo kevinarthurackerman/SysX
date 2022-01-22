@@ -1,7 +1,7 @@
 ﻿namespace Sysx.Collections.Generic;
 
 /// <summary>
-/// Memoizes the enumerable, ensuring that it will only be evaluated up to one time, even if it is called more than once.
+/// Memoizes the <see cref="IEnumerable{T}"/>, ensuring that it will only be evaluated up to one time, even if it is called more than once.
 /// </summary>
 public class MemoizedEnumerable<T> : IEnumerable<T>
 {
@@ -9,6 +9,9 @@ public class MemoizedEnumerable<T> : IEnumerable<T>
     private IEnumerable<T>? cache;
     private IEnumerable<T>? source;
 
+    /// <summary>
+    /// Factory method to memoize the <see cref="IEnumerable{T}"/>.
+    /// </summary>
     public static IEnumerable<T>? Create(IEnumerable<T>? enumerable)
     {
         if (enumerable == null) return null;

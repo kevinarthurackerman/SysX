@@ -1,7 +1,7 @@
 ﻿namespace Sysx.Enums;
 
 /// <summary>
-/// Base class for implementing type safe class enums.
+/// Base class for implementing type-safe <see langword="class"/> <see langword="enum"/>s.
 /// </summary>
 [DebuggerDisplay("{Value}: {DisplayName}")]
 public abstract class BaseEnumeration<TEnum, TValue>
@@ -16,7 +16,7 @@ public abstract class BaseEnumeration<TEnum, TValue>
     private static IDictionary<string, TEnum>? lookupUpDisplayName;
 
     /// <summary>
-    /// Returns all the values of the enum.
+    /// Returns all the values of the <see langword="enum"/>.
     /// </summary>
     public static IEnumerable<TEnum> All
     {   
@@ -61,6 +61,10 @@ public abstract class BaseEnumeration<TEnum, TValue>
             optsFn: x => x.WithMessage($"Enum class {typeof(TEnum).Name} should not have a public constructor."));
     }
 
+    /// <summary>
+    /// Creates an instance of the <see cref="BaseEnumeration{TEnum, TValue}"/>.
+    /// Instances should only be created at set to readonly static fields.
+    /// </summary>
     protected BaseEnumeration(TValue value, string displayName)
     {
         EnsureArg.HasValue(value, nameof(value));
@@ -70,8 +74,14 @@ public abstract class BaseEnumeration<TEnum, TValue>
         DisplayName = displayName;
     }
 
+    /// <summary>
+    /// The value of the <see langword="enum"/>.
+    /// </summary>
     public TValue Value { get; }
 
+    /// <summary>
+    /// The display name of the <see langword="enum"/>.
+    /// </summary>
     public string DisplayName { get; }
 
     public int CompareTo(TEnum? other)
@@ -103,6 +113,9 @@ public abstract class BaseEnumeration<TEnum, TValue>
     public static bool operator !=(BaseEnumeration<TEnum, TValue>? left, BaseEnumeration<TEnum, TValue>? right) =>
         !Equals(left, right);
 
+    /// <summary>
+    /// Parses a <see cref="BaseEnumeration{TEnum, TValue}.Value"/> to the matching <see langword="enum"/>.
+    /// </summary>
     public static TEnum ParseValue(TValue? value)
     {
         EnsureArg.HasValue(value, nameof(value));
@@ -117,6 +130,9 @@ public abstract class BaseEnumeration<TEnum, TValue>
         return enumValue;
     }
 
+    /// <summary>
+    /// Tries to parse the <see cref="BaseEnumeration{TEnum, TValue}.Value"/> to the matching <see langword="enum"/>.
+    /// </summary>
     public static bool TryParseValue(TValue? value, out TEnum? enumValue)
     {
         EnsureArg.HasValue(value, nameof(value));
@@ -125,6 +141,9 @@ public abstract class BaseEnumeration<TEnum, TValue>
         return lookupUpValue!.TryGetValue(value, out enumValue);
     }
 
+    /// <summary>
+    /// Parses the <see cref="BaseEnumeration{TEnum, TValue}.DisplayName"/> to the matching <see langword="enum"/>.
+    /// </summary>
     public static TEnum Parse(string? displayName)
     {
         EnsureArg.IsNotNullOrWhiteSpace(displayName, nameof(displayName));
@@ -139,6 +158,9 @@ public abstract class BaseEnumeration<TEnum, TValue>
         return enumValue;
     }
 
+    /// <summary>
+    /// Tries to parse the <see cref="BaseEnumeration{TEnum, TValue}.DisplayName"/> to the matching <see langword="enum"/>.
+    /// </summary>
     public static bool TryParse(string? displayName, out TEnum? enumValue)
     {
         EnsureArg.IsNotNullOrWhiteSpace(displayName, nameof(displayName));
@@ -148,6 +170,9 @@ public abstract class BaseEnumeration<TEnum, TValue>
         return lookupUpDisplayName!.TryGetValue(displayName, out enumValue);
     }
 
+    /// <summary>
+    /// Check that the <see langword="enum"/> values are equal.
+    /// </summary>
     protected virtual bool ValueEquals(TValue? value)
     {
         EnsureArg.HasValue(value, nameof(value));

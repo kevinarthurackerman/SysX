@@ -208,15 +208,13 @@ public static class Operator<TValue>
     private static INullOp<TValue> NullOp { get; }
 
     /// <summary>
-    /// Returns the zero value for value-types (even full Nullable&lt;TValue&gt;) - or null for reference types
+    /// Returns the zero value for value-types (even for <see cref="Nullable{T}"/>) - or <see langword="null"/> for reference types.
     /// </summary>
     public static TValue Zero { get; }
 
     /// <summary>
-    /// Indicates if the supplied value is non-null,
-    /// for reference-types or Nullable&lt;TValue&gt;
+    /// Indicates if the supplied value is non-<see langword="null"/>, for reference-types or <see cref="Nullable{T}"/>
     /// </summary>
-    /// <returns>True for non-null values, else false</returns>
     public static bool HasValue(TValue value) => NullOp.HasValue(value);
 
     /// <inheritdoc cref="Operator{TValue, TResult}.Not(TValue)" />
@@ -351,7 +349,7 @@ public static class Operator<TValue, TResult>
     private static readonly Func<TValue, TResult> onesComplement = ExpressionX.Function<TValue, TResult>(Expression.OnesComplement, "OnesComplement");
 
     /// <summary>
-    /// Executes the unary Not operator (!x)
+    /// Executes the unary Not <see langword="operator" /> (<c>!x</c>).
     /// </summary>
     public static TResult Not(TValue value)
     {
@@ -361,7 +359,7 @@ public static class Operator<TValue, TResult>
     }
 
     /// <summary>
-    /// Executes the unary Increment operator (x+1)
+    /// Executes the unary Increment <see langword="operator" /> (<c>x+1</c>).
     /// </summary>
     public static TResult Increment(TValue value)
     {
@@ -371,7 +369,7 @@ public static class Operator<TValue, TResult>
     }
 
     /// <summary>
-    /// Executes the unary Decrement operator (x-1)
+    /// Executes the unary Decrement <see langword="operator" /> (<c>x-1</c>).
     /// </summary>
     public static TResult Decrement(TValue value)
     {
@@ -381,17 +379,17 @@ public static class Operator<TValue, TResult>
     }
 
     /// <summary>
-    /// Executes the unary UnaryPlus operator (+x)
+    /// Executes the unary UnaryPlus <see langword="operator" /> (<c>+x</c>).
     /// </summary>
     public static TResult UnaryPlus(TValue value)
     {
         EnsureArg.HasValue(value, nameof(value));
-
+        
         return unaryPlus(value);
     }
 
     /// <summary>
-    /// Executes the unary Negate operator (-x)
+    /// Executes the unary Negate <see langword="operator" /> (<c>-x</c>).
     /// </summary>
     public static TResult Negate(TValue value)
     {
@@ -401,7 +399,7 @@ public static class Operator<TValue, TResult>
     }
 
     /// <summary>
-    /// Executes the unary NegateChecked operator (checked(-x))
+    /// Executes the unary NegateChecked <see langword="operator" /> (<c>checked(-x)</c>).
     /// </summary>
     public static TResult NegateChecked(TValue value)
     {
@@ -411,7 +409,7 @@ public static class Operator<TValue, TResult>
     }
 
     /// <summary>
-    /// Executes the unary OnesComplement operator (~x)
+    /// Executes the unary OnesComplement <see langword="operator" /> (<c>~x</c>).
     /// </summary>
     public static TResult OnesComplement(TValue value)
     {
@@ -422,7 +420,7 @@ public static class Operator<TValue, TResult>
 }
 
 /// <summary>
-/// Provides methods for executing operations on any valid type
+/// Provides methods for executing operations on any valid <see cref="Type" />.
 /// </summary>
 public static class Operator<TLeft, TRight, TResult>
 {
@@ -453,7 +451,7 @@ public static class Operator<TLeft, TRight, TResult>
     private static readonly Func<TLeft, TRight, TResult> coalesce = ExpressionX.Function<TLeft, TRight, TResult>(Expression.Coalesce, "Coalesce");
 
     /// <summary>
-    /// Executes the binary And operator (x&y)
+    /// Executes the binary And <see langword="operator" /> (<c>x&y</c>).
     /// </summary>
     public static TResult And(TLeft left, TRight right)
     {
@@ -464,7 +462,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary AndAlso operator (x&&y)
+    /// Executes the binary AndAlso <see langword="operator" /> (<c>x&&y</c>).
     /// </summary>
     public static TResult AndAlso(TLeft left, TRight right)
     {
@@ -475,7 +473,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Or operator (x|y)
+    /// Executes the binary Or <see langword="operator" /> (<c>x|y</c>).
     /// </summary>
     public static TResult Or(TLeft left, TRight right)
     {
@@ -486,7 +484,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary OrElse operator (x||y)
+    /// Executes the binary OrElse <see langword="operator" /> (<c>x||y</c>).
     /// </summary>
     public static TResult OrElse(TLeft left, TRight right)
     {
@@ -497,7 +495,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary ExclusiveOr operator (x^y)
+    /// Executes the binary ExclusiveOr <see langword="operator" /> (<c>x^y</c>).
     /// </summary>
     public static TResult ExclusiveOr(TLeft left, TRight right)
     {
@@ -508,7 +506,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Equal operator (x==y)
+    /// Executes the binary Equal <see langword="operator" /> (<c>x==y</c>).
     /// </summary>
     public static TResult Equal(TLeft left, TRight right)
     {
@@ -519,7 +517,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary NotEqual operator (x!=y)
+    /// Executes the binary NotEqual <see langword="operator" /> (<c>x!=y</c>).
     /// </summary>
     public static TResult NotEqual(TLeft left, TRight right)
     {
@@ -530,7 +528,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary ReferenceEqual operator (System.Object.ReferenceEquals(x,y))
+    /// Executes the binary ReferenceEqual <see langword="operator" /> (<c>System.Object.ReferenceEquals(x,y)</c>).
     /// </summary>
     public static TResult ReferenceEqual(TLeft left, TRight right)
     {
@@ -541,7 +539,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary ReferenceNotEqual operator (!System.Object.ReferenceEquals(x,y))
+    /// Executes the binary ReferenceNotEqual <see langword="operator" /> (<c>!System.Object.ReferenceEquals(x,y)</c>).
     /// </summary>
     public static TResult ReferenceNotEqual(TLeft left, TRight right)
     {
@@ -552,7 +550,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary GreaterThan operator (x>y)
+    /// Executes the binary GreaterThan <see langword="operator" /> (<c>x>y</c>).
     /// </summary>
     public static TResult GreaterThan(TLeft left, TRight right)
     {
@@ -563,7 +561,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary GreaterThanOrEqual operator (x>=y)
+    /// Executes the binary GreaterThanOrEqual <see langword="operator" /> (<c>x>=y</c>).
     /// </summary>
     public static TResult GreaterThanOrEqual(TLeft left, TRight right)
     {
@@ -574,7 +572,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary LessThan operator (x<y)
+    /// Executes the binary LessThan <see langword="operator" /> (<c>x<y</c>).
     /// </summary>
     public static TResult LessThan(TLeft left, TRight right)
     {
@@ -585,7 +583,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary LessThanOrEqual operator (x<=y)
+    /// Executes the binary LessThanOrEqual <see langword="operator" /> (<c>x<=y</c>).
     /// </summary>
     public static TResult LessThanOrEqual(TLeft left, TRight right)
     {
@@ -596,7 +594,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Multiply operator (x*y)
+    /// Executes the binary Multiply <see langword="operator" /> (<c>x*y</c>).
     /// </summary>
     public static TResult Multiply(TLeft left, TRight right)
     {
@@ -607,7 +605,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary MultiplyChecked operator (checked(x*y))
+    /// Executes the binary MultiplyChecked <see langword="operator" /> (<c>checked(x*y)</c>).
     /// </summary>
     public static TResult MultiplyChecked(TLeft left, TRight right)
     {
@@ -618,7 +616,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Divide operator (x/y)
+    /// Executes the binary Divide <see langword="operator" /> (<c>x/y</c>).
     /// </summary>
     public static TResult Divide(TLeft left, TRight right)
     {
@@ -629,7 +627,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Modulo operator (x%y)
+    /// Executes the binary Modulo <see langword="operator" /> (<c>x%y</c>).
     /// </summary>
     public static TResult Modulo(TLeft left, TRight right)
     {
@@ -640,7 +638,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Power operator (x^y)
+    /// Executes the binary Power <see langword="operator" /> (<c>x^y</c>).
     /// </summary>
     public static TResult Power(TLeft left, TRight right)
     {
@@ -651,7 +649,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Add operator (x+y)
+    /// Executes the binary Add <see langword="operator" /> (<c>x+y</c>).
     /// </summary>
     public static TResult Add(TLeft left, TRight right)
     {
@@ -662,7 +660,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary AddChecked operator (checked(x+y))
+    /// Executes the binary AddChecked <see langword="operator" /> (<c>checked(x+y)</c>).
     /// </summary>
     public static TResult AddChecked(TLeft left, TRight right)
     {
@@ -673,7 +671,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Subtract operator (x-y)
+    /// Executes the binary Subtract <see langword="operator" /> (<c>x-y</c>).
     /// </summary>
     public static TResult Subtract(TLeft left, TRight right)
     {
@@ -684,7 +682,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary SubtractChecked operator (x-y)
+    /// Executes the binary SubtractChecked <see langword="operator" /> (<c>x-y</c>).
     /// </summary>
     public static TResult SubtractChecked(TLeft left, TRight right)
     {
@@ -695,7 +693,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary LeftShift operator (x<<y)
+    /// Executes the binary LeftShift <see langword="operator" /> (<c>x<<y</c>).
     /// </summary>
     public static TResult LeftShift(TLeft left, TRight right)
     {
@@ -706,7 +704,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary RightShift operator (x>>y)
+    /// Executes the binary RightShift <see langword="operator" /> (<c>x>>y</c>).
     /// </summary>
     public static TResult RightShift(TLeft left, TRight right)
     {
@@ -717,7 +715,7 @@ public static class Operator<TLeft, TRight, TResult>
     }
 
     /// <summary>
-    /// Executes the binary Coalesce operator (x??y)
+    /// Executes the binary Coalesce <see langword="operator" /> (<c>x??y</c>).
     /// </summary>
     public static TResult Coalesce(TLeft left, TRight right)
     {

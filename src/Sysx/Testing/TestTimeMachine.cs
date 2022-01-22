@@ -12,6 +12,9 @@ public class TestTimeMachine : IDisposable
 
     private bool disposed;
 
+    /// <summary>
+    /// Gets the currently set "now" time.
+    /// </summary>
     public DateTime Now { get; private set; }
 
     /// <summary>
@@ -20,12 +23,24 @@ public class TestTimeMachine : IDisposable
     /// </summary>
     public TimeSpan DefaultTimeToWaitForOtherWork { get; }
 
+    /// <summary>
+    /// Initializes a new <see cref="TestTimeMachine"/> with the default "now" time and delay.
+    /// </summary>
     public TestTimeMachine() : this(defaultNowTime, defaultTimeToWaitForOtherWork) { }
 
+    /// <summary>
+    /// Initializes a new <see cref="TestTimeMachine"/> with the default "now" time and the given delay.
+    /// </summary>
     public TestTimeMachine(TimeSpan defaultTimeToWaitForOtherWork) : this(defaultNowTime, defaultTimeToWaitForOtherWork) { }
 
+    /// <summary>
+    /// Initializes a new <see cref="TestTimeMachine"/> with the given "now" time and default delay.
+    /// </summary>
     public TestTimeMachine(DateTime now) : this(now, defaultTimeToWaitForOtherWork) { }
 
+    /// <summary>
+    /// Initializes a new <see cref="TestTimeMachine"/> with the given "now" time and delay.
+    /// </summary>
     public TestTimeMachine(DateTime now, TimeSpan defaultTimeToWaitForOtherWork)
     {
         Now = now;
@@ -43,7 +58,7 @@ public class TestTimeMachine : IDisposable
 
     /// <summary>
     /// Creates a mock delay that will be completed when the time is incremented passed it's completion time.
-    /// The system will wait at least timeToWaitForOtherWork amount of time before continuing.
+    /// The system will wait at least <paramref name="timeToWaitForOtherWork"/> amount of time before continuing.
     /// </summary>
     public Task CreateDelay(DateTime completesAt, TimeSpan timeToWaitForOtherWork)
     {
@@ -114,5 +129,5 @@ public class TestTimeMachine : IDisposable
             delay.CompletionSource.SetCanceled();
     }
 
-    public record struct Delay(DateTime CompletesAt, TaskCompletionSource<object?> CompletionSource, TimeSpan TimeToWaitForOtherWork);
+    private record struct Delay(DateTime CompletesAt, TaskCompletionSource<object?> CompletionSource, TimeSpan TimeToWaitForOtherWork);
 }

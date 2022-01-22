@@ -61,7 +61,7 @@ public static class FlagsEnum
 }
 
 /// <summary>
-/// Provides operations for manipulating flags enums
+/// Provides operations for manipulating flags <see langword="enum"/>s.
 /// </summary>
 public static class FlagsEnum<TEnum> where TEnum : Enum
 {

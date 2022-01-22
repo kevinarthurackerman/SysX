@@ -80,15 +80,13 @@ public static class Operator<TValue>
     private static INullOp<TValue> NullOp { get; }
 
     /// <summary>
-    /// Returns the zero value for value-types (even full Nullable&lt;TValue&gt;) - or null for reference types
+    /// Returns the zero value for value-types (even for <see cref="Nullable{T}"/>) - or <see langword="null"/> for reference types.
     /// </summary>
     public static TValue Zero { get; }
 
     /// <summary>
-    /// Indicates if the supplied value is non-null,
-    /// for reference-types or Nullable&lt;TValue&gt;
+    /// Indicates if the supplied value is non-<see langword="null"/>, for reference-types or <see cref="Nullable{T}"/>
     /// </summary>
-    /// <returns>True for non-null values, else false</returns>
     public static bool HasValue(TValue value) => NullOp.HasValue(value);
 
 <#foreach(var op in unaryOperators) {#>
@@ -136,7 +134,7 @@ public static class Operator<TValue, TResult>
 
 <#foreach(var op in unaryOperators) {#>
     /// <summary>
-    /// Executes the unary <#=op.Name#> operator (<#=op.Symbol#>)
+    /// Executes the unary <#=op.Name#> <see langword="operator" /> (<c><#=op.Symbol#></c>).
     /// </summary>
     public static TResult <#=op.Name#>(TValue value)
     {
@@ -149,7 +147,7 @@ public static class Operator<TValue, TResult>
 }
 
 /// <summary>
-/// Provides methods for executing operations on any valid type
+/// Provides methods for executing operations on any valid <see cref="Type" />.
 /// </summary>
 public static class Operator<TLeft, TRight, TResult>
 {
@@ -159,7 +157,7 @@ public static class Operator<TLeft, TRight, TResult>
 
 <#foreach(var op in binaryOperators) {#>
     /// <summary>
-    /// Executes the binary <#=op.Name#> operator (<#=op.Symbol#>)
+    /// Executes the binary <#=op.Name#> <see langword="operator" /> (<c><#=op.Symbol#></c>).
     /// </summary>
     public static TResult <#=op.Name#>(TLeft left, TRight right)
     {

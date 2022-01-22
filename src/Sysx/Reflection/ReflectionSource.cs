@@ -1,7 +1,7 @@
 ﻿namespace Sysx.Reflection;
 
 /// <summary>
-/// Contains Assemblies, Types, and filters used to select an Enumerable<Type> used for reflection based APIs.
+/// Contains <see cref="Assembly"/>s, <see cref="Type"/>s, and <see cref="TypeFilter"/>s used to select an <see cref="IEnumerable{T}"/> of <see cref="Type"/> used for reflection based APIs.
 /// </summary>
 public class ReflectionSource : IEnumerable<Type>
 {
@@ -11,9 +11,9 @@ public class ReflectionSource : IEnumerable<Type>
     public static readonly TypeFilter Unfiltered = _ => true;
 
     /// <summary>
-    /// The ReflectionSource containing the assembly that is the process executable in the default application domain,
-    /// or the first executable that was executed by System.AppDomain.ExecuteAssembly(System.String).
-    /// Can contain no assembly when called from unmanaged code.
+    /// The <see cref="ReflectionSource"/> containing the <see cref="Assembly"/> that is the process executable in the default <see cref="AppDomain"/>,
+    /// or the first executable that was executed by <see cref="AppDomain.ExecuteAssembly(string)"/>.
+    /// Can contain no <see cref="Assembly"/> when called from unmanaged code.
     /// </summary>
     public static ReflectionSource GetEntrySource()
     {
@@ -24,7 +24,7 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
-    /// Gets the ReflectionSource containing the assembly that contains the code that is currently executing.
+    /// Gets the <see cref="ReflectionSource"/> containing the <see cref="Assembly"/> that contains the code that is currently executing.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static ReflectionSource GetExecutingSource()
@@ -36,8 +36,8 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
-    /// Gets the ReflectionSource containing the System.Reflection.Assembly of the method that invoked the currently executing method.
-    /// [MethodImpl(MethodImplOptions.NoInlining)] should be affixed to methods that call this method to ensure the proper Assembly is located.
+    /// Gets the <see cref="ReflectionSource"/> containing the <see cref="Assembly"/> of the method that invoked the currently executing method.
+    /// [<see cref="MethodImplAttribute"/>(<see cref="MethodImplOptions.NoInlining"/>)] should be affixed to methods that call this method to ensure the proper <see cref="Assembly"/> is located.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static ReflectionSource GetCallingSource()
@@ -49,20 +49,23 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
-    /// The FilteredAssemblies contained in this ReflectionSource.
+    /// The <see cref="FilteredAssembly"/>s contained in this <see cref="ReflectionSource"/>.
     /// </summary>
     public readonly ICollection<FilteredAssembly> FilteredAssemblies;
 
     /// <summary>
-    /// The Types contained in this ReflectionSource.
+    /// The <see cref="Type"/>s contained in this <see cref="ReflectionSource"/>.
     /// </summary>
     public readonly ICollection<Type> Types;
 
     /// <summary>
-    /// The TypeFilters contained in this ReflectionSource.
+    /// The <see cref="TypeFilter"/>s contained in this <see cref="ReflectionSource"/>.
     /// </summary>
     public readonly ICollection<TypeFilter> TypeFilters;
 
+    /// <summary>
+    /// Initializes a new empty <see cref="ReflectionSource"/>.
+    /// </summary>
     public ReflectionSource()
     {
         FilteredAssemblies = new Collection<FilteredAssembly>();
@@ -70,6 +73,9 @@ public class ReflectionSource : IEnumerable<Type>
         TypeFilters = new Collection<TypeFilter>();
     }
 
+    /// <summary>
+    /// Initializes a <see cref="ReflectionSource"/> with the given <see cref="Assembly"/>s.
+    /// </summary>
     public ReflectionSource(IEnumerable<Assembly> assemblies)
     {
         EnsureArg.IsNotNull(assemblies, nameof(assemblies));
@@ -81,10 +87,21 @@ public class ReflectionSource : IEnumerable<Type>
         TypeFilters = new Collection<TypeFilter>();
     }
 
-    public ReflectionSource(IEnumerable<FilteredAssembly> filteredAssemblies) : this(filteredAssemblies, Array.Empty<Type>(), Array.Empty<TypeFilter>()) { }
+    /// <summary>
+    /// Initializes a <see cref="ReflectionSource"/> with the given <see cref="FilteredAssembly"/>s.
+    /// </summary>
+    public ReflectionSource(IEnumerable<FilteredAssembly> filteredAssemblies)
+        : this(filteredAssemblies, Array.Empty<Type>(), Array.Empty<TypeFilter>()) { }
 
-    public ReflectionSource(IEnumerable<Type> types) : this(Array.Empty<FilteredAssembly>(), types, Array.Empty<TypeFilter>()) { }
+    /// <summary>
+    /// Initializes a <see cref="ReflectionSource"/> with the given <see cref="Type"/>s.
+    /// </summary>
+    public ReflectionSource(IEnumerable<Type> types)
+        : this(Array.Empty<FilteredAssembly>(), types, Array.Empty<TypeFilter>()) { }
 
+    /// <summary>
+    /// Initializes a <see cref="ReflectionSource"/> with the given <see cref="FilteredAssembly"/>s, <see cref="Types"/>s, and <see cref="TypeFilter"/>s.
+    /// </summary>
     public ReflectionSource(IEnumerable<FilteredAssembly> filteredAssemblies, IEnumerable<Type> types, IEnumerable<TypeFilter> filters)
     {
         EnsureArg.IsNotNull(filteredAssemblies, nameof(filteredAssemblies));
@@ -100,7 +117,7 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
-    /// Adds the FilteredAssemblies, Types, and TypeFilters of the passed ReflectionSource in this ReflectionSource.
+    /// Adds the <see cref="FilteredAssembly"/>s, <see cref="Types"/>s, and <see cref="TypeFilter"/>s of the given <see cref="ReflectionSource"/> in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(ReflectionSource reflectionSource)
     {
@@ -117,7 +134,7 @@ public class ReflectionSource : IEnumerable<Type>
     public ReflectionSource Include(params ReflectionSource[] reflectionSources) => Include(reflectionSources.AsEnumerable());
 
     /// <summary>
-    /// Adds the FilteredAssemblies, Types, and TypeFilters of the passed ReflectionSources in this ReflectionSource.
+    /// Adds the <see cref="FilterAssembly"/>s, <see cref="Type"/>s, and <see cref="TypeFilter"/>s of the given <see cref="ReflectionSource"/>s in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(IEnumerable<ReflectionSource> reflectionSources)
     {
@@ -132,7 +149,7 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
-    /// Includes this Assembly in this ReflectionSource.
+    /// Includes the given <see cref="Assembly"/> in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(Assembly assembly) => Include(assembly, Unfiltered);
 
@@ -150,7 +167,7 @@ public class ReflectionSource : IEnumerable<Type>
     public ReflectionSource Include(params Assembly[] assemblies) => Include(assemblies.AsEnumerable());
 
     /// <summary>
-    /// Include these Assemblies in this ReflectionSource.
+    /// Include the given <see cref="Assembly"/>s in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(IEnumerable<Assembly> assemblies)
     {
@@ -163,7 +180,7 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
-    /// Include this FilteredAssembly in this ReflectionSource.
+    /// Include the given <see cref="FilteredAssembly"/> in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(FilteredAssembly filteredAssembly)
     {
@@ -179,7 +196,7 @@ public class ReflectionSource : IEnumerable<Type>
     public ReflectionSource Include(params FilteredAssembly[] filteredAssemblies) => Include(filteredAssemblies.AsEnumerable());
 
     /// <summary>
-    /// Include these FilteredAssemblies in this ReflectionSource.
+    /// Include the given <see cref="FilteredAssembly"/>s in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(IEnumerable<FilteredAssembly> filteredAssemblies)
     {
@@ -193,7 +210,7 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
-    /// Include this Type in this ReflectionSource.
+    /// Include the given <see cref="Type"/> in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(Type type)
     {
@@ -208,7 +225,7 @@ public class ReflectionSource : IEnumerable<Type>
     public ReflectionSource Include(params Type[] types) => Include(types.AsEnumerable());
 
     /// <summary>
-    /// Include these Types in this ReflectionSource.
+    /// Include the given <see cref="Type"/>s in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(IEnumerable<Type> types)
     {
@@ -221,7 +238,7 @@ public class ReflectionSource : IEnumerable<Type>
     }
 
     /// <summary>
-    /// Include this TypeFilter in this ReflectionSource.
+    /// Include the given <see cref="TypeFilter"/> in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(TypeFilter filter)
     {
@@ -236,7 +253,7 @@ public class ReflectionSource : IEnumerable<Type>
     public ReflectionSource Include(params TypeFilter[] filters) => Include(filters.AsEnumerable());
 
     /// <summary>
-    /// Include these TypeFilters in this ReflectionSource.
+    /// Include the given <see cref="TypeFilters"/>s in this <see cref="ReflectionSource"/>.
     /// </summary>
     public ReflectionSource Include(IEnumerable<TypeFilter> filters)
     {
@@ -322,7 +339,15 @@ public class ReflectionSource : IEnumerable<Type>
 
     public static ReflectionSource operator +(ReflectionSource left, ReflectionSource right) => left.Include(right);
 
+    /// <summary>
+    /// A filter <see cref="Func{T, TResult}"/> that takes a <see cref="Type"/> and returns a <see cref="bool"/> indicating if it should be included in the source.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
     public delegate bool TypeFilter(Type type);
 
+    /// <summary>
+    /// An <see cref="Assembly"/> with a <see cref="TypeFilter"/> for selecting a subset of all provided <see cref="Type"/>s.
+    /// </summary>
     public record struct FilteredAssembly(Assembly Assembly, TypeFilter Filter);
 }

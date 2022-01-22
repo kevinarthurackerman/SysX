@@ -1,5 +1,8 @@
 ﻿namespace Sysx.Linq;
 
+/// <summary>
+/// Extended <see langword="static"/> methods for <see cref="Enumerable"/>.
+/// </summary>
 public static class EnumerableX
 {
     /// <summary>

@@ -1,5 +1,8 @@
 ﻿namespace Sysx;
 
+/// <summary>
+/// Static <see langword="class"/> that provides extensions to <see cref="Type"/>.
+/// </summary>
 public static class TypeExtensions
 {
     private static readonly IReadOnlyDictionary<Type, string> aliases = new ReadOnlyDictionary<Type, string>(new Dictionary<Type, string>()
@@ -64,7 +67,7 @@ public static class TypeExtensions
         });
 
     /// <summary>
-    /// Gets the code alias for the given type.
+    /// Gets the code alias for the given <see cref="Type"/>.
     /// </summary>
     public static string? GetAlias(this Type? type)
     {
@@ -74,14 +77,14 @@ public static class TypeExtensions
     }
 
     /// <summary>
-    /// Get the identified for the given type. If the type has an alias that is returned,
+    /// Get the identifier for the given <see cref="Type"/>. If the <see cref="Type"/> has an <see langword="alias"/> it is returned,
     /// otherwise the fully qualified name will be returned.
     /// </summary>
     public static string? GetIdentifier(this Type? type) =>
         GetAlias(type) ?? type!.FullName?.Replace('+', '.');
 
     /// <summary>
-    /// Returns whether or not the given type is nullable.
+    /// Returns whether or not the given <see cref="Type"/> is <see langword="null"/>able.
     /// </summary>
     public static bool IsNullable(this Type type)
     {
