@@ -48,7 +48,10 @@ public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<Bina
 
     public static BinaryGuid NewGuid() => new(Guid.NewGuid());
 
-    public static BinaryGuid NewSequentialGuid(IdentifierOptions? options = default) =>
+    public static BinaryGuid NewSequentialGuid() =>
+        new(IdentifierGenerator.Next(IdentifierType.Binary, IdentifierOptions.Default));
+
+    public static BinaryGuid NewSequentialGuid(IdentifierOptions options) =>
         new (IdentifierGenerator.Next(IdentifierType.Binary, options));
 
     public static bool operator ==(BinaryGuid a, BinaryGuid b) =>  a.innerGuid == b.innerGuid;
