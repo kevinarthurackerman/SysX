@@ -2,6 +2,8 @@
 # Sysx
 This is a general utilities library and a place for me to experiment with new ideas.
 
+Get the nuget package [here](https://www.nuget.org/packages/Sysx/).
+
 An incomplete list of other libraries I like (in alphabetical order):
 
 ### AutoMapper
