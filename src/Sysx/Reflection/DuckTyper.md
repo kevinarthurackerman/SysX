@@ -102,6 +102,6 @@ public class Test
 }
 ```
 
-See [here](https://github.com/kevinarthurackerman/Sysx/tree/main/src/Test_Sysx/Reflection/DuckTyper) for more tests and examples of use.
+See [here](/src/Test_Sysx/Reflection/DuckTyper) for more tests and examples of use.
 
-See [here](https://github.com/kevinarthurackerman/Sysx/blob/main/src/Sysx/Reflection/DuckTyper.cs) for the implementation of the DuckTyper static class.
+See [here](/src/Sysx/Reflection/DuckTyper.cs) for the implementation of the DuckTyper static class.
