@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework;
+﻿namespace SysX.EntityFramework;
 
 public static class ModelBuilderExtensions
 {

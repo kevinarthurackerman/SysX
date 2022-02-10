@@ -5,4 +5,4 @@ global using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 global using System;
 global using System.Data.Common;
 global using System.IO;
-global using Sysx.EntityFramework.Testing;
+global using SysX.EntityFramework.Testing;

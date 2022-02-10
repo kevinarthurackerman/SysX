@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Plugins;
+﻿namespace SysX.EntityFramework.Plugins;
 
 /// <summary>
 /// The IMemberTranslatorPlugin used by ContainerTypesDbContextOptionsExtensions to handle IMemberTranslators

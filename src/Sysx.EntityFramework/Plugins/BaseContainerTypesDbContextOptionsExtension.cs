@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Plugins;
+﻿namespace SysX.EntityFramework.Plugins;
 
 /// <summary>
 /// A base class for implementing IDbContextOptionsExtensions that register types from the services provider.

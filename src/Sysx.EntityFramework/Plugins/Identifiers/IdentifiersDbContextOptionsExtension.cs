@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Plugins.Identifiers;
+﻿namespace SysX.EntityFramework.Plugins.Identifiers;
 
 /// <summary>
 /// ContainerTypesDbContextOptionsExtension that adds handling of identifier types to EntityFramework

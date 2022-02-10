@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Plugins.Enums;
+﻿namespace SysX.EntityFramework.Plugins.Enums;
 
 /// <summary>
 /// ContainerTypesDbContextOptionsExtension that adds handling of enumeration types to EntityFramework

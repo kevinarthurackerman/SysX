@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Plugins;
+﻿namespace SysX.EntityFramework.Plugins;
 
 public static class DbContextOptionsBuilderExtensions
 {

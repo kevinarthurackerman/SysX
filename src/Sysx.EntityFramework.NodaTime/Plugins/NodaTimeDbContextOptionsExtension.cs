@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.NodaTime.Plugins;
+﻿namespace SysX.EntityFramework.NodaTime.Plugins;
 
 /// <summary>
 /// ContainerTypesDbContextOptionsExtension that adds handling of NodaTime types to EntityFramework

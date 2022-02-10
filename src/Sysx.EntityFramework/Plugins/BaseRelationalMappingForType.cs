@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Plugins;
+﻿namespace SysX.EntityFramework.Plugins;
 
 /// <summary>
 /// Base class for implementing container registered RelationalTypeMapping.

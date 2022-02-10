@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.SqlServer.Testing;
+﻿namespace SysX.EntityFramework.SqlServer.Testing;
 
 public sealed class SqlServerTestDbContextActivator
     : BaseTestDbContextActivator<SqlServerDbContextOptionsBuilder, SqlServerDbContextOptionsBuilder, SqlServerOptionsExtension>

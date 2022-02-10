@@ -1,4 +1,4 @@
-﻿namespace Sysx.EntityFramework.Testing;
+﻿namespace SysX.EntityFramework.Testing;
 
 public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder, TBuilder, TExtension>
     where TDbContextOptionsBuilder : RelationalDbContextOptionsBuilder<TBuilder, TExtension>
