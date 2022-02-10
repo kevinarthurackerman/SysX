@@ -11,7 +11,7 @@
   <Import Project="..\XUnit.targets" />
 
   <ItemGroup Label="Project References">
-    <ProjectReference Include="..\Sysx.EntityFramework\Sysx.EntityFramework.csproj" />
+    <ProjectReference Include="..\SysX.EntityFramework\SysX.EntityFramework.csproj" />
   </ItemGroup>
 
 </Project>

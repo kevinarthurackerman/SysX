@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Project References">
-    <ProjectReference Include="..\Sysx\Sysx.csproj" />
+    <ProjectReference Include="..\SysX\SysX.csproj" />
   </ItemGroup>
 
 </Project>

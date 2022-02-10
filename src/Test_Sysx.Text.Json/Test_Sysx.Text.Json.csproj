@@ -11,7 +11,7 @@
   <Import Project="..\XUnit.targets" />
 
   <ItemGroup Label="Project References">
-    <ProjectReference Include="..\Sysx.Text.Json\Sysx.Text.Json.csproj" />
+    <ProjectReference Include="..\SysX.Text.Json\SysX.Text.Json.csproj" />
   </ItemGroup>
 
   <ItemGroup>

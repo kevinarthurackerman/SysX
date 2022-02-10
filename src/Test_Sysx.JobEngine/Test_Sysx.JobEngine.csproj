@@ -11,7 +11,7 @@
   <Import Project="..\XUnit.targets" />
 
   <ItemGroup Label="Project References">
-    <ProjectReference Include="..\Sysx.JobEngine\Sysx.JobEngine.csproj" />
+    <ProjectReference Include="..\SysX.JobEngine\SysX.JobEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

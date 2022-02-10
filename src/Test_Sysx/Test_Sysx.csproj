@@ -11,13 +11,13 @@
   <Import Project="..\XUnit.targets" />
 
   <ItemGroup Label="Project References">
-    <ProjectReference Include="..\Sysx\Sysx.csproj" />
+    <ProjectReference Include="..\SysX\SysX.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <ProjectReference Include="..\Test_Sysx._Parent\Test_Sysx._Parent.csproj" />
-    <ProjectReference Include="..\Test_Sysx._Child\Test_Sysx._Child.csproj" />
-    <ProjectReference Include="..\Test_Sysx._Grandchild\Test_Sysx._Grandchild.csproj" />
+    <ProjectReference Include="..\Test_SysX._Parent\Test_SysX._Parent.csproj" />
+    <ProjectReference Include="..\Test_SysX._Child\Test_SysX._Child.csproj" />
+    <ProjectReference Include="..\Test_SysX._Grandchild\Test_SysX._Grandchild.csproj" />
   </ItemGroup>
 
   <ItemGroup>
