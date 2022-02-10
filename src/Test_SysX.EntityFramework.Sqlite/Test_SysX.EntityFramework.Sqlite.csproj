@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <Import Project="..\Assertions.targets" />
+  <Import Project="..\XUnit.targets" />
+
+  <ItemGroup Label="Project References">
+    <ProjectReference Include="..\SysX.EntityFramework.NodaTime\SysX.EntityFramework.NodaTime.csproj" />
+    <ProjectReference Include="..\SysX.EntityFramework.Sqlite\SysX.EntityFramework.Sqlite.csproj" />
+  </ItemGroup>
+
+</Project>

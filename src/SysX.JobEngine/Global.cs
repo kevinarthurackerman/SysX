@@ -1,0 +1,14 @@
+﻿global using EnsureThat;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.ObjectPool;
+global using System;
+global using System.Collections.Concurrent;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Reflection;
+global using System.Threading;
+global using System.Transactions;
+global using SysX.Collections.Generic;
+global using SysX.DependencyInjection;
+global using SysX.EnsureThat;
+global using SysX.Reflection;

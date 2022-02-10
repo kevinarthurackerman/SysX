@@ -1,0 +1,7 @@
+<Project>
+
+  <PropertyGroup>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">ASSERTIONS</DefineConstants>
+  </PropertyGroup>
+  
+</Project>
