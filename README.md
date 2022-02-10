@@ -1,15 +1,15 @@
 
-# Sysx
+# SysX
 This is a general utilities library and a place for me to experiment with new ideas.
 
 Nuget packages:
-- [Sysx](https://www.nuget.org/packages/Sysx/)
-- [Sysx.EntityFramework](https://www.nuget.org/packages/Sysx.EntityFramework/)
-- [Sysx.EntityFramework.NodaTime](https://www.nuget.org/packages/Sysx.EntityFramework.NodaTime/)
-- [Sysx.EntityFramework.Sqlite](https://www.nuget.org/packages/Sysx.EntityFramework.Sqlite/)
-- [Sysx.EntityFramework.SqlServer](https://www.nuget.org/packages/Sysx.EntityFramework.SqlServer/)
-- [Sysx.JobEngine](https://www.nuget.org/packages/Sysx.JobEngine/)
-- [Sysx.Text.Json](https://www.nuget.org/packages/Sysx.Text.Json/)
+- [SysX](https://www.nuget.org/packages/SysX/)
+- [SysX.EntityFramework](https://www.nuget.org/packages/SysX.EntityFramework/)
+- [SysX.EntityFramework.NodaTime](https://www.nuget.org/packages/SysX.EntityFramework.NodaTime/)
+- [SysX.EntityFramework.Sqlite](https://www.nuget.org/packages/SysX.EntityFramework.Sqlite/)
+- [SysX.EntityFramework.SqlServer](https://www.nuget.org/packages/SysX.EntityFramework.SqlServer/)
+- [SysX.JobEngine](https://www.nuget.org/packages/SysX.JobEngine/)
+- [SysX.Text.Json](https://www.nuget.org/packages/SysX.Text.Json/)
 
 An incomplete list of other libraries I like (in alphabetical order):
 
