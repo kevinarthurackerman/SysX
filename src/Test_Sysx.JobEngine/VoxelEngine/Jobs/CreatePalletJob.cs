@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.VoxelEngine.Jobs;
+﻿namespace Test_SysX.JobEngine.VoxelEngine.Jobs;
 
 public static class CreatePallet
 {

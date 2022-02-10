@@ -1,4 +1,4 @@
-﻿namespace Sysx.Threading;
+﻿namespace SysX.Threading;
 
 /// <summary>
 /// Creates a debounce action that will execute after the <see cref="Invoke"/> method has been

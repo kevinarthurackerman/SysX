@@ -1,4 +1,4 @@
-﻿namespace Sysx.Text.Json.Serialization.Identifiers;
+﻿namespace SysX.Text.Json.Serialization.Identifiers;
 
 /// <summary>
 /// Converter to delegate to another converter.

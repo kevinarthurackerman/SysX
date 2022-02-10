@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.App.Jobs;
+﻿namespace Test_SysX.JobEngine.App.Jobs;
 
 public static class EnsureMainManifestExists
 {

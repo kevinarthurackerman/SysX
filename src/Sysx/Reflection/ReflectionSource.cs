@@ -1,4 +1,4 @@
-﻿namespace Sysx.Reflection;
+﻿namespace SysX.Reflection;
 
 /// <summary>
 /// Contains <see cref="Assembly"/>s, <see cref="Type"/>s, and <see cref="TypeFilter"/>s used to select an <see cref="IEnumerable{T}"/> of <see cref="Type"/> used for reflection based APIs.

@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Reflection;
+﻿namespace Test_SysX.Reflection;
 
 using System;
 using Assert = Xunit.Assert;

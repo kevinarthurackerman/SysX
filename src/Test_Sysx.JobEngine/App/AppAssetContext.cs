@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.App;
+﻿namespace Test_SysX.JobEngine.App;
 
 public class AppAssetContext : AssetContext
 {

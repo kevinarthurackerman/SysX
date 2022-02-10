@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Reflection.DuckTyper;
+﻿namespace Test_SysX.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
 public class PrivateMethodTests
@@ -7,7 +7,7 @@ public class PrivateMethodTests
     public void Should_Not_Wrap_Method_To_Private_Method()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value, includePrivateMembers: false);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value, includePrivateMembers: false);
 
         var callException = Assert.Throws<InvalidOperationException>(() => wrapper.Quack("Quack"));
 
@@ -21,7 +21,7 @@ public class PrivateMethodTests
     public void Should_Not_TryWrap_Method_To_Private_Method()
     {
         var value = new Duck();
-        var success = Sysx.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper, includePrivateMembers: false);
+        var success = SysX.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper, includePrivateMembers: false);
 
         Assert.False(success);
         Assert.Null(wrapper);
@@ -31,7 +31,7 @@ public class PrivateMethodTests
     public void Should_Wrap_Method_To_Private_Method()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value, includePrivateMembers: true);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value, includePrivateMembers: true);
 
         var result = wrapper.Quack("Quack");
 
@@ -43,7 +43,7 @@ public class PrivateMethodTests
     public void Should_TryWrap_Method_To_Private_Method()
     {
         var value = new Duck();
-        var success = Sysx.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper, includePrivateMembers: true);
+        var success = SysX.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper, includePrivateMembers: true);
 
         Assert.True(success);
         Assert.NotNull(wrapper);

@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx;
+﻿namespace Test_SysX;
 using Assert = Xunit.Assert;
 
 public class OperatorTests

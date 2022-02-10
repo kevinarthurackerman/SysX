@@ -1,4 +1,4 @@
-﻿namespace Sysx.JobEngine;
+﻿namespace SysX.JobEngine;
 
 /// <summary>
 /// Data for a job that manipulates assets.

@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Reflection.DuckTyper;
+﻿namespace Test_SysX.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
 public class SimilarPrivateMethodSignatureTests
@@ -7,7 +7,7 @@ public class SimilarPrivateMethodSignatureTests
     public void Should_Distinguish_Similar_Methods()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value, true);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value, true);
 
         var success1 = wrapper.TryQuack(1, out var result1);
 

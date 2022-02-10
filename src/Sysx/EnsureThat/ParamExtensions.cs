@@ -1,4 +1,4 @@
-﻿namespace Sysx.EnsureThat;
+﻿namespace SysX.EnsureThat;
 
 public static class ParamExtensions
 {

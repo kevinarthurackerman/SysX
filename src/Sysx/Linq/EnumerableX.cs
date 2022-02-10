@@ -1,4 +1,4 @@
-﻿namespace Sysx.Linq;
+﻿namespace SysX.Linq;
 
 /// <summary>
 /// Extended <see langword="static"/> methods for <see cref="Enumerable"/>.

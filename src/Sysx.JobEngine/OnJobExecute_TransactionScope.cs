@@ -1,4 +1,4 @@
-﻿namespace Sysx.JobEngine;
+﻿namespace SysX.JobEngine;
 
 /// <summary>
 /// Default service for wrapping all jobs and their wrapping handlers in a transaction.

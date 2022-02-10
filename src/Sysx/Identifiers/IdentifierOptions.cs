@@ -1,4 +1,4 @@
-﻿namespace Sysx.Identifiers;
+﻿namespace SysX.Identifiers;
 
 /// <summary>
 /// Options for generating a semi-sequential <see cref="Guid"/>.

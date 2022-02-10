@@ -1,4 +1,4 @@
-﻿namespace Sysx.DependencyInjection;
+﻿namespace SysX.DependencyInjection;
 
 public static class IServicesCollectionExtensions
 {

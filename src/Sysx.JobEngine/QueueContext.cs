@@ -1,4 +1,4 @@
-﻿namespace Sysx.JobEngine;
+﻿namespace SysX.JobEngine;
 
 /// <summary>
 /// A service used to get the queue which is executing the current job.

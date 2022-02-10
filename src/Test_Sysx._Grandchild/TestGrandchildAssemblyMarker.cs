@@ -1,3 +1,3 @@
-﻿namespace Sysx_Test__Grandchild;
+﻿namespace SysX_Test__Grandchild;
 
 public static class TestGrandchildAssemblyMarker { }

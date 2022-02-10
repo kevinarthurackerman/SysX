@@ -1,4 +1,4 @@
-﻿namespace Sysx.Identifiers;
+﻿namespace SysX.Identifiers;
 
 /// <summary>
 /// Types of identifiers.

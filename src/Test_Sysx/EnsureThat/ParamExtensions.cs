@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.EnsureThat;
+﻿namespace Test_SysX.EnsureThat;
 using Assert = Xunit.Assert;
 
 public class ParamExtensions

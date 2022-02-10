@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Linq;
+﻿namespace Test_SysX.Linq;
 using Assert = Xunit.Assert;
 
 public class EnumerableXTests

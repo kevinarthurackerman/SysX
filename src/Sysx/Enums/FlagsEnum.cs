@@ -1,4 +1,4 @@
-﻿namespace Sysx.Enums;
+﻿namespace SysX.Enums;
 
 /// <inheritdoc cref="FlagsEnum{TEnum}"/>
 public static class FlagsEnum

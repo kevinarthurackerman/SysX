@@ -1,4 +1,4 @@
-﻿namespace Sysx.Reflection;
+﻿namespace SysX.Reflection;
 
 /// <summary>
 /// Used to recursively load the dependencies of an <see cref="Assembly"/>.

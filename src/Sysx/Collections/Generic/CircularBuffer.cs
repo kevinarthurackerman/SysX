@@ -1,4 +1,4 @@
-﻿namespace Sysx.Collections.Generic;
+﻿namespace SysX.Collections.Generic;
 
 public static class ICircularBufferExtensions
 {

@@ -1,4 +1,4 @@
-﻿namespace Sysx.JobEngine;
+﻿namespace SysX.JobEngine;
 
 /// <summary>
 /// An asset that can be read from and manipulated during the execution of a job.

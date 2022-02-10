@@ -1,4 +1,4 @@
-﻿namespace Sysx;
+﻿namespace SysX;
 
 /// <summary>
 /// Static class used to assert that certain conditions should always be met, but to only check for them during debugging.

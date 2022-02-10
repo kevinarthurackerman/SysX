@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Reflection.DuckTyper;
+﻿namespace Test_SysX.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
 public class MissingFieldOrPropertyTests
@@ -7,7 +7,7 @@ public class MissingFieldOrPropertyTests
     public void Should_Not_Wrap_Property_To_Missing_Field_Or_Property()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value);
 
         var getException = Assert.Throws<InvalidOperationException>(() => wrapper.Quack);
         var setException = Assert.Throws<InvalidOperationException>(() => wrapper.Quack = "Quack");
@@ -23,7 +23,7 @@ public class MissingFieldOrPropertyTests
     public void Should_TryWrap_Property_To_Missing_Field_Or_Property()
     {
         var value = new Duck();
-        var success = Sysx.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper);
+        var success = SysX.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper);
 
         Assert.False(success);
         Assert.Null(wrapper);

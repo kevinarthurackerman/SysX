@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Text.Json.Serialization.Enums;
+﻿namespace Test_SysX.Text.Json.Serialization.Enums;
 using Assert = Assert;
 
 public class EnumerationsByValueTests

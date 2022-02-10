@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Reflection.DuckTyper;
+﻿namespace Test_SysX.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
 public class TryMethodTests
@@ -7,7 +7,7 @@ public class TryMethodTests
     public void Should_Wrap_Try_Method_To_Try_Method()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value);
 
         var success = wrapper.TryQuack("Quack", out var result);
 
@@ -19,7 +19,7 @@ public class TryMethodTests
     public void Should_TryWrap_Try_Method_To_Try_Method()
     {
         var value = new Duck();
-        var success = Sysx.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper);
+        var success = SysX.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper);
 
         Assert.True(success);
         Assert.NotNull(wrapper);

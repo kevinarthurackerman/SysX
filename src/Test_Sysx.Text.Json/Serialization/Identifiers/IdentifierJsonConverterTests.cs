@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Text.Json.Serialization.Identifiers;
+﻿namespace Test_SysX.Text.Json.Serialization.Identifiers;
 using Assert = Assert;
 
 public class IdentifierJsonConverterTests

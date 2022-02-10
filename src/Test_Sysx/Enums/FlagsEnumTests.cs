@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Enums;
+﻿namespace Test_SysX.Enums;
 using Assert = Xunit.Assert;
 
 public class FlagsEnumTests

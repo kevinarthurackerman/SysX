@@ -1,4 +1,4 @@
-﻿namespace Sysx;
+﻿namespace SysX;
 
 /// <summary>
 /// Static <see langword="class"/> that provides extensions to <see cref="Type"/>.

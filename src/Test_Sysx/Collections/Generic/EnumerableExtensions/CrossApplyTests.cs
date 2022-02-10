@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Collections.Generic.EnumerableExtensions;
+﻿namespace Test_SysX.Collections.Generic.EnumerableExtensions;
 using Assert = Xunit.Assert;
 
 public class CrossApplyTests

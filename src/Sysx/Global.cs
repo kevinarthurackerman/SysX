@@ -24,11 +24,11 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using System.Threading;
 global using System.Threading.Tasks;
-global using Sysx.EnsureThat;
-global using Sysx.Enums;
-global using Sysx.Linq;
-global using Sysx.Linq.Expressions;
-global using Sysx.Reflection;
+global using SysX.EnsureThat;
+global using SysX.Enums;
+global using SysX.Linq;
+global using SysX.Linq.Expressions;
+global using SysX.Reflection;
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1
 global using System.Runtime.Loader;

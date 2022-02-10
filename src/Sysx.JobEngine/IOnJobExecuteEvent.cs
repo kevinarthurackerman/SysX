@@ -1,4 +1,4 @@
-﻿namespace Sysx.JobEngine;
+﻿namespace SysX.JobEngine;
 
 /// <summary>
 /// A handler that wraps jobs executing. Calling next calles the next handler in the chain

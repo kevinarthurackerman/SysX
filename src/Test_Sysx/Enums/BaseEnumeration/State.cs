@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Enums.BaseEnumeration;
+﻿namespace Test_SysX.Enums.BaseEnumeration;
 
 public class State : BaseEnumeration<State, int>
 {

@@ -1,4 +1,4 @@
-﻿namespace Sysx;
+﻿namespace SysX;
 
 /// <summary>
 /// An <see cref="Exception"/> that is thrown when a contract is violated.

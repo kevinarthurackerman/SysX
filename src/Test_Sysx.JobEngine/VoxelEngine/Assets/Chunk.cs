@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.VoxelEngine.Assets;
+﻿namespace Test_SysX.JobEngine.VoxelEngine.Assets;
 
 public class Chunk : IAsset<Guid>
 {

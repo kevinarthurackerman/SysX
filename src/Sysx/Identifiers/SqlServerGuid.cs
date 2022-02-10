@@ -1,4 +1,4 @@
-﻿namespace Sysx.Identifiers;
+﻿namespace SysX.Identifiers;
 
 /// <summary>
 /// A thin wrapper over <see cref="Guid"/> to create semi-sequential values by overriding the comparison methods to use SQL Server's unique sort order.

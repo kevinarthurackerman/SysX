@@ -1,4 +1,4 @@
-﻿namespace Sysx;
+﻿namespace SysX;
 
 /// <inheritdoc cref="Operator{TLeft, TRight, TResult}" />
 public static class Operator

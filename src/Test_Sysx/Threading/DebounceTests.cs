@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Threading;
+﻿namespace Test_SysX.Threading;
 using Assert = Xunit.Assert;
 
 public class DebounceTests

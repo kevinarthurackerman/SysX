@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx;
+﻿namespace Test_SysX;
 using Assert = Xunit.Assert;
 
 public class TypeExtensionsTests
@@ -24,7 +24,7 @@ public class TypeExtensionsTests
     {
         var result = typeof(TestParent.TestChild).GetIdentifier();
 
-        Assert.Equal("Test_Sysx.TypeExtensionsTests.TestParent.TestChild", result);
+        Assert.Equal("Test_SysX.TypeExtensionsTests.TestParent.TestChild", result);
     }
 
     [Fact]

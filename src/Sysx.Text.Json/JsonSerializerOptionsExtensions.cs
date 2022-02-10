@@ -1,4 +1,4 @@
-﻿namespace Sysx.Text.Json;
+﻿namespace SysX.Text.Json;
 
 public static class JsonSerializerOptionsExtensions
 {

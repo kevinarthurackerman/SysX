@@ -1,4 +1,4 @@
-﻿namespace Sysx.Reflection;
+﻿namespace SysX.Reflection;
 
 public static class MethodInfoExtensions
 {

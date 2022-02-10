@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.App.OnActionHandlers;
+﻿namespace Test_SysX.JobEngine.App.OnActionHandlers;
 
 public class OnJobExecute_PropagatePallets<TJob, TJobExecutor> : OnJobExecute_PropagateAssets<TJob, TJobExecutor>
     where TJob : IJob

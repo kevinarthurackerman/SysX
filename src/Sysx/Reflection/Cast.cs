@@ -1,4 +1,4 @@
-﻿namespace Sysx.Reflection;
+﻿namespace SysX.Reflection;
 
 /// <summary>
 /// Used to cast a value from one <see cref="Type"/> to another.

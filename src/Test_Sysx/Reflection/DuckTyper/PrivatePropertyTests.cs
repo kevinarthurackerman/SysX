@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Reflection.DuckTyper;
+﻿namespace Test_SysX.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
 public class PrivatePropertyTests
@@ -7,7 +7,7 @@ public class PrivatePropertyTests
     public void Should_Not_Wrap_Property_To_Private_Property()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value, includePrivateMembers: false);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value, includePrivateMembers: false);
 
         var getException = Assert.Throws<InvalidOperationException>(() => wrapper.Quack);
         var setException = Assert.Throws<InvalidOperationException>(() => wrapper.Quack = "Quack");
@@ -23,7 +23,7 @@ public class PrivatePropertyTests
     public void Should_Not_TryWrap_Property_To_Private_Property()
     {
         var value = new Duck();
-        var success = Sysx.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper, includePrivateMembers: false);
+        var success = SysX.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper, includePrivateMembers: false);
 
         Assert.False(success);
         Assert.Null(wrapper);
@@ -33,7 +33,7 @@ public class PrivatePropertyTests
     public void Should_Wrap_Property_To_Private_Property()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value, includePrivateMembers: true);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value, includePrivateMembers: true);
 
         wrapper.Quack = "Quack";
 
@@ -45,7 +45,7 @@ public class PrivatePropertyTests
     public void Should_TryWrap_Property_To_Private_Property()
     {
         var value = new Duck();
-        var success = Sysx.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper, includePrivateMembers: true);
+        var success = SysX.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper, includePrivateMembers: true);
 
         Assert.True(success);
         Assert.NotNull(wrapper);

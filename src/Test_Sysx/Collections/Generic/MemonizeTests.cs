@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Collections.Generic;
+﻿namespace Test_SysX.Collections.Generic;
 using Assert = Xunit.Assert;
 
 public class MemonizeTests

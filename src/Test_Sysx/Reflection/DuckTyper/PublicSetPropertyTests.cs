@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Reflection.DuckTyper;
+﻿namespace Test_SysX.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
 public class PublicSetPropertyTests
@@ -7,7 +7,7 @@ public class PublicSetPropertyTests
     public void Should_Wrap_Property_To_Public_Property()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value);
 
         wrapper.Quack = "Quack";
 
@@ -18,7 +18,7 @@ public class PublicSetPropertyTests
     public void Should_TryWrap_Property_To_Public_Property()
     {
         var value = new Duck();
-        var success = Sysx.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper);
+        var success = SysX.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper);
 
         Assert.True(success);
         Assert.NotNull(wrapper);

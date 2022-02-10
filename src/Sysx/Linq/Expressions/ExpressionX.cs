@@ -1,4 +1,4 @@
-﻿namespace Sysx.Linq.Expressions;
+﻿namespace SysX.Linq.Expressions;
 
 /// <summary>
 /// Helper to generate functions during <see langword="class"/> initialization that if valid will only <see langword="throw" /> an <see cref="Exception"/> if called.

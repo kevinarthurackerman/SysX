@@ -1,7 +1,7 @@
 ﻿using System;
-using Sysx_Test__Child;
+using SysX_Test__Child;
 
-namespace Sysx_Test__Parent;
+namespace SysX_Test__Parent;
 
 public static class TestParentAssemblyMarker
 {

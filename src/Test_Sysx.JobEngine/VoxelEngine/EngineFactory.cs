@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.VoxelEngine;
+﻿namespace Test_SysX.JobEngine.VoxelEngine;
 
 public static class EngineFactory
 {

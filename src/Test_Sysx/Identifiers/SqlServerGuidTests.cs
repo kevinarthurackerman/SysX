@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.Identifiers;
+﻿namespace Test_SysX.Identifiers;
 using Assert = Xunit.Assert;
 
 public class SqlServerGuidTests

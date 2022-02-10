@@ -1,4 +1,4 @@
-﻿namespace Sysx.Testing;
+﻿namespace SysX.Testing;
 
 /// <summary>
 /// Used for testing to mock out the passage of time.

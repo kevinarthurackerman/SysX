@@ -1,4 +1,4 @@
-﻿namespace Sysx.Enums;
+﻿namespace SysX.Enums;
 
 /// <summary>
 /// Base class for implementing type-safe <see langword="class"/> <see langword="enum"/>s.

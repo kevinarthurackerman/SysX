@@ -1,4 +1,4 @@
-﻿namespace Sysx;
+﻿namespace SysX;
 
 /// <summary>
 /// Represents a potentially <see langword="null"/>able unknown value type

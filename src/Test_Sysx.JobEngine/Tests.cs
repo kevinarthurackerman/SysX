@@ -1,4 +1,4 @@
-namespace Test_Sysx.JobEngine;
+namespace Test_SysX.JobEngine;
 
 public class Tests
 {

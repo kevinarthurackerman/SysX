@@ -1,4 +1,4 @@
-# Sysx.Reflection.DuckTyper
+# SysX.Reflection.DuckTyper
 
 Allows wrapping types with an interface at runtime so that they can be accessed via duck-typing or as a "friend class".
 
@@ -15,7 +15,7 @@ public class Test
     public void Should_Wrap_And_Set_Value()
     {
         var value = new Duck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IDuck>(value);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value);
 
         wrapper.Quack = "Quack";
 
@@ -44,7 +44,7 @@ public class Test
     public void Should_Wrap_And_Set_Value()
     {
         var value = new FriendlyDuck();
-        var wrapper = Sysx.Reflection.DuckTyper.Wrap<IFriendedDuck>(value, includePrivateMembers: true);
+        var wrapper = SysX.Reflection.DuckTyper.Wrap<IFriendedDuck>(value, includePrivateMembers: true);
 
         wrapper.quack = "Quack";
 
@@ -79,7 +79,7 @@ public class Test
 
         foreach (var potentialDuck in possiblyDucks)
         {
-            if (Sysx.Reflection.DuckTyper.TryWrap<IDuck>(potentialDuck, out var duck))
+            if (SysX.Reflection.DuckTyper.TryWrap<IDuck>(potentialDuck, out var duck))
             {
                 duck.Quack = "Quack";
 
@@ -102,6 +102,6 @@ public class Test
 }
 ```
 
-See [here](/src/Test_Sysx/Reflection/DuckTyper) for more tests and examples of use.
+See [here](/src/Test_SysX/Reflection/DuckTyper) for more tests and examples of use.
 
-See [here](/src/Sysx/Reflection/DuckTyper.cs) for the implementation of the DuckTyper static class.
+See [here](/src/SysX/Reflection/DuckTyper.cs) for the implementation of the DuckTyper static class.

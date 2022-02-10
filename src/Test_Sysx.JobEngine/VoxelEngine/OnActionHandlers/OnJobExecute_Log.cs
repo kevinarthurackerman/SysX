@@ -1,4 +1,4 @@
-﻿namespace Test_Sysx.JobEngine.VoxelEngine.OnActionHandlers;
+﻿namespace Test_SysX.JobEngine.VoxelEngine.OnActionHandlers;
 
 public class OnJobExecute_Log<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJobExecutor>
     where TJob : IJob

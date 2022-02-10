@@ -1,4 +1,4 @@
-﻿namespace Sysx.Collections.Generic;
+﻿namespace SysX.Collections.Generic;
 
 /// <summary>
 /// Memoizes the <see cref="IEnumerable{T}"/>, ensuring that it will only be evaluated up to one time, even if it is called more than once.
