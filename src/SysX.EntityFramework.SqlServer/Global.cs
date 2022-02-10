@@ -6,3 +6,4 @@ global using System;
 global using System.Data.Common;
 global using System.IO;
 global using SysX.EntityFramework.Testing;
+global using System.Diagnostics;

@@ -18,14 +18,14 @@ public sealed class SqlServerTestDbContextActivator
 
     override protected string GetDatabaseName(Type dbContextType)
     {
-        Assert.That(dbContextType != null);
+        Debug.Assert(dbContextType != null);
 
         return $"{dbContextType!.Name}_{Guid.NewGuid()}.mdf";
     }
 
     override protected DbConnection CreateConnection(string databasePath)
     {
-        Assert.That(databasePath != null);
+        Debug.Assert(databasePath != null);
 
         var connectionString = $"Data Source=(LocalDB)\\MSSQLLocalDB; AttachDbFilename={databasePath}; Integrated Security=True; Connect Timeout=30; Pooling=false;";
         return new SqlConnection(connectionString);
@@ -35,7 +35,7 @@ public sealed class SqlServerTestDbContextActivator
         DbConnection dbConnection,
         Action<CreateDbContextOptions<TDbContext>>? configure)
     {
-        Assert.That(dbConnection != null);
+        Debug.Assert(dbConnection != null);
 
         var dbContextOptions = new DbContextOptionsBuilder<TDbContext>();
         dbContextOptions.UseSqlServer(dbConnection, providerOptions =>
@@ -45,7 +45,7 @@ public sealed class SqlServerTestDbContextActivator
 
     override protected void CreateDatabase(string databasePath)
     {
-        Assert.That(databasePath != null);
+        Debug.Assert(databasePath != null);
 
         var databaseName = Path.GetFileNameWithoutExtension(databasePath);
         using var connection = new SqlConnection("Data Source=(LocalDB)\\MSSQLLocalDB; Initial Catalog=master; Integrated Security=true;");

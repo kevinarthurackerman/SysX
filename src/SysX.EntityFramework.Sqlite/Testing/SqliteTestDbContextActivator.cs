@@ -17,14 +17,14 @@ public sealed class SqliteTestDbContextActivator
 
     override protected string GetDatabaseName(Type dbContextType)
     {
-        Assert.That(dbContextType != null);
+        Debug.Assert(dbContextType != null);
 
         return $"{dbContextType!.Name}_{Guid.NewGuid()}.sqlite";
     }
 
     override protected DbConnection CreateConnection(string databasePath)
     {
-        Assert.That(databasePath != null);
+        Debug.Assert(databasePath != null);
 
         var connectionString = $"Data Source={databasePath};";
         return new SqliteConnection(connectionString);
@@ -34,7 +34,7 @@ public sealed class SqliteTestDbContextActivator
         DbConnection dbConnection,
         Action<CreateDbContextOptions<TDbContext>>? configure)
     {
-        Assert.That(dbConnection != null);
+        Debug.Assert(dbConnection != null);
 
         var dbContextOptions = new DbContextOptionsBuilder<TDbContext>();
         dbContextOptions.UseSqlite(dbConnection, providerOptions =>
@@ -44,7 +44,7 @@ public sealed class SqliteTestDbContextActivator
 
     override protected void CreateDatabase(string databasePath)
     {
-        Assert.That(databasePath != null);
+        Debug.Assert(databasePath != null);
 
         File.WriteAllBytes(databasePath!, Array.Empty<byte>());
     }

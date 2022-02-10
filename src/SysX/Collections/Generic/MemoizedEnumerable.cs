@@ -56,6 +56,6 @@ public class MemoizedEnumerable<T> : IEnumerable<T>
             source = null;
         }
 
-        Assert.That(cache == null ^ source == null);
+        Debug.Assert(cache == null ^ source == null);
     }
 }

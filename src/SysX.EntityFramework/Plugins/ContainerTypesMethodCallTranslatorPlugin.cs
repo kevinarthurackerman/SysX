@@ -30,7 +30,7 @@ public class ContainerTypesMethodCallTranslatorPlugin : IMethodCallTranslatorPlu
 
         internal CallTranslatorForMethods(IEnumerable<BaseCallTranslatorForMethod> baseCallTranslatorForMethods)
         {
-            Assert.That(baseCallTranslatorForMethods != null);
+            Debug.Assert(baseCallTranslatorForMethods != null);
 
             translatorLookupByMember = baseCallTranslatorForMethods!.ToImmutableDictionary(x => x.ForMethod);
         }

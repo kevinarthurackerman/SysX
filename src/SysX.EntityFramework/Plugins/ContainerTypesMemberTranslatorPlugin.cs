@@ -30,7 +30,7 @@ public class ContainerTypesMemberTranslatorPlugin : IMemberTranslatorPlugin
 
         internal TranslatorForMembers(IEnumerable<BaseTranslatorForMember> baseTranslatorForMembers)
         {
-            Assert.That(baseTranslatorForMembers != null);
+            Debug.Assert(baseTranslatorForMembers != null);
 
             translatorLookupByMember = baseTranslatorForMembers!.ToImmutableDictionary(x => x.ForMember);
         }

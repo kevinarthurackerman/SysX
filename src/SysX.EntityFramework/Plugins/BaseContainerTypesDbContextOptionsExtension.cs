@@ -69,7 +69,7 @@ public abstract class BaseContainerTypesDbContextOptionsExtension : IDbContextOp
 
         public ExtensionInfo(BaseContainerTypesDbContextOptionsExtension extension) : base(extension)
         {
-            Assert.That(extension != null);
+            Debug.Assert(extension != null);
 
             this.extension = extension!;
             LogFragment = $"'ContainerTypes:{this.extension.Name}'=Enabled ";
