@@ -1,4 +1,4 @@
-﻿namespace Test_SysX.Reflection.DuckTyper;
+﻿namespace Test_SysX.CodeGeneration.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
 public class MissingMethodTests
@@ -7,7 +7,7 @@ public class MissingMethodTests
     public void Should_Not_Wrap_Method_To_Missing_Method()
     {
         var value = new Duck();
-        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value);
+        var wrapper = SysX.CodeGeneration.DuckTyper.Wrap<IDuck>(value);
 
         var callException = Assert.Throws<InvalidOperationException>(() => wrapper.Quack("Quack"));
 
@@ -20,7 +20,7 @@ public class MissingMethodTests
     public void Should_TryWrap_Method_To_Missing_Method()
     {
         var value = new Duck();
-        var success = SysX.Reflection.DuckTyper.TryWrap<IDuck>(value, out var wrapper);
+        var success = SysX.CodeGeneration.DuckTyper.TryWrap<IDuck>(value, out var wrapper);
 
         Assert.False(success);
         Assert.Null(wrapper);

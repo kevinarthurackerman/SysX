@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netstandard2.1;net48</TargetFrameworks>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <Import Project="..\Assertions.targets" />
+  <Import Project="..\NugetPack.targets" />
+
+  <ItemGroup Label="Nuget Packages">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Project References">
+    <ProjectReference Include="..\SysX\SysX.csproj" />
+  </ItemGroup>
+
+</Project>

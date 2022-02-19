@@ -1,13 +1,13 @@
-﻿namespace Test_SysX.Reflection.DuckTyper;
+﻿namespace Test_SysX.CodeGeneration.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
-public class SimilarPublicMethodSignatureTests
+public class SimilarPrivateMethodSignatureTests
 {
     [Fact]
     public void Should_Distinguish_Similar_Methods()
     {
         var value = new Duck();
-        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value);
+        var wrapper = SysX.CodeGeneration.DuckTyper.Wrap<IDuck>(value, true);
 
         var success1 = wrapper.TryQuack(1, out var result1);
 
@@ -51,28 +51,28 @@ public class SimilarPublicMethodSignatureTests
         public int MethodThreeCallCount = 0;
         public int MethodFourCallCount = 0;
 
-        public bool TryQuack(int value, out int? result)
+        private bool TryQuack(int value, out int? result)
         {
             MethodOneCallCount++;
             result = value;
             return true;
         }
 
-        public bool TryQuack(int? value, out int? result)
+        private bool TryQuack(int? value, out int? result)
         {
             MethodTwoCallCount++;
             result = value;
             return true;
         }
 
-        public bool TryQuack(string? value, out string? result)
+        private bool TryQuack(string? value, out string? result)
         {
             MethodThreeCallCount++;
             result = value;
             return true;
         }
 
-        public bool TryQuack(string? value, string? result)
+        private bool TryQuack(string? value, string? result)
         {
             MethodFourCallCount++;
             return true;

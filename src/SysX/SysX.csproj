@@ -14,20 +14,9 @@
     <PackageReference Include="Ensure.That" Version="10.1.0" />
     <PackageReference Include="Microsoft.Bcl" Version="1.1.10" Condition="'$(TargetFramework)' == 'net48'" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" Condition="'$(TargetFramework)' == 'net48'" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.15" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Update="Operator.cs">
-      <DesignTime>True</DesignTime>
-    </Compile>
   </ItemGroup>
   
 </Project>

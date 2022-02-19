@@ -1,4 +1,4 @@
-﻿namespace Test_SysX.Reflection.DuckTyper;
+﻿namespace Test_SysX.CodeGeneration.Reflection.DuckTyper;
 using Assert = Xunit.Assert;
 
 public class NonInterfaceMappingTests
@@ -7,12 +7,12 @@ public class NonInterfaceMappingTests
     public void Should_Not_Wrap_Property_To_Missing_Field_Or_Property()
     {
         var value = new Duck();
-        var success = SysX.Reflection.DuckTyper.TryWrap<AlsoDuck>(value, out var result);
+        var success = SysX.CodeGeneration.DuckTyper.TryWrap<AlsoDuck>(value, out var result);
 
         Assert.False(success);
         Assert.Null(result);
 
-        var exception = Assert.Throws<ArgumentException>(() => SysX.Reflection.DuckTyper.Wrap<AlsoDuck>(value));
+        var exception = Assert.Throws<ArgumentException>(() => SysX.CodeGeneration.DuckTyper.Wrap<AlsoDuck>(value));
 
 #if NET48
         var expectedExceptionMessage = "TWithInterface must be an interface type.\r\nParameter name: TWithInterface";

@@ -3,7 +3,6 @@ global using System.Collections.Generic;
 global using System.Linq;
 global using System.Linq.Dynamic.Core;
 global using System.Reflection;
-global using System.Runtime.CompilerServices;
 global using System.Threading;
 global using SysX.Collections.Generic;
 global using SysX.Enums;

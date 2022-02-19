@@ -1,4 +1,4 @@
-﻿namespace SysX.Reflection;
+﻿namespace SysX.CodeGeneration;
 
 /// <inheritdoc cref="DuckTyper{TValue, TWithInterface}" />
 public static class DuckTyper
