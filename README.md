@@ -4,6 +4,7 @@ This is a general utilities library and a place for me to experiment with new id
 
 Nuget packages:
 - [SysX](https://www.nuget.org/packages/SysX/)
+- [SysX.CodeGeneration](https://www.nuget.org/packages/SysX.CodeGeneration/)
 - [SysX.EntityFramework](https://www.nuget.org/packages/SysX.EntityFramework/)
 - [SysX.EntityFramework.NodaTime](https://www.nuget.org/packages/SysX.EntityFramework.NodaTime/)
 - [SysX.EntityFramework.Sqlite](https://www.nuget.org/packages/SysX.EntityFramework.Sqlite/)
