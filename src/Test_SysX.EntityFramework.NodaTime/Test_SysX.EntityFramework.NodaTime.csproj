@@ -7,7 +7,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Import Project="..\Assertions.targets" />
   <Import Project="..\XUnit.targets" />
   
   <ItemGroup Label="Project References">
