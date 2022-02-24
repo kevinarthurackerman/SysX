@@ -5,23 +5,29 @@
 /// An implementation of this must be registered in the queue from which asset changes will propagate.
 /// A propagate assets job executor should be registered to all queues receiving propagated assets.
 /// </summary>
-public abstract class OnJobExecute_PropagateAssets<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJobExecutor>
+public abstract class OnJobExecutePropagateAssets<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJobExecutor>
     where TJob : IJob
     where TJobExecutor : IJobExecutor<TJob>
 {
     private static readonly ConcurrentDictionary<Type, Action<IEnumerable<Type>, IEnumerable<AssetContext>, IEnumerable<IQueue>>> runPropagateAssetJobsCache = new();
 
     private readonly IQueueServiceProvider queueServiceProvider;
+
     private readonly IQueueContext queueContext;
+
     private readonly IQueueLocator queueLocator;
+
     private readonly IEnumerable<AssetContext> assetContexts;
 
     protected abstract IEnumerable<Type> FromContextTypes { get; }
+
     protected abstract IEnumerable<Type> ToQueueTypes { get; }
+
     protected abstract IEnumerable<Type> ToContextTypes { get; }
+
     protected abstract IEnumerable<Type> AssetTypes { get; }
 
-    public OnJobExecute_PropagateAssets(IQueueServiceProvider queueServiceProvider)
+    public OnJobExecutePropagateAssets(IQueueServiceProvider queueServiceProvider)
     {
         EnsureArg.IsNotNull(queueServiceProvider, nameof(queueServiceProvider));
 
@@ -63,7 +69,8 @@ public abstract class OnJobExecute_PropagateAssets<TJob, TJobExecutor> : IOnJobE
             .ToArray();
     }
 
-    public OnJobExecuteEventResultData<TJob, TJobExecutor> Execute(in OnJobExecuteEventRequest<TJob, TJobExecutor> request, OnJobExecuteEventNext<TJob, TJobExecutor> next)
+    public OnJobExecuteEventResultData<TJob, TJobExecutor> Execute(
+        in OnJobExecuteEventRequest<TJob, TJobExecutor> request, OnJobExecuteEventNext<TJob, TJobExecutor> next)
     {
         EnsureArg.HasValue(request, nameof(request));
         EnsureArg.IsNotNull(next, nameof(next));
@@ -85,7 +92,7 @@ public abstract class OnJobExecute_PropagateAssets<TJob, TJobExecutor> : IOnJobE
                 var keyType = assetType.GetGenericTypeImplementation(typeof(IAsset<>))!
                     .GetGenericArguments()[0];
 
-                var methodInfo = typeof(OnJobExecute_PropagateAssets<TJob, TJobExecutor>)
+                var methodInfo = typeof(OnJobExecutePropagateAssets<TJob, TJobExecutor>)
                     .GetMethod(nameof(PropagateAssets), BindingFlags.NonPublic | BindingFlags.Static)!
                     .MakeGenericMethod(keyType, assetType);
 
@@ -99,7 +106,8 @@ public abstract class OnJobExecute_PropagateAssets<TJob, TJobExecutor> : IOnJobE
         return result.Current;
     }
 
-    private static void PropagateAssets<TKey, TAsset>(IEnumerable<Type> toAssetContextTypes, IEnumerable<AssetContext> fromAssetContexts, IEnumerable<IQueue> propagateToQueues)
+    private static void PropagateAssets<TKey, TAsset>(
+        IEnumerable<Type> toAssetContextTypes, IEnumerable<AssetContext> fromAssetContexts, IEnumerable<IQueue> propagateToQueues)
         where TAsset : class, IAsset<TKey>
     {
         var modifiedAssetDatas = fromAssetContexts
@@ -110,58 +118,5 @@ public abstract class OnJobExecute_PropagateAssets<TJob, TJobExecutor> : IOnJobE
 
         foreach(var queue in propagateToQueues)
             queue.SubmitJob(new PropagateAssets<TKey, TAsset>.JobData(toAssetContextTypes, modifiedAssetDatas));
-    }
-}
-
-/// <summary>
-/// A convenience job for propagating changes to assets in one queue to other queues.
-/// This executor should be registered to all queues receiving propagated assets.
-/// An implementation of OnJobExecute_PropagateAssets must be registered in the queue from which asset changes will propagate.
-/// </summary>
-public static class PropagateAssets<TKey, TAsset>
-    where TAsset : class, IAsset<TKey>
-{
-    public readonly record struct JobData(IEnumerable<Type> ToAssetContextTypes, IEnumerable<JobData.AssetData> Assets) : IJob
-    {
-        public readonly record struct AssetData(TAsset? Old, TAsset? New);
-    };
-
-    public class Executor : IJobExecutor<JobData>
-    {
-        private readonly IQueueServiceProvider queueServiceProvider;
-
-        public Executor(IQueueServiceProvider queueServiceProvider)
-        {
-            EnsureArg.IsNotNull(queueServiceProvider, nameof(queueServiceProvider));
-
-            this.queueServiceProvider = queueServiceProvider;
-        }
-
-        public void Execute(in JobData data)
-        {
-            EnsureArg.HasValue(data, nameof(data));
-
-            var assetContexts = data.ToAssetContextTypes
-                .Select(x => queueServiceProvider.GetService(x))
-                .Where(x => x != null)
-                .Cast<AssetContext>()
-                .ToArray();
-
-            if (!assetContexts.Any()) return;
-
-            foreach (var assetData in data.Assets)
-            {
-                if (assetData.New == null)
-                {
-                    foreach(var assetContext in assetContexts)
-                        assetContext.AssetSet<TKey, TAsset>().Delete(assetData.Old!.Key);
-                }
-                else
-                {
-                    foreach (var assetContext in assetContexts)
-                        assetContext.AssetSet<TKey, TAsset>().AddOrUpdate(assetData.New!);
-                }
-            }
-        }
     }
 }

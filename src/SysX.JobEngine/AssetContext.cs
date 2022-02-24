@@ -54,6 +54,6 @@ public abstract class AssetContext
     /// Used to access assets of the given type stored in this context.
     /// </summary>
     public IAssetSet<TKey, TAsset> AssetSet<TKey, TAsset>()
-        where TAsset : class, IAsset<TKey>
-        => (IAssetSet<TKey, TAsset>)assetSetCache[typeof(TAsset)];
+        where TAsset : class, IAsset<TKey> =>
+        (IAssetSet<TKey, TAsset>)assetSetCache[typeof(TAsset)];
 }

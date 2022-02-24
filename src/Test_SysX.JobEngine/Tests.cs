@@ -10,7 +10,7 @@ public class Tests
             configureDefaultQueueServices: services => { },
             configureConfigQueueServices: services =>
             {
-                services.AddOnJobExecute(typeof(OnJobExecute_RecordPalletsToManifest<,>));
+                services.AddOnJobExecute(typeof(OnJobExecuteRecordPalletsToManifest<,>));
 
                 services.AddAssetContext(typeof(AppAssetContext));
                 services.AddJobExecutor(typeof(EnsureMainManifestExists.Executor));

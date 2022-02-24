@@ -1,10 +1,11 @@
 ﻿namespace Test_SysX.JobEngine.App.OnActionHandlers;
 
-public class OnJobExecute_PropagatePallets<TJob, TJobExecutor> : OnJobExecute_PropagateAssets<TJob, TJobExecutor>
+public class OnJobExecutePropagatePallets<TJob, TJobExecutor> : OnJobExecutePropagateAssets<TJob, TJobExecutor>
     where TJob : IJob
     where TJobExecutor : IJobExecutor<TJob>
 {
-    public OnJobExecute_PropagatePallets(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider)
+    public OnJobExecutePropagatePallets(IQueueServiceProvider queueServiceProvider)
+        : base(queueServiceProvider)
     {
     }
 

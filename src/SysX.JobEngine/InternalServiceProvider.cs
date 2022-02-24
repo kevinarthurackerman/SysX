@@ -1,22 +1,6 @@
 ﻿namespace SysX.JobEngine;
 
 /// <summary>
-/// Used to access services provided by the engine.
-/// </summary>
-public interface IEngineServiceProvider : IServiceProvider
-{
-    internal void SetServiceProvider(IServiceProvider serviceProvider);
-}
-
-/// <summary>
-/// Used to access services provided by the queue.
-/// </summary>
-public interface IQueueServiceProvider : IServiceProvider
-{
-    internal void SetServiceProvider(IServiceProvider serviceProvider);
-}
-
-/// <summary>
 /// An internal service provided used by the engine and the queue.
 /// </summary>
 public class InternalServiceProvider : IEngineServiceProvider, IQueueServiceProvider

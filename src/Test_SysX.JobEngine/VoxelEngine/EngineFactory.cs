@@ -17,7 +17,7 @@ public static class EngineFactory
             },
             DefaultConfigureQueueServices = services =>
             {
-                services.AddOnJobExecute(typeof(OnJobExecute_Log<,>));
+                services.AddOnJobExecute(typeof(OnJobExecuteLog<,>));
                 services.AddQueueServiceToQueue(typeof(ConfigQueue));
                 services.AddQueueServiceToQueue(typeof(MainQueue));
                 services.AddQueueServiceToQueue(typeof(ContouringQueue));
@@ -32,7 +32,7 @@ public static class EngineFactory
                 services.AddAssetContext(typeof(ConfigurationAssetContext));
                 services.AddJobExecutor(typeof(CreatePallet.Executor));
                 //services.AddOnJobExecute(typeof(OnJobExecute_PropagatePallets<,>));
-                services.AddOnJobExecute(typeof(OnJobExecute_PropagatePallets<,>));
+                services.AddOnJobExecute(typeof(OnJobExecutePropagatePallets<,>));
                 configureConfigQueueServices(services);
             }
         });

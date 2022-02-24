@@ -6,8 +6,11 @@
 public class Engine : IDisposable
 {
     private readonly Dictionary<QueueKey, QueueInfo> queues;
+
     private readonly IServiceCollection defaultQueueServices;
+
     private readonly IServiceProvider engineServices;
+
     private bool disposed;
 
     public Engine(in EngineOptions createEngineOptions)
@@ -28,7 +31,7 @@ public class Engine : IDisposable
         this.engineServices = engineServices.BuildServiceProvider();
 
         var defaultQueueServices = new ServiceCollection()
-            .AddSingleton(typeof(IOnJobExecuteEvent<,>), typeof(OnJobExecute_TransactionScope<,>))
+            .AddSingleton(typeof(IOnJobExecuteEvent<,>), typeof(OnJobExecuteTransactionScope<,>))
             .AddSingleton(queueServices => queueServices
                 .GetRequiredService<IEngineServiceProvider>()
                 .GetRequiredService<IQueueLocator>());

@@ -1,13 +1,13 @@
 ﻿namespace Test_SysX.JobEngine.App.OnActionHandlers;
 
-public class OnJobExecute_RecordPalletsToManifest<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJobExecutor>
+public class OnJobExecuteRecordPalletsToManifest<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJobExecutor>
     where TJob : IJob
     where TJobExecutor : IJobExecutor<TJob>
 {
     private readonly ConfigurationAssetContext configurationAssetContext;
     private readonly AppAssetContext appAssetContext;
 
-    public OnJobExecute_RecordPalletsToManifest(ConfigurationAssetContext configurationAssetContext, AppAssetContext appAssetContext)
+    public OnJobExecuteRecordPalletsToManifest(ConfigurationAssetContext configurationAssetContext, AppAssetContext appAssetContext)
     {
         this.configurationAssetContext = configurationAssetContext;
         this.appAssetContext = appAssetContext;

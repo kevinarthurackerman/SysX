@@ -1,25 +1,5 @@
 ﻿namespace SysX.JobEngine;
 
-/// <inheritdoc cref="Queue" />
-public interface IQueue
-{
-    /// <summary>
-    /// Adds a job to be ran on this queue after all previously submitted jobs have completed.
-    /// Jobs added in the scope of a transaction will be batched together and added at the
-    /// end of the queue when the transaction is completed.
-    /// </summary>
-    public void SubmitJob<TJob>(TJob data)
-        where TJob : IJob;
-
-    /// <summary>
-    /// Adds a job to be ran on this queue before all other jobs. 
-    /// Child jobs must be added in the scope of a transaction will be batched
-    /// and submitted together when the transaction is completed.
-    /// </summary>
-    public void SubmitChildJob<TJob>(TJob jobData)
-        where TJob : IJob;
-}
-
 /// <summary>
 /// A queue for executing jobs. Each queue runs on it's own thread in isolation from each other.
 /// </summary>
@@ -28,12 +8,19 @@ public class Queue : IQueue, IDisposable
     private static int queueInstanceNumber = 0;
 
     private readonly IQueueServiceProvider queueServiceProvider;
+
     private readonly CircularBuffer<IJobRunner> jobRunnersToRun = new();
+
     private readonly Dictionary<Transaction, TransactionJobRunners> transactionJobRunners = new();
+
     private readonly Action<Transaction> rollback;
+
     private readonly Action<Transaction, TransactionJobRunners> commit;
+
     private List<Exception>? backgroundExceptions;
+
     private bool disposed = false;
+
     private readonly object jobRunnersUpdateLock = new { };
 
     public Queue(IQueueServiceProvider queueServiceProvider)
