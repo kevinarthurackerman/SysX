@@ -9,8 +9,8 @@
   <Import Project="..\NugetPack.targets" />
 
   <ItemGroup Label="Nuget Packages">
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup Label="Project References">
