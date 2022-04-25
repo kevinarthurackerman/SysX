@@ -4,8 +4,15 @@ public class DisposableExample : IDisposable
 {
     private bool disposed;
 
-    private object? largeObject;
     private IDisposable? disposable;
+
+    private object? largeObject;
+
+    public DisposableExample(IDisposable? disposable, object? largeObject)
+    {
+        this.disposable = disposable;
+        this.largeObject = largeObject;
+    }
 
     public void Dispose()
     {
@@ -14,7 +21,7 @@ public class DisposableExample : IDisposable
         disposed = true;
 
         // dispose inner values and nullify large objects
-        largeObject = null;
         disposable?.Dispose();
+        largeObject = null;
     }
 }
