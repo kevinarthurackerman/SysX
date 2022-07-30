@@ -15,14 +15,14 @@ public class IdentifierTests
 		using var command = connection.CreateCommand();
 		command.CommandText = $@"
 SELECT
-    [{nameof(GuidPropertiesModel.Guid)}],
-    [{nameof(GuidPropertiesModel.BinaryGuid)}],
-    [{nameof(GuidPropertiesModel.StringGuid)}],
-    [{nameof(GuidPropertiesModel.SqlServerGuid)}],
-    [{nameof(GuidPropertiesModel.NullableGuid)}],
-    [{nameof(GuidPropertiesModel.NullableBinaryGuid)}],
-    [{nameof(GuidPropertiesModel.NullableStringGuid)}],
-    [{nameof(GuidPropertiesModel.NullableSqlServerGuid)}]
+	[{nameof(GuidPropertiesModel.Guid)}],
+	[{nameof(GuidPropertiesModel.BinaryGuid)}],
+	[{nameof(GuidPropertiesModel.StringGuid)}],
+	[{nameof(GuidPropertiesModel.SqlServerGuid)}],
+	[{nameof(GuidPropertiesModel.NullableGuid)}],
+	[{nameof(GuidPropertiesModel.NullableBinaryGuid)}],
+	[{nameof(GuidPropertiesModel.NullableStringGuid)}],
+	[{nameof(GuidPropertiesModel.NullableSqlServerGuid)}]
 FROM [GuidProperties]";
 
 		using var reader = command.ExecuteReader();

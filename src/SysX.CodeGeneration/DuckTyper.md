@@ -11,27 +11,27 @@ The following demonstrates using duck typing to access the members of a class:
 ```csharp
 public class Test
 {
-    [Xunit.Fact]
-    public void Should_Wrap_And_Set_Value()
-    {
-        var value = new Duck();
-        var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value);
+	[Xunit.Fact]
+	public void Should_Wrap_And_Set_Value()
+	{
+		var value = new Duck();
+		var wrapper = SysX.Reflection.DuckTyper.Wrap<IDuck>(value);
 
-        wrapper.Quack = "Quack";
+		wrapper.Quack = "Quack";
 
-        Xunit.Assert.Equal("Quack", value.Quack);
-        Xunit.Assert.Equal("Quack", wrapper.Quack);
-    }
+		Xunit.Assert.Equal("Quack", value.Quack);
+		Xunit.Assert.Equal("Quack", wrapper.Quack);
+	}
 
-    public interface IDuck
-    {
-        public string? Quack { get; set; }
-    }
+	public interface IDuck
+	{
+		public string? Quack { get; set; }
+	}
 
-    public class Duck
-    {
-        public string? Quack { get; set; }
-    }
+	public class Duck
+	{
+		public string? Quack { get; set; }
+	}
 }
 ```
 
@@ -40,26 +40,26 @@ Similarly we can access the class as a friended class as follows:
 ```csharp
 public class Test
 {
-    [Xunit.Fact]
-    public void Should_Wrap_And_Set_Value()
-    {
-        var value = new FriendlyDuck();
-        var wrapper = SysX.Reflection.DuckTyper.Wrap<IFriendedDuck>(value, includePrivateMembers: true);
+	[Xunit.Fact]
+	public void Should_Wrap_And_Set_Value()
+	{
+		var value = new FriendlyDuck();
+		var wrapper = SysX.Reflection.DuckTyper.Wrap<IFriendedDuck>(value, includePrivateMembers: true);
 
-        wrapper.quack = "Quack";
+		wrapper.quack = "Quack";
 
-        Xunit.Assert.Equal("Quack", wrapper.quack);
-    }
+		Xunit.Assert.Equal("Quack", wrapper.quack);
+	}
 
-    public interface IFriendedDuck
-    {
-        public string? quack { get; set; }
-    }
+	public interface IFriendedDuck
+	{
+		public string? quack { get; set; }
+	}
 
-    public class FriendlyDuck
-    {
-        private string? quack;
-    }
+	public class FriendlyDuck
+	{
+		private string? quack;
+	}
 }
 ```
 
@@ -68,37 +68,37 @@ And finally, if we are not sure if what we have is duck-like we can try to wrap 
 ```csharp
 public class Test
 {
-    [Xunit.Fact]
-    public void Should_Wrap_And_Set_Value()
-    {
-        var possiblyDucks = new object[]
-        {
-            new Duck(),
-            new NotDuck()
-        };
+	[Xunit.Fact]
+	public void Should_Wrap_And_Set_Value()
+	{
+		var possiblyDucks = new object[]
+		{
+			new Duck(),
+			new NotDuck()
+		};
 
-        foreach (var potentialDuck in possiblyDucks)
-        {
-            if (SysX.Reflection.DuckTyper.TryWrap<IDuck>(potentialDuck, out var duck))
-            {
-                duck.Quack = "Quack";
+		foreach (var potentialDuck in possiblyDucks)
+		{
+			if (SysX.Reflection.DuckTyper.TryWrap<IDuck>(potentialDuck, out var duck))
+			{
+				duck.Quack = "Quack";
 
-                Xunit.Assert.Equal("Quack", duck.Quack);
-            }
-        }
-    }
+				Xunit.Assert.Equal("Quack", duck.Quack);
+			}
+		}
+	}
 
-    public interface IDuck
-    {
-        public string? Quack { get; set; }
-    }
+	public interface IDuck
+	{
+		public string? Quack { get; set; }
+	}
 
-    public class Duck
-    {
-        public string? Quack { get; set; }
-    }
+	public class Duck
+	{
+		public string? Quack { get; set; }
+	}
 
-    public class NotDuck { }
+	public class NotDuck { }
 }
 ```
 

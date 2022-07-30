@@ -15,12 +15,12 @@ public class EnumerationByValueTests
 		using var command = connection.CreateCommand();
 		command.CommandText = $@"
 SELECT
-    [{nameof(EnumerationPropertiesModel.Id)}],
-    [{nameof(EnumerationPropertiesModel.Null)}],
-    [{nameof(EnumerationPropertiesModel.Lion)}],
-    [{nameof(EnumerationPropertiesModel.Snake)}],
-    [{nameof(EnumerationPropertiesModel.LionAnimal)}],
-    [{nameof(EnumerationPropertiesModel.SnakeAnimal)}]
+	[{nameof(EnumerationPropertiesModel.Id)}],
+	[{nameof(EnumerationPropertiesModel.Null)}],
+	[{nameof(EnumerationPropertiesModel.Lion)}],
+	[{nameof(EnumerationPropertiesModel.Snake)}],
+	[{nameof(EnumerationPropertiesModel.LionAnimal)}],
+	[{nameof(EnumerationPropertiesModel.SnakeAnimal)}]
 FROM [EnumerationProperties]";
 
 		using var reader = command.ExecuteReader();

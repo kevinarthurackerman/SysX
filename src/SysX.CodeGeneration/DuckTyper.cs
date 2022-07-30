@@ -233,8 +233,8 @@ public static class DuckTyper<TValue, TWithInterface>
 			var interfacePropertyHasSet = interfaceProperty.GetSetMethod() != null;
 
 			publicMembers.AppendLine();
-			publicMembers.AppendLine($@"    {interfacePropertySignature}");
-			publicMembers.AppendLine($@"    {{");
+			publicMembers.AppendLine($@"	{interfacePropertySignature}");
+			publicMembers.AppendLine($@"	{{");
 
 			var matchCount = 0;
 			if (valueFieldInfo != null) matchCount++;
@@ -248,11 +248,11 @@ public static class DuckTyper<TValue, TWithInterface>
 
 				if (interfacePropertyHasGet)
 				{
-					publicMembers.AppendLine($@"        get => throw new {invalidOperationExceptionType}(""No accessible field or property {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
+					publicMembers.AppendLine($@"		get => throw new {invalidOperationExceptionType}(""No accessible field or property {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
 				}
 				if (interfacePropertyHasSet)
 				{
-					publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""No accessible field or property {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
+					publicMembers.AppendLine($@"		set => throw new {invalidOperationExceptionType}(""No accessible field or property {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
 				}
 			}
 			else if (matchCount > 1)
@@ -262,11 +262,11 @@ public static class DuckTyper<TValue, TWithInterface>
 
 				if (interfacePropertyHasGet)
 				{
-					publicMembers.AppendLine($@"        get => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
+					publicMembers.AppendLine($@"		get => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
 				}
 				if (interfacePropertyHasSet)
 				{
-					publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
+					publicMembers.AppendLine($@"		set => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType}."");");
 				}
 			}
 			else if (valueFieldInfo != null)
@@ -278,19 +278,19 @@ public static class DuckTyper<TValue, TWithInterface>
 				{
 					if (interfacePropertyHasGet)
 					{
-						publicMembers.AppendLine($@"        get => {innerValue}.{valueField};");
+						publicMembers.AppendLine($@"		get => {innerValue}.{valueField};");
 					}
 					if (interfacePropertyHasSet)
 					{
 						if (!valueFieldInfo.IsInitOnly)
 						{
-							publicMembers.AppendLine($@"        set => {innerValue}.{valueField} = value;");
+							publicMembers.AppendLine($@"		set => {innerValue}.{valueField} = value;");
 						}
 						else
 						{
 							fullyMapped = false;
 
-							publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""The field matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is init only."");");
+							publicMembers.AppendLine($@"		set => throw new {invalidOperationExceptionType}(""The field matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is init only."");");
 						}
 					}
 				}
@@ -298,23 +298,23 @@ public static class DuckTyper<TValue, TWithInterface>
 				{
 					var staticValueFieldInfo = $@"{valueField}_FieldInfo_{cachedMemberNumber++}";
 
-					staticPrivateFields.AppendLine($@"    private static readonly {fieldInfo} {staticValueFieldInfo} = typeof({valueType}).GetField(""{valueField}"", {nonPublicInstanceBindingFlags});");
+					staticPrivateFields.AppendLine($@"	private static readonly {fieldInfo} {staticValueFieldInfo} = typeof({valueType}).GetField(""{valueField}"", {nonPublicInstanceBindingFlags});");
 
 					if (interfacePropertyHasGet)
 					{
-						publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValueFieldInfo}.GetValue({innerValue});");
+						publicMembers.AppendLine($@"		get => ({interfacePropertyType}){staticValueFieldInfo}.GetValue({innerValue});");
 					}
 					if (interfacePropertyHasSet)
 					{
 						if (!valueFieldInfo.IsInitOnly)
 						{
-							publicMembers.AppendLine($@"        set => {staticValueFieldInfo}.SetValue({innerValue}, value);");
+							publicMembers.AppendLine($@"		set => {staticValueFieldInfo}.SetValue({innerValue}, value);");
 						}
 						else
 						{
 							fullyMapped = false;
 
-							publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""The field matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is init only."");");
+							publicMembers.AppendLine($@"		set => throw new {invalidOperationExceptionType}(""The field matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is init only."");");
 						}
 					}
 
@@ -334,19 +334,19 @@ public static class DuckTyper<TValue, TWithInterface>
 					{
 						fullyMapped = false;
 
-						publicMembers.AppendLine($@"        get => throw new {invalidOperationExceptionType}(""The property matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is has no accessible get method defined."");");
+						publicMembers.AppendLine($@"		get => throw new {invalidOperationExceptionType}(""The property matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found on wrapped value {valueType} is has no accessible get method defined."");");
 					}
 					else if (valuePropertyGet.IsPublic)
 					{
-						publicMembers.AppendLine($@"        get => {innerValue}.{valueProperty};");
+						publicMembers.AppendLine($@"		get => {innerValue}.{valueProperty};");
 					}
 					else
 					{
 						var staticValuePropertyGetMethodInfo = $@"get_{valueProperty}_MethodInfo_{cachedMemberNumber++}";
 
-						staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertyGetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetGetMethod(true);");
+						staticPrivateFields.AppendLine($@"	private static readonly {methodInfo} {staticValuePropertyGetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetGetMethod(true);");
 
-						publicMembers.AppendLine($@"        get => ({interfacePropertyType}){staticValuePropertyGetMethodInfo}.Invoke({innerValue}, null);");
+						publicMembers.AppendLine($@"		get => ({interfacePropertyType}){staticValuePropertyGetMethodInfo}.Invoke({innerValue}, null);");
 					}
 				}
 
@@ -356,19 +356,19 @@ public static class DuckTyper<TValue, TWithInterface>
 					{
 						fullyMapped = false;
 
-						publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""The property matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found wrapped value {valueType} is has no accessible set method defined."");");
+						publicMembers.AppendLine($@"		set => throw new {invalidOperationExceptionType}(""The property matching {interfaceType}.{interfacePropertyName} => {interfacePropertyType} found wrapped value {valueType} is has no accessible set method defined."");");
 					}
 					else if (valuePropertySet.IsPublic)
 					{
-						publicMembers.AppendLine($@"        set => {innerValue}!.{valueProperty} = value;");
+						publicMembers.AppendLine($@"		set => {innerValue}!.{valueProperty} = value;");
 					}
 					else
 					{
 						var staticValuePropertySetMethodInfo = $@"Set_{valueProperty}_MethodInfo_{cachedMemberNumber++}";
 
-						staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValuePropertySetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetSetMethod(true);");
+						staticPrivateFields.AppendLine($@"	private static readonly {methodInfo} {staticValuePropertySetMethodInfo} = typeof({valueType}).GetProperty(""{valueProperty}"", {nonPublicInstanceBindingFlags}).GetSetMethod(true);");
 
-						publicMembers.AppendLine($@"        set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}, new {@object}[] {{ value }});");
+						publicMembers.AppendLine($@"		set => {staticValuePropertySetMethodInfo}.Invoke({innerValue}, new {@object}[] {{ value }});");
 					}
 				}
 			}
@@ -379,11 +379,11 @@ public static class DuckTyper<TValue, TWithInterface>
 
 				if (interfacePropertyHasGet)
 				{
-					publicMembers.AppendLine($@"        get => throw new {invalidOperationExceptionType}(""Cannot map method to {interfaceType}.{interfacePropertyName} => {interfacePropertyType} on wrapped value {valueType}, a method must map to a method."");");
+					publicMembers.AppendLine($@"		get => throw new {invalidOperationExceptionType}(""Cannot map method to {interfaceType}.{interfacePropertyName} => {interfacePropertyType} on wrapped value {valueType}, a method must map to a method."");");
 				}
 				if (interfacePropertyHasSet)
 				{
-					publicMembers.AppendLine($@"        set => throw new {invalidOperationExceptionType}(""Cannot map method to {interfaceType}.{interfacePropertyName} => {interfacePropertyType} on wrapped value {valueType}, a method must map to a method."");");
+					publicMembers.AppendLine($@"		set => throw new {invalidOperationExceptionType}(""Cannot map method to {interfaceType}.{interfacePropertyName} => {interfacePropertyType} on wrapped value {valueType}, a method must map to a method."");");
 				}
 			}
 			else
@@ -392,7 +392,7 @@ public static class DuckTyper<TValue, TWithInterface>
 				throw new Exception("Else block was reached unexpectedly.");
 			}
 
-			publicMembers.AppendLine($@"    }}");
+			publicMembers.AppendLine($@"	}}");
 		}
 
 		foreach (var interfaceMethodInfo in interfaceMethods)
@@ -429,77 +429,77 @@ public static class DuckTyper<TValue, TWithInterface>
 				// map to exception, no mapping found
 				fullyMapped = false;
 
-				publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""No accessible method {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} found on wrapped value {valueType}."");");
+				publicMembers.AppendLine($@"	{interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""No accessible method {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} found on wrapped value {valueType}."");");
 			}
 			else if (matchCount > 1)
 			{
 				// map to exception, multiple mappings found
 				fullyMapped = false;
 
-				publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} found on wrapped value {valueType}."");");
+				publicMembers.AppendLine($@"	{interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Multiple members matching {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} found on wrapped value {valueType}."");");
 			}
 			else if (valueFieldInfo != null)
 			{
 				// map to exception, invalid mapping
 				fullyMapped = false;
 
-				publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Cannot map field to {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} on wrapped value {valueType}, a field must map to a property."");");
+				publicMembers.AppendLine($@"	{interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Cannot map field to {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} on wrapped value {valueType}, a field must map to a property."");");
 			}
 			else if (valuePropertyInfo != null)
 			{
 				// map to exception, invalid mapping
 				fullyMapped = false;
 
-				publicMembers.AppendLine($@"    {interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Cannot map property to {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} on wrapped value {valueType}, a property must map to a property."");");
+				publicMembers.AppendLine($@"	{interfaceMethodSignature} => throw new {invalidOperationExceptionType}(""Cannot map property to {interfaceType}.{interfaceMethod}({interfaceMethodParameterTypeList}) => {interfaceMethodReturnType} on wrapped value {valueType}, a property must map to a property."");");
 			}
 			else if (valueMethodInfo != null)
 			{
 				// map to method
 				if (valueMethodInfo.IsPublic)
 				{
-					publicMembers.AppendLine($@"    {interfaceMethodSignature} => innerValue.{interfaceMethod}({interfaceMethodParameterNameList});");
+					publicMembers.AppendLine($@"	{interfaceMethodSignature} => innerValue.{interfaceMethod}({interfaceMethodParameterNameList});");
 				}
 				else
 				{
 					var staticValueMethodInfo = $@"{interfaceMethod}_MethodInfo_{cachedMemberNumber++}";
 					var parameters = interfaceMethodInfo.GetParameters();
 
-					staticPrivateFields.AppendLine($@"    private static readonly {methodInfo} {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
+					staticPrivateFields.AppendLine($@"	private static readonly {methodInfo} {staticValueMethodInfo} = typeof({valueType}).GetMethod(""{interfaceMethod}"", {nonPublicInstanceBindingFlags}, null, new {type}[]{{ {interfaceMethodTypeIdentifiersList} }}, null);");
 
-					publicMembers.AppendLine($@"    {interfaceMethodSignature}");
-					publicMembers.AppendLine($@"    {{");
+					publicMembers.AppendLine($@"	{interfaceMethodSignature}");
+					publicMembers.AppendLine($@"	{{");
 					if (parameters.Any())
 					{
-						publicMembers.AppendLine($@"        var __parameters = new {@object}[]");
-						publicMembers.AppendLine($@"        {{");
+						publicMembers.AppendLine($@"		var __parameters = new {@object}[]");
+						publicMembers.AppendLine($@"		{{");
 						for (var i = 0; i < parameters.Length; i++)
 						{
 							if (parameters[i].IsOut)
 							{
-								publicMembers.Append($@"            default({parameters[i].ParameterType.GetIdentifier()})");
+								publicMembers.Append($@"			default({parameters[i].ParameterType.GetIdentifier()})");
 							}
 							else
 							{
-								publicMembers.Append($@"            {parameters[i].Name}");
+								publicMembers.Append($@"			{parameters[i].Name}");
 							}
 							publicMembers.AppendLine(parameters[i] != parameters.Last() ? "," : string.Empty);
 						}
-						publicMembers.AppendLine($@"        }};");
+						publicMembers.AppendLine($@"		}};");
 					}
 					else
 					{
-						publicMembers.AppendLine($@"        var __parameters = {array}.{nameof(Array.Empty)}<{@object}>()");
+						publicMembers.AppendLine($@"		var __parameters = {array}.{nameof(Array.Empty)}<{@object}>()");
 					}
-					publicMembers.AppendLine($@"        var __result = ({interfaceMethodReturnType}){staticValueMethodInfo}.Invoke({innerValue}, __parameters);");
+					publicMembers.AppendLine($@"		var __result = ({interfaceMethodReturnType}){staticValueMethodInfo}.Invoke({innerValue}, __parameters);");
 					for (var i = 0; i < parameters.Length; i++)
 					{
 						if (parameters[i].IsOut)
 						{
-							publicMembers.AppendLine($@"        {parameters[i].Name} = ({parameters[i].ParameterType.GetIdentifier()})__parameters[{i}];");
+							publicMembers.AppendLine($@"		{parameters[i].Name} = ({parameters[i].ParameterType.GetIdentifier()})__parameters[{i}];");
 						}
 					}
-					publicMembers.AppendLine($@"        return __result;");
-					publicMembers.AppendLine($@"    }}");
+					publicMembers.AppendLine($@"		return __result;");
+					publicMembers.AppendLine($@"	}}");
 				}
 			}
 			else
@@ -518,12 +518,12 @@ public static class DuckTyper<TValue, TWithInterface>
 			codeBuilder.Append(staticPrivateFields.ToString());
 			codeBuilder.AppendLine();
 		}
-		codeBuilder.AppendLine($@"    private readonly {valueType} {innerValue};");
+		codeBuilder.AppendLine($@"	private readonly {valueType} {innerValue};");
 		codeBuilder.AppendLine();
-		codeBuilder.AppendLine($@"    public {wrapperType}({valueType} valueToWrap)");
-		codeBuilder.AppendLine($@"    {{");
-		codeBuilder.AppendLine($@"        {innerValue} = valueToWrap ?? throw new {argumentNullExceptionType}(nameof(valueToWrap));");
-		codeBuilder.AppendLine($@"    }}");
+		codeBuilder.AppendLine($@"	public {wrapperType}({valueType} valueToWrap)");
+		codeBuilder.AppendLine($@"	{{");
+		codeBuilder.AppendLine($@"		{innerValue} = valueToWrap ?? throw new {argumentNullExceptionType}(nameof(valueToWrap));");
+		codeBuilder.AppendLine($@"	}}");
 		if (publicMembers.Length > 0)
 		{
 			codeBuilder.Append(publicMembers.ToString());
