@@ -5,10 +5,10 @@
 /// </summary>
 public interface IQueueContext
 {
-    /// <summary>
-    /// The queue executing the current job.
-    /// </summary>
-    public IQueue Current { get; }
+	/// <summary>
+	/// The queue executing the current job.
+	/// </summary>
+	public IQueue Current { get; }
 
-    internal void SetCurrent(IQueue queue);
+	internal void SetCurrent(IQueue queue);
 }

@@ -2,158 +2,158 @@
 
 public static class IServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds an asset context to the service collection.
-    /// Asset contexts should only be added to the queue services.
-    /// </summary>
-    public static IServiceCollection AddAssetContext(
-        this IServiceCollection services,
-        Type assetContextType,
-        IEnumerable<Type>? assetTypes = null,
-        ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
-    {
-        EnsureArg.HasValue(services, nameof(services));
-        EnsureArg.HasValue(assetContextType, nameof(assetContextType));
+	/// <summary>
+	/// Adds an asset context to the service collection.
+	/// Asset contexts should only be added to the queue services.
+	/// </summary>
+	public static IServiceCollection AddAssetContext(
+		this IServiceCollection services,
+		Type assetContextType,
+		IEnumerable<Type>? assetTypes = null,
+		ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
+	{
+		EnsureArg.HasValue(services, nameof(services));
+		EnsureArg.HasValue(assetContextType, nameof(assetContextType));
 
-        var isAssetContextType = typeof(AssetContext).IsAssignableFrom(assetContextType);
+		var isAssetContextType = typeof(AssetContext).IsAssignableFrom(assetContextType);
 
-        if (!isAssetContextType)
-            throw new InvalidOperationException($"Type {nameof(isAssetContextType)} {isAssetContextType} is not an AssetContext type.");
+		if (!isAssetContextType)
+			throw new InvalidOperationException($"Type {nameof(isAssetContextType)} {isAssetContextType} is not an AssetContext type.");
 
-        services.Add(new ServiceDescriptor(assetContextType, services => services.Activate(assetContextType, assetTypes ?? Type.EmptyTypes), serviceLifetime));
+		services.Add(new ServiceDescriptor(assetContextType, services => services.Activate(assetContextType, assetTypes ?? Type.EmptyTypes), serviceLifetime));
 
-        var ancestorContextType = assetContextType.BaseType;
+		var ancestorContextType = assetContextType.BaseType;
 
-        while (ancestorContextType != null)
-        {
-            if (!ancestorContextType.IsAbstract && ancestorContextType.IsPublic)
-            {
-                services.Add(new ServiceDescriptor(ancestorContextType, services => services.GetRequiredService(assetContextType), serviceLifetime));
-            }
+		while (ancestorContextType != null)
+		{
+			if (!ancestorContextType.IsAbstract && ancestorContextType.IsPublic)
+			{
+				services.Add(new ServiceDescriptor(ancestorContextType, services => services.GetRequiredService(assetContextType), serviceLifetime));
+			}
 
-            ancestorContextType = ancestorContextType.BaseType;
-        }
+			ancestorContextType = ancestorContextType.BaseType;
+		}
 
-        return services;
-    }
+		return services;
+	}
 
-    /// <summary>
-    /// Adds a queue type as a service to a queue.
-    /// Queue types should only be added to the queue services.
-    /// The queue must be created by the engine before it can be referenced by a job.
-    /// </summary>
-    public static IServiceCollection AddQueueServiceToQueue(
-        this IServiceCollection services,
-        Type queueType,
-        string name = QueueLocator.DefaultQueueName,
-        ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
-    {
-        EnsureArg.HasValue(services, nameof(services));
-        EnsureArg.HasValue(queueType, nameof(queueType));
+	/// <summary>
+	/// Adds a queue type as a service to a queue.
+	/// Queue types should only be added to the queue services.
+	/// The queue must be created by the engine before it can be referenced by a job.
+	/// </summary>
+	public static IServiceCollection AddQueueServiceToQueue(
+		this IServiceCollection services,
+		Type queueType,
+		string name = QueueLocator.DefaultQueueName,
+		ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+	{
+		EnsureArg.HasValue(services, nameof(services));
+		EnsureArg.HasValue(queueType, nameof(queueType));
 
-        var isQueueType = typeof(IQueue).IsAssignableFrom(queueType);
-        
-        if (!isQueueType)
-            throw new InvalidOperationException($"Type {nameof(isQueueType)} {isQueueType} is not a Queue type.");
+		var isQueueType = typeof(IQueue).IsAssignableFrom(queueType);
 
-        services.Add(new ServiceDescriptor(
-            queueType,
-            serviceProvider => serviceProvider.GetRequiredService<IQueueLocator>().Get(queueType, name),
-            serviceLifetime));
+		if (!isQueueType)
+			throw new InvalidOperationException($"Type {nameof(isQueueType)} {isQueueType} is not a Queue type.");
 
-        return services;
-    }
+		services.Add(new ServiceDescriptor(
+			queueType,
+			serviceProvider => serviceProvider.GetRequiredService<IQueueLocator>().Get(queueType, name),
+			serviceLifetime));
 
-    /// <summary>
-    /// Adds a job executor to the service collection.
-    /// Job executors should only be added to the queue services.
-    /// </summary>
-    public static IServiceCollection AddJobExecutor(
-        this IServiceCollection services,
-        Type jobExecutorType,
-        ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
-    {
-        EnsureArg.HasValue(services, nameof(services));
-        EnsureArg.HasValue(jobExecutorType, nameof(jobExecutorType));
+		return services;
+	}
 
-        var isJobExecutor = jobExecutorType.IsAssignableToGenericType(typeof(IJobExecutor<>));
+	/// <summary>
+	/// Adds a job executor to the service collection.
+	/// Job executors should only be added to the queue services.
+	/// </summary>
+	public static IServiceCollection AddJobExecutor(
+		this IServiceCollection services,
+		Type jobExecutorType,
+		ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+	{
+		EnsureArg.HasValue(services, nameof(services));
+		EnsureArg.HasValue(jobExecutorType, nameof(jobExecutorType));
 
-        if (!isJobExecutor)
-            throw new InvalidOperationException($"Type {nameof(jobExecutorType)} {jobExecutorType} is not a JobExecutor type.");
+		var isJobExecutor = jobExecutorType.IsAssignableToGenericType(typeof(IJobExecutor<>));
 
-        services.AddClosedType(typeof(IJobExecutor<>), jobExecutorType, serviceLifetime);
+		if (!isJobExecutor)
+			throw new InvalidOperationException($"Type {nameof(jobExecutorType)} {jobExecutorType} is not a JobExecutor type.");
 
-        return services;
-    }
+		services.AddClosedType(typeof(IJobExecutor<>), jobExecutorType, serviceLifetime);
 
-    /// <summary>
-    /// Adds an on job execute event to the service collection.
-    /// On job execute events should only be added to the queue services.
-    /// </summary>
-    public static IServiceCollection AddOnJobExecute(
-        this IServiceCollection services,
-        Type onJobExecuteType,
-        ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
-    {
-        EnsureArg.HasValue(services, nameof(services));
-        EnsureArg.HasValue(onJobExecuteType, nameof(onJobExecuteType));
+		return services;
+	}
 
-        var isOnJobExecute = onJobExecuteType.IsAssignableToGenericType(typeof(IOnJobExecuteEvent<,>));
+	/// <summary>
+	/// Adds an on job execute event to the service collection.
+	/// On job execute events should only be added to the queue services.
+	/// </summary>
+	public static IServiceCollection AddOnJobExecute(
+		this IServiceCollection services,
+		Type onJobExecuteType,
+		ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
+	{
+		EnsureArg.HasValue(services, nameof(services));
+		EnsureArg.HasValue(onJobExecuteType, nameof(onJobExecuteType));
 
-        if (!isOnJobExecute)
-            throw new InvalidOperationException($"Type {nameof(onJobExecuteType)} {onJobExecuteType} is not an OnJobExecute type.");
+		var isOnJobExecute = onJobExecuteType.IsAssignableToGenericType(typeof(IOnJobExecuteEvent<,>));
 
-        services.AddOpenOrClosedType(typeof(IOnJobExecuteEvent<,>), onJobExecuteType, serviceLifetime);
+		if (!isOnJobExecute)
+			throw new InvalidOperationException($"Type {nameof(onJobExecuteType)} {onJobExecuteType} is not an OnJobExecute type.");
 
-        return services;
-    }
+		services.AddOpenOrClosedType(typeof(IOnJobExecuteEvent<,>), onJobExecuteType, serviceLifetime);
 
-    private static IServiceCollection AddClosedType(
-        this IServiceCollection services,
-        Type openServiceType,
-        Type implementationType,
-        ServiceLifetime serviceLifetime)
-    {
-        var implementedOpenServiceType = implementationType.GetGenericTypeImplementation(openServiceType);
+		return services;
+	}
 
-        EnsureArg.IsNotNull(
-            implementedOpenServiceType,
-            optsFn: x => x.WithMessage($"Type {implementationType} must implemenet {openServiceType}."));
-        EnsureArg.IsFalse(
-            implementedOpenServiceType.ContainsGenericParameters,
-            optsFn: x => x.WithMessage($"Type {implementationType} is an open type and must be closed."));
+	private static IServiceCollection AddClosedType(
+		this IServiceCollection services,
+		Type openServiceType,
+		Type implementationType,
+		ServiceLifetime serviceLifetime)
+	{
+		var implementedOpenServiceType = implementationType.GetGenericTypeImplementation(openServiceType);
 
-        if (implementedOpenServiceType.ContainsGenericParameters)
-        {
-            services.Add(new ServiceDescriptor(openServiceType, implementationType, serviceLifetime));
-        }
-        else
-        {
-            services.Add(new ServiceDescriptor(implementedOpenServiceType, implementationType, serviceLifetime));
-        }
+		EnsureArg.IsNotNull(
+			implementedOpenServiceType,
+			optsFn: x => x.WithMessage($"Type {implementationType} must implemenet {openServiceType}."));
+		EnsureArg.IsFalse(
+			implementedOpenServiceType.ContainsGenericParameters,
+			optsFn: x => x.WithMessage($"Type {implementationType} is an open type and must be closed."));
 
-        return services;
-    }
+		if (implementedOpenServiceType.ContainsGenericParameters)
+		{
+			services.Add(new ServiceDescriptor(openServiceType, implementationType, serviceLifetime));
+		}
+		else
+		{
+			services.Add(new ServiceDescriptor(implementedOpenServiceType, implementationType, serviceLifetime));
+		}
 
-    private static IServiceCollection AddOpenOrClosedType(
-        this IServiceCollection services,
-        Type openServiceType,
-        Type implementationType,
-        ServiceLifetime serviceLifetime)
-    {
-        var implementedOpenServiceType = implementationType.GetGenericTypeImplementation(openServiceType);
+		return services;
+	}
 
-        EnsureArg.IsNotNull(implementedOpenServiceType, optsFn: x => x.WithMessage($"Type {implementationType} must implemenet {openServiceType}."));
+	private static IServiceCollection AddOpenOrClosedType(
+		this IServiceCollection services,
+		Type openServiceType,
+		Type implementationType,
+		ServiceLifetime serviceLifetime)
+	{
+		var implementedOpenServiceType = implementationType.GetGenericTypeImplementation(openServiceType);
 
-        if (implementedOpenServiceType.ContainsGenericParameters)
-        {
-            services.Add(new ServiceDescriptor(openServiceType, implementationType, serviceLifetime));
-        }
-        else
-        {
-            services.Add(new ServiceDescriptor(implementedOpenServiceType, implementationType, serviceLifetime));
-        }
+		EnsureArg.IsNotNull(implementedOpenServiceType, optsFn: x => x.WithMessage($"Type {implementationType} must implemenet {openServiceType}."));
 
-        return services;
-    }
+		if (implementedOpenServiceType.ContainsGenericParameters)
+		{
+			services.Add(new ServiceDescriptor(openServiceType, implementationType, serviceLifetime));
+		}
+		else
+		{
+			services.Add(new ServiceDescriptor(implementedOpenServiceType, implementationType, serviceLifetime));
+		}
+
+		return services;
+	}
 }

@@ -5,8 +5,8 @@
 /// </summary>
 public class JobExecuteException : Exception
 {
-    public JobExecuteException(string? message, Exception? innerException)
-        : base(message, innerException)
-    {
-    }
+	public JobExecuteException(string? message, Exception? innerException)
+		: base(message, innerException)
+	{
+	}
 }

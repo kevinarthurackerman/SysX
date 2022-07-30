@@ -5,89 +5,89 @@
 /// </summary>
 public static class ExpressionX
 {
-    /// <summary>
-    /// Creates a nullary <see cref="Func{TResult}"/>.
-    /// </summary>
-    public static Func<TResult> Function<TResult>(Func<Expression> func, string? operatorName = null)
-    {
-        EnsureArg.IsNotNull(func, nameof(func));
+	/// <summary>
+	/// Creates a nullary <see cref="Func{TResult}"/>.
+	/// </summary>
+	public static Func<TResult> Function<TResult>(Func<Expression> func, string? operatorName = null)
+	{
+		EnsureArg.IsNotNull(func, nameof(func));
 
-        try
-        {
-            var expression = func();
+		try
+		{
+			var expression = func();
 
-            return Expression.Lambda<Func<TResult>>(expression).Compile();
-        }
-        catch (Exception)
-        {
-            return () => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}() => {typeof(TResult).Name}.");
-        }
-    }
+			return Expression.Lambda<Func<TResult>>(expression).Compile();
+		}
+		catch (Exception)
+		{
+			return () => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}() => {typeof(TResult).Name}.");
+		}
+	}
 
-    /// <summary>
-    /// Creates a unary <see cref="Func{TResult}"/>.
-    /// </summary>
-    public static Func<TValue, TResult> Function<TValue, TResult>(Func<ParameterExpression, Expression> func, string? operatorName = null)
-    {
-        EnsureArg.IsNotNull(func, nameof(func));
+	/// <summary>
+	/// Creates a unary <see cref="Func{TResult}"/>.
+	/// </summary>
+	public static Func<TValue, TResult> Function<TValue, TResult>(Func<ParameterExpression, Expression> func, string? operatorName = null)
+	{
+		EnsureArg.IsNotNull(func, nameof(func));
 
-        try
-        {
-            var valueParam = Expression.Parameter(typeof(TValue), "value");
+		try
+		{
+			var valueParam = Expression.Parameter(typeof(TValue), "value");
 
-            var expression = func(valueParam);
+			var expression = func(valueParam);
 
-            if (typeof(TValue) != typeof(TResult))
-            {
-                try
-                {
-                    expression = Expression.Convert(expression, typeof(TResult));
-                }
-                catch (Exception)
-                {
-                    return (value) => throw new InvalidCastException($"Operator {operatorName ?? string.Empty}({typeof(TValue).Name}) could not cast to result type {typeof(TResult).Name}.");
-                }
-            }
+			if (typeof(TValue) != typeof(TResult))
+			{
+				try
+				{
+					expression = Expression.Convert(expression, typeof(TResult));
+				}
+				catch (Exception)
+				{
+					return (value) => throw new InvalidCastException($"Operator {operatorName ?? string.Empty}({typeof(TValue).Name}) could not cast to result type {typeof(TResult).Name}.");
+				}
+			}
 
-            return Expression.Lambda<Func<TValue, TResult>>(expression, valueParam).Compile();
-        }
-        catch (Exception)
-        {
-            return (value) => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}({typeof(TValue).Name}) => {typeof(TResult).Name}.");
-        }
-    }
+			return Expression.Lambda<Func<TValue, TResult>>(expression, valueParam).Compile();
+		}
+		catch (Exception)
+		{
+			return (value) => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}({typeof(TValue).Name}) => {typeof(TResult).Name}.");
+		}
+	}
 
-    /// <summary>
-    /// Creates a binary <see cref="Func{TResult}"/>.
-    /// </summary>
-    public static Func<TLeft, TRight, TResult> Function<TLeft, TRight, TResult>(Func<ParameterExpression, ParameterExpression, Expression> func, string? operatorName = null)
-    {
-        EnsureArg.IsNotNull(func, nameof(func));
+	/// <summary>
+	/// Creates a binary <see cref="Func{TResult}"/>.
+	/// </summary>
+	public static Func<TLeft, TRight, TResult> Function<TLeft, TRight, TResult>(Func<ParameterExpression, ParameterExpression, Expression> func, string? operatorName = null)
+	{
+		EnsureArg.IsNotNull(func, nameof(func));
 
-        try
-        {
-            var leftParam = Expression.Parameter(typeof(TLeft), "left");
-            var rightParam = Expression.Parameter(typeof(TRight), "right");
+		try
+		{
+			var leftParam = Expression.Parameter(typeof(TLeft), "left");
+			var rightParam = Expression.Parameter(typeof(TRight), "right");
 
-            var expression = func(leftParam, rightParam);
+			var expression = func(leftParam, rightParam);
 
-            if (typeof(TLeft) != typeof(TResult) || typeof(TRight) != typeof(TResult))
-            {
-                try
-                {
-                    expression = Expression.Convert(expression, typeof(TResult));
-                }
-                catch (Exception)
-                {
-                    return (left, right) => throw new InvalidCastException($"Operator {operatorName ?? string.Empty}({typeof(TLeft).Name}, {typeof(TRight).Name}) could not cast to result type {typeof(TResult).Name}.");
-                }
-            }
+			if (typeof(TLeft) != typeof(TResult) || typeof(TRight) != typeof(TResult))
+			{
+				try
+				{
+					expression = Expression.Convert(expression, typeof(TResult));
+				}
+				catch (Exception)
+				{
+					return (left, right) => throw new InvalidCastException($"Operator {operatorName ?? string.Empty}({typeof(TLeft).Name}, {typeof(TRight).Name}) could not cast to result type {typeof(TResult).Name}.");
+				}
+			}
 
-            return Expression.Lambda<Func<TLeft, TRight, TResult>>(expression, leftParam, rightParam).Compile();
-        }
-        catch (Exception)
-        {
-            return (left, right) => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}({typeof(TLeft).Name}, {typeof(TRight).Name}) => {typeof(TResult).Name}.");
-        }
-    }
+			return Expression.Lambda<Func<TLeft, TRight, TResult>>(expression, leftParam, rightParam).Compile();
+		}
+		catch (Exception)
+		{
+			return (left, right) => throw new InvalidOperationException($"No operator exists for {operatorName ?? string.Empty}({typeof(TLeft).Name}, {typeof(TRight).Name}) => {typeof(TResult).Name}.");
+		}
+	}
 }

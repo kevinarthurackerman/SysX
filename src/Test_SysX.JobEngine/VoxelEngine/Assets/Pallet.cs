@@ -2,14 +2,14 @@
 
 public class Pallet : IAsset<Guid>
 {
-    public Guid Key { get; }
-    public ImmutableDictionary<int, VoxelType> VoxelCodeMappings { get; }
+	public Guid Key { get; }
+	public ImmutableDictionary<int, VoxelType> VoxelCodeMappings { get; }
 
-    public Pallet(Guid key, ImmutableDictionary<int, VoxelType> voxelCodeMappings)
-    {
-        Key = key;
-        VoxelCodeMappings = voxelCodeMappings;
-    }
+	public Pallet(Guid key, ImmutableDictionary<int, VoxelType> voxelCodeMappings)
+	{
+		Key = key;
+		VoxelCodeMappings = voxelCodeMappings;
+	}
 
-    public class VoxelType { }
+	public class VoxelType { }
 }

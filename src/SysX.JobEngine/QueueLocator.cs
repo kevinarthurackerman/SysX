@@ -8,51 +8,51 @@
 /// </summary>
 public class QueueLocator : IQueueLocator
 {
-    private readonly Dictionary<QueueKey, IQueue> queues = new();
+	private readonly Dictionary<QueueKey, IQueue> queues = new();
 
-    public const string DefaultQueueName = "Default";
+	public const string DefaultQueueName = "Default";
 
-    /// <summary>
-    /// Gets a queue.
-    /// </summary>
-    public IQueue Get(Type queueType, string name)
-    {
-        EnsureArg.IsNotNull(queueType, nameof(queueType));
-        EnsureArg.IsTrue(
-            typeof(IQueue).IsAssignableFrom(queueType),
-            optsFn: x => x.WithMessage($"Type {nameof(queueType)} must be assignable to {typeof(IQueue)}"));
-        EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
+	/// <summary>
+	/// Gets a queue.
+	/// </summary>
+	public IQueue Get(Type queueType, string name)
+	{
+		EnsureArg.IsNotNull(queueType, nameof(queueType));
+		EnsureArg.IsTrue(
+			typeof(IQueue).IsAssignableFrom(queueType),
+			optsFn: x => x.WithMessage($"Type {nameof(queueType)} must be assignable to {typeof(IQueue)}"));
+		EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
 
-        return queues[new QueueKey(queueType, name)];
-    }
+		return queues[new QueueKey(queueType, name)];
+	}
 
-    /// <summary>
-    /// Gets all queues.
-    /// </summary>
-    public IEnumerable<IQueue> GetAll() => queues.Values.ToArray();
+	/// <summary>
+	/// Gets all queues.
+	/// </summary>
+	public IEnumerable<IQueue> GetAll() => queues.Values.ToArray();
 
-    void IQueueLocator.Register(IQueue queue, string name)
-    {
-        EnsureArg.IsNotNull(queue, nameof(queue));
-        EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
+	void IQueueLocator.Register(IQueue queue, string name)
+	{
+		EnsureArg.IsNotNull(queue, nameof(queue));
+		EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
 
-        var key = new QueueKey(queue.GetType(), name);
+		var key = new QueueKey(queue.GetType(), name);
 
-        EnsureArg.IsFalse(queues.ContainsKey(key), optsFn: x => x.WithMessage("A queue with this type and name already exists."));
+		EnsureArg.IsFalse(queues.ContainsKey(key), optsFn: x => x.WithMessage("A queue with this type and name already exists."));
 
-        queues[new QueueKey(queue.GetType(), name)] = queue;
-    }
+		queues[new QueueKey(queue.GetType(), name)] = queue;
+	}
 
-    void IQueueLocator.Deregister(Type queueType, string name)
-    {
-        EnsureArg.IsNotNull(queueType, nameof(queueType));
-        EnsureArg.IsTrue(
-            typeof(IQueue).IsAssignableFrom(queueType),
-            optsFn: x => x.WithMessage($"Type {nameof(queueType)} must be assignable to {typeof(IQueue)}"));
-        EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
+	void IQueueLocator.Deregister(Type queueType, string name)
+	{
+		EnsureArg.IsNotNull(queueType, nameof(queueType));
+		EnsureArg.IsTrue(
+			typeof(IQueue).IsAssignableFrom(queueType),
+			optsFn: x => x.WithMessage($"Type {nameof(queueType)} must be assignable to {typeof(IQueue)}"));
+		EnsureArg.IsNotNullOrWhiteSpace(name, nameof(name));
 
-        queues.Remove(new QueueKey(queueType, name));
-    }
+		queues.Remove(new QueueKey(queueType, name));
+	}
 
-    private readonly record struct QueueKey(Type Type, string Name);
+	private readonly record struct QueueKey(Type Type, string Name);
 }

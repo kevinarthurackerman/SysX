@@ -1,21 +1,21 @@
 ﻿namespace Test_SysX.JobEngine.App.OnActionHandlers;
 
 public class OnJobExecutePropagatePallets<TJob, TJobExecutor> : OnJobExecutePropagateAssets<TJob, TJobExecutor>
-    where TJob : IJob
-    where TJobExecutor : IJobExecutor<TJob>
+	where TJob : IJob
+	where TJobExecutor : IJobExecutor<TJob>
 {
-    public OnJobExecutePropagatePallets(IQueueServiceProvider queueServiceProvider)
-        : base(queueServiceProvider)
-    {
-    }
+	public OnJobExecutePropagatePallets(IQueueServiceProvider queueServiceProvider)
+		: base(queueServiceProvider)
+	{
+	}
 
-    protected override IEnumerable<Type> FromContextTypes { get; } = new[] { typeof(ConfigurationAssetContext) };
+	protected override IEnumerable<Type> FromContextTypes { get; } = new[] { typeof(ConfigurationAssetContext) };
 
-    protected override IEnumerable<Type> ToQueueTypes { get; } = new[] { typeof(MainQueue), typeof(ContouringQueue) };
+	protected override IEnumerable<Type> ToQueueTypes { get; } = new[] { typeof(MainQueue), typeof(ContouringQueue) };
 
-    protected override IEnumerable<Type> ToContextTypes { get; } = new[] { typeof(ConfigurableAssetContext) };
+	protected override IEnumerable<Type> ToContextTypes { get; } = new[] { typeof(ConfigurableAssetContext) };
 
-    protected override IEnumerable<Type> AssetTypes { get; } = new[] { typeof(Pallet) };
+	protected override IEnumerable<Type> AssetTypes { get; } = new[] { typeof(Pallet) };
 }
 
 //public class OnJobExecute_PropagatePallets<TJob, TJobExecutor> : IOnJobExecuteEvent<TJob, TJobExecutor>

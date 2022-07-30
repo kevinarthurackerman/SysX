@@ -5,45 +5,45 @@
 /// </summary>
 public class ContainerTypesMethodCallTranslatorPlugin : IMethodCallTranslatorPlugin
 {
-    public ContainerTypesMethodCallTranslatorPlugin(IEnumerable<IMethodCallTranslator> methodCallTranslators)
-    {
-        EnsureArg.IsNotNull(methodCallTranslators, nameof(methodCallTranslators));
+	public ContainerTypesMethodCallTranslatorPlugin(IEnumerable<IMethodCallTranslator> methodCallTranslators)
+	{
+		EnsureArg.IsNotNull(methodCallTranslators, nameof(methodCallTranslators));
 
-        var baseCallTranslatorForMethods = methodCallTranslators
-            .OfType<BaseCallTranslatorForMethod>()
-            .ToArray();
+		var baseCallTranslatorForMethods = methodCallTranslators
+			.OfType<BaseCallTranslatorForMethod>()
+			.ToArray();
 
-        var callTranslatorForMethods = new CallTranslatorForMethods(baseCallTranslatorForMethods);
+		var callTranslatorForMethods = new CallTranslatorForMethods(baseCallTranslatorForMethods);
 
-        var otherMethodCallTranslators = methodCallTranslators
-            .Where(x => x is not BaseCallTranslatorForMethod)
-            .ToArray();
+		var otherMethodCallTranslators = methodCallTranslators
+			.Where(x => x is not BaseCallTranslatorForMethod)
+			.ToArray();
 
-        Translators = otherMethodCallTranslators.Prepend(callTranslatorForMethods).ToArray();
-    }
+		Translators = otherMethodCallTranslators.Prepend(callTranslatorForMethods).ToArray();
+	}
 
-    public IEnumerable<IMethodCallTranslator> Translators { get; }
+	public IEnumerable<IMethodCallTranslator> Translators { get; }
 
-    private class CallTranslatorForMethods : IMethodCallTranslator
-    {
-        private readonly ImmutableDictionary<MethodInfo, BaseCallTranslatorForMethod> translatorLookupByMember;
+	private class CallTranslatorForMethods : IMethodCallTranslator
+	{
+		private readonly ImmutableDictionary<MethodInfo, BaseCallTranslatorForMethod> translatorLookupByMember;
 
-        internal CallTranslatorForMethods(IEnumerable<BaseCallTranslatorForMethod> baseCallTranslatorForMethods)
-        {
-            Debug.Assert(baseCallTranslatorForMethods != null);
+		internal CallTranslatorForMethods(IEnumerable<BaseCallTranslatorForMethod> baseCallTranslatorForMethods)
+		{
+			Debug.Assert(baseCallTranslatorForMethods != null);
 
-            translatorLookupByMember = baseCallTranslatorForMethods!.ToImmutableDictionary(x => x.ForMethod);
-        }
+			translatorLookupByMember = baseCallTranslatorForMethods!.ToImmutableDictionary(x => x.ForMethod);
+		}
 
-        public SqlExpression? Translate(
-            SqlExpression instance,
-            MethodInfo method,
-            IReadOnlyList<SqlExpression> arguments,
-            IDiagnosticsLogger<DbLoggerCategory.Query> logger)
-        {
-            translatorLookupByMember.TryGetValue(method, out var translator);
+		public SqlExpression? Translate(
+			SqlExpression instance,
+			MethodInfo method,
+			IReadOnlyList<SqlExpression> arguments,
+			IDiagnosticsLogger<DbLoggerCategory.Query> logger)
+		{
+			translatorLookupByMember.TryGetValue(method, out var translator);
 
-            return translator?.Translate(instance, method, arguments, logger);
-        }
-    }
+			return translator?.Translate(instance, method, arguments, logger);
+		}
+	}
 }

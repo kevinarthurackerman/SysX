@@ -5,75 +5,75 @@
 /// </summary>
 public sealed class BaseEnumerationsByDisplayNameDbContextOptionsExtension : BaseContainerTypesDbContextOptionsExtension
 {
-    private readonly ReflectionSource reflectionSource;
+	private readonly ReflectionSource reflectionSource;
 
-    public BaseEnumerationsByDisplayNameDbContextOptionsExtension(ReflectionSource reflectionSource)
-    {
-        this.reflectionSource = reflectionSource;
-    }
+	public BaseEnumerationsByDisplayNameDbContextOptionsExtension(ReflectionSource reflectionSource)
+	{
+		this.reflectionSource = reflectionSource;
+	}
 
-    public override void RegisterServices(IServiceCollection services, IDatabaseProvider databaseProvider)
-    {
-        EnsureArg.IsNotNull(services, nameof(services));
-        EnsureArg.IsNotNull(databaseProvider, nameof(databaseProvider));
+	public override void RegisterServices(IServiceCollection services, IDatabaseProvider databaseProvider)
+	{
+		EnsureArg.IsNotNull(services, nameof(services));
+		EnsureArg.IsNotNull(databaseProvider, nameof(databaseProvider));
 
-        foreach (var type in reflectionSource)
-        {
-            var baseEnumerationType = GetBaseEnumerationType(type);
+		foreach (var type in reflectionSource)
+		{
+			var baseEnumerationType = GetBaseEnumerationType(type);
 
-            if (baseEnumerationType == null) continue;
+			if (baseEnumerationType == null) continue;
 
-            var genericParams = baseEnumerationType.GetGenericArguments();
-            var enumType = genericParams[0];
-            var valueType = genericParams[1];
+			var genericParams = baseEnumerationType.GetGenericArguments();
+			var enumType = genericParams[0];
+			var valueType = genericParams[1];
 
-            services.AddSingleton<RelationalTypeMapping>(services =>
-            {
-                var initializeRelationalTypeMapper = () =>
-                {
-                    var providerTypeMapping = services
-                        .GetRequiredService<IRelationalTypeMappingSource>()
-                        .FindMapping(typeof(string));
+			services.AddSingleton<RelationalTypeMapping>(services =>
+			{
+				var initializeRelationalTypeMapper = () =>
+				{
+					var providerTypeMapping = services
+						.GetRequiredService<IRelationalTypeMappingSource>()
+						.FindMapping(typeof(string));
 
-                    var valueConverter = (ValueConverter)GetType()
-                        .GetMethod(nameof(CreateValueConverter), BindingFlags.NonPublic | BindingFlags.Static)!
-                        .MakeGenericMethod(enumType, valueType)
-                        .Invoke(null, null)!;
+					var valueConverter = (ValueConverter)GetType()
+						.GetMethod(nameof(CreateValueConverter), BindingFlags.NonPublic | BindingFlags.Static)!
+						.MakeGenericMethod(enumType, valueType)
+						.Invoke(null, null)!;
 
-                    return (RelationalTypeMapping)providerTypeMapping
-                        .Clone(new RelationalTypeMappingInfo(type))
-                        .Clone(valueConverter);
-                };
+					return (RelationalTypeMapping)providerTypeMapping
+						.Clone(new RelationalTypeMappingInfo(type))
+						.Clone(valueConverter);
+				};
 
-                return new LazyInitializedRelationalTypeMapping(type, initializeRelationalTypeMapper);
-            });
-        }
-    }
+				return new LazyInitializedRelationalTypeMapping(type, initializeRelationalTypeMapper);
+			});
+		}
+	}
 
-    private static Type? GetBaseEnumerationType(Type type)
-    {
-        var baseType = type!;
+	private static Type? GetBaseEnumerationType(Type type)
+	{
+		var baseType = type!;
 
-        while (baseType != null && baseType != baseType.BaseType)
-        {
-            if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(BaseEnumeration<,>))
-            {
-                return baseType;
-            }
+		while (baseType != null && baseType != baseType.BaseType)
+		{
+			if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(BaseEnumeration<,>))
+			{
+				return baseType;
+			}
 
-            baseType = baseType.BaseType;
-        }
+			baseType = baseType.BaseType;
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    private static ValueConverter CreateValueConverter<TEnum, TValue>()
-        where TEnum : BaseEnumeration<TEnum, TValue>
-        where TValue : IComparable<TValue>, IEquatable<TValue>, IComparable
-    {
-        return new ValueConverter<TEnum, string>(
-            @enum => @enum.DisplayName,
-            displayName => BaseEnumeration<TEnum, TValue>.Parse(displayName)
-        );
-    }
+	private static ValueConverter CreateValueConverter<TEnum, TValue>()
+		where TEnum : BaseEnumeration<TEnum, TValue>
+		where TValue : IComparable<TValue>, IEquatable<TValue>, IComparable
+	{
+		return new ValueConverter<TEnum, string>(
+			@enum => @enum.DisplayName,
+			displayName => BaseEnumeration<TEnum, TValue>.Parse(displayName)
+		);
+	}
 }

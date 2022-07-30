@@ -6,148 +6,148 @@
 /// </summary>
 public struct BinaryGuid : IComparable, IComparable<BinaryGuid>, IEquatable<BinaryGuid>, IFormattable
 {
-    public static readonly BinaryGuid Empty = new (Guid.Empty);
+	public static readonly BinaryGuid Empty = new(Guid.Empty);
 
-    private readonly Guid innerGuid;
+	private readonly Guid innerGuid;
 
-    /// <summary>
-    /// Initializes a new <see cref="BinaryGuid"/> with the given <see cref="Guid"/> value.
-    /// </summary>
-    public BinaryGuid(Guid guid)
-    {
-        innerGuid = guid;
-    }
+	/// <summary>
+	/// Initializes a new <see cref="BinaryGuid"/> with the given <see cref="Guid"/> value.
+	/// </summary>
+	public BinaryGuid(Guid guid)
+	{
+		innerGuid = guid;
+	}
 
-    public int CompareTo(BinaryGuid value)
-    {
-        var innerBytes = innerGuid.ToByteArray();
-        var otherBytes = value.innerGuid.ToByteArray();
+	public int CompareTo(BinaryGuid value)
+	{
+		var innerBytes = innerGuid.ToByteArray();
+		var otherBytes = value.innerGuid.ToByteArray();
 
-        for (var i = 0; i < innerBytes.Length; i++)
-        {
-            var comparison = innerBytes[i].CompareTo(otherBytes[i]);
-            if (comparison != 0) return comparison;
-        }
+		for (var i = 0; i < innerBytes.Length; i++)
+		{
+			var comparison = innerBytes[i].CompareTo(otherBytes[i]);
+			if (comparison != 0) return comparison;
+		}
 
-        return 0;
-    }
+		return 0;
+	}
 
-    public int CompareTo(object? value)
-    {
-        if (value is BinaryGuid binaryGuidValue)
-            return CompareTo(binaryGuidValue);
+	public int CompareTo(object? value)
+	{
+		if (value is BinaryGuid binaryGuidValue)
+			return CompareTo(binaryGuidValue);
 
-        throw new ArgumentException("Incorrect type", nameof(value));
-    }
+		throw new ArgumentException("Incorrect type", nameof(value));
+	}
 
-    public bool Equals(BinaryGuid g) => innerGuid.Equals(g.innerGuid);
+	public bool Equals(BinaryGuid g) => innerGuid.Equals(g.innerGuid);
 
-    public override bool Equals(object? o) => o is BinaryGuid otherBinaryGuid && innerGuid.Equals(otherBinaryGuid);
-    
-    public override int GetHashCode() => innerGuid.GetHashCode();
+	public override bool Equals(object? o) => o is BinaryGuid otherBinaryGuid && innerGuid.Equals(otherBinaryGuid);
 
-    public static BinaryGuid NewGuid() => new(Guid.NewGuid());
+	public override int GetHashCode() => innerGuid.GetHashCode();
 
-    public static BinaryGuid NewSequentialGuid() =>
-        new(IdentifierGenerator.Next(IdentifierType.Binary, IdentifierOptions.Default));
+	public static BinaryGuid NewGuid() => new(Guid.NewGuid());
 
-    public static BinaryGuid NewSequentialGuid(IdentifierOptions options) =>
-        new (IdentifierGenerator.Next(IdentifierType.Binary, options));
+	public static BinaryGuid NewSequentialGuid() =>
+		new(IdentifierGenerator.Next(IdentifierType.Binary, IdentifierOptions.Default));
 
-    public static bool operator ==(BinaryGuid a, BinaryGuid b) =>  a.innerGuid == b.innerGuid;
+	public static BinaryGuid NewSequentialGuid(IdentifierOptions options) =>
+		new(IdentifierGenerator.Next(IdentifierType.Binary, options));
 
-    public static bool operator !=(BinaryGuid a, BinaryGuid b) => a.innerGuid != b.innerGuid;
+	public static bool operator ==(BinaryGuid a, BinaryGuid b) => a.innerGuid == b.innerGuid;
+
+	public static bool operator !=(BinaryGuid a, BinaryGuid b) => a.innerGuid != b.innerGuid;
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-    public static BinaryGuid Parse(ReadOnlySpan<char> input) => new(Guid.Parse(input));
+	public static BinaryGuid Parse(ReadOnlySpan<char> input) => new(Guid.Parse(input));
 #endif
 
-    public static BinaryGuid Parse(string input) => new(Guid.Parse(input));
+	public static BinaryGuid Parse(string input) => new(Guid.Parse(input));
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-    public static BinaryGuid ParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format) => new(Guid.ParseExact(input, format));
+	public static BinaryGuid ParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format) => new(Guid.ParseExact(input, format));
 #endif
 
-    public static BinaryGuid ParseExact(string input, string format) => new(Guid.ParseExact(input, format));
+	public static BinaryGuid ParseExact(string input, string format) => new(Guid.ParseExact(input, format));
 
-    public byte[] ToByteArray() => innerGuid.ToByteArray();
+	public byte[] ToByteArray() => innerGuid.ToByteArray();
 
-    public override string ToString() => innerGuid.ToString();
+	public override string ToString() => innerGuid.ToString();
 
-    public string ToString(string? format) => innerGuid.ToString(format);
+	public string ToString(string? format) => innerGuid.ToString(format);
 
-    public string ToString(string? format, IFormatProvider? provider) => innerGuid.ToString(format, provider);
+	public string ToString(string? format, IFormatProvider? provider) => innerGuid.ToString(format, provider);
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-    public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default) =>
-        innerGuid.TryFormat(destination, out charsWritten, format);
+	public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default) =>
+		innerGuid.TryFormat(destination, out charsWritten, format);
 #endif
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-    public static bool TryParse(ReadOnlySpan<char> input, out BinaryGuid result)
-    {
-        if(Guid.TryParse(input, out var guid))
-        {
-            result = new BinaryGuid(guid);
-            return true;
-        }
+	public static bool TryParse(ReadOnlySpan<char> input, out BinaryGuid result)
+	{
+		if (Guid.TryParse(input, out var guid))
+		{
+			result = new BinaryGuid(guid);
+			return true;
+		}
 
-        result = default;
-        return false;
-    }
+		result = default;
+		return false;
+	}
 #endif
 
 #if NET48
-    public static bool TryParse(string? input, out BinaryGuid result)
+	public static bool TryParse(string? input, out BinaryGuid result)
 #elif NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-    public static bool TryParse([NotNullWhen(true)] string? input, out BinaryGuid result)
+	public static bool TryParse([NotNullWhen(true)] string? input, out BinaryGuid result)
 #endif
-    {
-        if (Guid.TryParse(input, out var guid))
-        {
-            result = new BinaryGuid(guid);
-            return true;
-        }
+	{
+		if (Guid.TryParse(input, out var guid))
+		{
+			result = new BinaryGuid(guid);
+			return true;
+		}
 
-        result = default;
-        return false;
-    }
+		result = default;
+		return false;
+	}
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-    public static bool TryParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, out BinaryGuid result)
-    {
-        if (Guid.TryParseExact(input, format, out var guid))
-        {
-            result = new BinaryGuid(guid);
-            return true;
-        }
+	public static bool TryParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, out BinaryGuid result)
+	{
+		if (Guid.TryParseExact(input, format, out var guid))
+		{
+			result = new BinaryGuid(guid);
+			return true;
+		}
 
-        result = default;
-        return false;
-    }
+		result = default;
+		return false;
+	}
 #endif
 
 #if NET48
-    public static bool TryParseExact(string? input, string? format, out BinaryGuid result)
+	public static bool TryParseExact(string? input, string? format, out BinaryGuid result)
 #elif NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-    public static bool TryParseExact([NotNullWhen(true)] string? input, [NotNullWhen(true)] string? format, out BinaryGuid result)
+	public static bool TryParseExact([NotNullWhen(true)] string? input, [NotNullWhen(true)] string? format, out BinaryGuid result)
 #endif
-    {
-        if (Guid.TryParseExact(input, format, out var guid))
-        {
-            result = new BinaryGuid(guid);
-            return true;
-        }
+	{
+		if (Guid.TryParseExact(input, format, out var guid))
+		{
+			result = new BinaryGuid(guid);
+			return true;
+		}
 
-        result = default;
-        return false;
-    }
+		result = default;
+		return false;
+	}
 
 #if NET6_0 || NET5_0 || NETCOREAPP3_1 || NETSTANDARD2_1
-    public bool TryWriteBytes(Span<byte> destination) => innerGuid.TryWriteBytes(destination);
+	public bool TryWriteBytes(Span<byte> destination) => innerGuid.TryWriteBytes(destination);
 #endif
 
-    public static implicit operator Guid(BinaryGuid x) => x.innerGuid;
+	public static implicit operator Guid(BinaryGuid x) => x.innerGuid;
 
-    public static implicit operator BinaryGuid(Guid x) => new(x);
+	public static implicit operator BinaryGuid(Guid x) => new(x);
 }

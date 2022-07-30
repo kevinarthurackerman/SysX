@@ -5,7 +5,7 @@
 /// </summary>
 internal enum IdentifierType
 {
-    String,
-    Binary,
-    SqlServer
+	String,
+	Binary,
+	SqlServer
 }

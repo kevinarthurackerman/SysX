@@ -5,5 +5,5 @@ namespace SysX_Test__Parent;
 
 public static class TestParentAssemblyMarker
 {
-    public static readonly Type Child = typeof(TestChildAssemblyMarker);
+	public static readonly Type Child = typeof(TestChildAssemblyMarker);
 }

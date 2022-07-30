@@ -5,15 +5,15 @@
 /// </summary>
 public class QueueContext : IQueueContext
 {
-    /// <summary>
-    /// The queue executing the current job.
-    /// </summary>
-    public IQueue Current { get; private set; } = null!;
+	/// <summary>
+	/// The queue executing the current job.
+	/// </summary>
+	public IQueue Current { get; private set; } = null!;
 
-    void IQueueContext.SetCurrent(IQueue queue)
-    {
-        EnsureArg.IsNotNull(queue, nameof(queue));
+	void IQueueContext.SetCurrent(IQueue queue)
+	{
+		EnsureArg.IsNotNull(queue, nameof(queue));
 
-        Current = queue;
-    }
+		Current = queue;
+	}
 }

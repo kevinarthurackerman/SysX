@@ -3,109 +3,109 @@ using Assert = Xunit.Assert;
 
 public class ParamExtensions
 {
-    [Fact]
-    public void Should_Throw_When_Disposed()
-    {
-        var testObj = new Disposable();
-        testObj.Dispose();
+	[Fact]
+	public void Should_Throw_When_Disposed()
+	{
+		var testObj = new Disposable();
+		testObj.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => testObj.DoThing());
-    }
+		Assert.Throws<ObjectDisposedException>(() => testObj.DoThing());
+	}
 
-    [Fact]
-    public void Should_Not_Throw_When_Not_Disposed()
-    {
-        var testObj = new Disposable();
+	[Fact]
+	public void Should_Not_Throw_When_Not_Disposed()
+	{
+		var testObj = new Disposable();
 
-        var exception = Record.Exception(() => testObj.DoThing());
+		var exception = Record.Exception(() => testObj.DoThing());
 
-        Assert.Null(exception);
-    }
+		Assert.Null(exception);
+	}
 
-    [Fact]
-    public void Should_Throw_When_Contains_Null()
-    {
-        var testObj = new int?[] { 1, 2, null };
+	[Fact]
+	public void Should_Throw_When_Contains_Null()
+	{
+		var testObj = new int?[] { 1, 2, null };
 
-        Assert.Throws<ArgumentNullException>(() => Ensure.That(testObj).DoesNotContainNull());
-    }
+		Assert.Throws<ArgumentNullException>(() => Ensure.That(testObj).DoesNotContainNull());
+	}
 
-    [Fact]
-    public void Should_Not_Throw_When_Not_Contains_Null()
-    {
-        var testObj = new int?[] { 1, 2, 3 };
+	[Fact]
+	public void Should_Not_Throw_When_Not_Contains_Null()
+	{
+		var testObj = new int?[] { 1, 2, 3 };
 
-        var exception = Record.Exception(() => Ensure.That(testObj).DoesNotContainNull());
+		var exception = Record.Exception(() => Ensure.That(testObj).DoesNotContainNull());
 
-        Assert.Null(exception);
-    }
+		Assert.Null(exception);
+	}
 
-    [Fact]
-    public void Should_Throw_When_Contains_Value()
-    {
-        var testObj = new int[] { 1, 2, 3 };
-        
-        Assert.Throws<ArgumentException>(() => Ensure.That(testObj).DoesNotContain(3));
-    }
+	[Fact]
+	public void Should_Throw_When_Contains_Value()
+	{
+		var testObj = new int[] { 1, 2, 3 };
 
-    [Fact]
-    public void Should_Not_Throw_When_Not_Contains_Value()
-    {
-        var testObj = new int[] { 1, 2, 4 };
+		Assert.Throws<ArgumentException>(() => Ensure.That(testObj).DoesNotContain(3));
+	}
 
-        var exception = Record.Exception(() => Ensure.That(testObj).DoesNotContain(3));
+	[Fact]
+	public void Should_Not_Throw_When_Not_Contains_Value()
+	{
+		var testObj = new int[] { 1, 2, 4 };
 
-        Assert.Null(exception);
-    }
+		var exception = Record.Exception(() => Ensure.That(testObj).DoesNotContain(3));
 
-    [Fact]
-    public void Should_Throw_When_Contains_Char()
-    {
-        var testObj = "test";
+		Assert.Null(exception);
+	}
 
-        Assert.Throws<ArgumentException>(() => Ensure.That(testObj).DoesNotContain('t'));
-    }
+	[Fact]
+	public void Should_Throw_When_Contains_Char()
+	{
+		var testObj = "test";
 
-    [Fact]
-    public void Should_Not_Throw_When_Not_Contains_Char()
-    {
-        var testObj = "es";
+		Assert.Throws<ArgumentException>(() => Ensure.That(testObj).DoesNotContain('t'));
+	}
 
-        var exception = Record.Exception(() => Ensure.That(testObj).DoesNotContain('t'));
+	[Fact]
+	public void Should_Not_Throw_When_Not_Contains_Char()
+	{
+		var testObj = "es";
 
-        Assert.Null(exception);
-    }
+		var exception = Record.Exception(() => Ensure.That(testObj).DoesNotContain('t'));
 
-    [Fact]
-    public void Should_Throw_When_Value_Is_Contained_In()
-    {
-        var testObj = new int[] { 1, 2, 3 };
+		Assert.Null(exception);
+	}
 
-        Assert.Throws<ArgumentException>(() => Ensure.That(3).IsNotContainedIn(testObj));
-    }
+	[Fact]
+	public void Should_Throw_When_Value_Is_Contained_In()
+	{
+		var testObj = new int[] { 1, 2, 3 };
 
-    [Fact]
-    public void Should_Not_Throw_When_Value_Is_Not_Contained_In()
-    {
-        var testObj = new int[] { 1, 2, 4 };
+		Assert.Throws<ArgumentException>(() => Ensure.That(3).IsNotContainedIn(testObj));
+	}
 
-        var exception = Record.Exception(() => Ensure.That(3).IsNotContainedIn(testObj));
+	[Fact]
+	public void Should_Not_Throw_When_Value_Is_Not_Contained_In()
+	{
+		var testObj = new int[] { 1, 2, 4 };
 
-        Assert.Null(exception);
-    }
+		var exception = Record.Exception(() => Ensure.That(3).IsNotContainedIn(testObj));
 
-    public class Disposable : IDisposable
-    {
-        private bool disposed = false;
+		Assert.Null(exception);
+	}
 
-        public void DoThing()
-        {
-            Ensure.That(this).IsNotDisposed(disposed);
-        }
+	public class Disposable : IDisposable
+	{
+		private bool disposed = false;
 
-        public void Dispose()
-        {
-            disposed = true;
-        }
-    }
+		public void DoThing()
+		{
+			Ensure.That(this).IsNotDisposed(disposed);
+		}
+
+		public void Dispose()
+		{
+			disposed = true;
+		}
+	}
 }

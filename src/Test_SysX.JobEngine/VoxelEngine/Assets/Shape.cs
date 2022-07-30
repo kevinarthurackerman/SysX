@@ -2,10 +2,10 @@
 
 public class Shape : IAsset<Guid>
 {
-    public Guid Key { get; }
+	public Guid Key { get; }
 
-    public Shape(Guid key)
-    {
-        Key = key;
-    }
+	public Shape(Guid key)
+	{
+		Key = key;
+	}
 }

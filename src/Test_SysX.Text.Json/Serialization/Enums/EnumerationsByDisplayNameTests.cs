@@ -3,98 +3,98 @@ using Assert = Assert;
 
 public class EnumerationsByDisplayNameTests
 {
-    [Fact]
-    public void Should_Persist_Values()
-    {
-        var options = new JsonSerializerOptions().UseEnumerationsByDisplayName();
+	[Fact]
+	public void Should_Persist_Values()
+	{
+		var options = new JsonSerializerOptions().UseEnumerationsByDisplayName();
 
-        var testObject = new EnumerationPropertiesModel
-        {
-            Null = Animal.Null,
-            Lion = Mammal.Lion,
-            Snake = Reptile.Snake,
-            LionAnimal = Mammal.Lion,
-            SnakeAnimal = Reptile.Snake
-        };
+		var testObject = new EnumerationPropertiesModel
+		{
+			Null = Animal.Null,
+			Lion = Mammal.Lion,
+			Snake = Reptile.Snake,
+			LionAnimal = Mammal.Lion,
+			SnakeAnimal = Reptile.Snake
+		};
 
-        var json = JsonSerializer.Serialize(testObject, options);
+		var json = JsonSerializer.Serialize(testObject, options);
 
-        Assert.Equal(CreateExpectedJson(testObject), json);
+		Assert.Equal(CreateExpectedJson(testObject), json);
 
-        var persistedTestObject = JsonSerializer.Deserialize<EnumerationPropertiesModel>(json, options);
+		var persistedTestObject = JsonSerializer.Deserialize<EnumerationPropertiesModel>(json, options);
 
-        Assert.NotNull(persistedTestObject);
-        Assert.Equal(testObject.Null, persistedTestObject!.Null);
-        Assert.Equal(testObject.Lion, persistedTestObject.Lion);
-        Assert.Equal(testObject.Snake, persistedTestObject.Snake);
-        Assert.Equal(testObject.LionAnimal, persistedTestObject.LionAnimal);
-        Assert.Equal(testObject.SnakeAnimal, persistedTestObject.SnakeAnimal);
-    }
+		Assert.NotNull(persistedTestObject);
+		Assert.Equal(testObject.Null, persistedTestObject!.Null);
+		Assert.Equal(testObject.Lion, persistedTestObject.Lion);
+		Assert.Equal(testObject.Snake, persistedTestObject.Snake);
+		Assert.Equal(testObject.LionAnimal, persistedTestObject.LionAnimal);
+		Assert.Equal(testObject.SnakeAnimal, persistedTestObject.SnakeAnimal);
+	}
 
-    [Fact]
-    public void Should_Persist_Empty_Values()
-    {
-        var options = new JsonSerializerOptions().UseEnumerationsByDisplayName();
+	[Fact]
+	public void Should_Persist_Empty_Values()
+	{
+		var options = new JsonSerializerOptions().UseEnumerationsByDisplayName();
 
-        var testObject = new EnumerationPropertiesModel
-        {
-            Null = default,
-            Lion = default,
-            Snake = default,
-            LionAnimal = default,
-            SnakeAnimal = default
-        };
+		var testObject = new EnumerationPropertiesModel
+		{
+			Null = default,
+			Lion = default,
+			Snake = default,
+			LionAnimal = default,
+			SnakeAnimal = default
+		};
 
-        var json = JsonSerializer.Serialize(testObject, options);
+		var json = JsonSerializer.Serialize(testObject, options);
 
-        Assert.Equal(CreateExpectedJson(testObject), json);
+		Assert.Equal(CreateExpectedJson(testObject), json);
 
-        var persistedTestObject = JsonSerializer.Deserialize<EnumerationPropertiesModel>(json, options);
+		var persistedTestObject = JsonSerializer.Deserialize<EnumerationPropertiesModel>(json, options);
 
-        Assert.NotNull(persistedTestObject);
-        Assert.Equal(testObject.Null, persistedTestObject!.Null);
-        Assert.Equal(testObject.Lion, persistedTestObject.Lion);
-        Assert.Equal(testObject.Snake, persistedTestObject.Snake);
-        Assert.Equal(testObject.LionAnimal, persistedTestObject.LionAnimal);
-        Assert.Equal(testObject.SnakeAnimal, persistedTestObject.SnakeAnimal);
-    }
+		Assert.NotNull(persistedTestObject);
+		Assert.Equal(testObject.Null, persistedTestObject!.Null);
+		Assert.Equal(testObject.Lion, persistedTestObject.Lion);
+		Assert.Equal(testObject.Snake, persistedTestObject.Snake);
+		Assert.Equal(testObject.LionAnimal, persistedTestObject.LionAnimal);
+		Assert.Equal(testObject.SnakeAnimal, persistedTestObject.SnakeAnimal);
+	}
 
-    private static string CreateExpectedJson(EnumerationPropertiesModel model) =>
-        $"{{\"Null\":{WrapJsonValue(model.Null)},\"Lion\":{WrapJsonValue(model.Lion)},\"Snake\":{WrapJsonValue(model.Snake)},\"LionAnimal\":{WrapJsonValue(model.LionAnimal)},\"SnakeAnimal\":{WrapJsonValue(model.SnakeAnimal)}}}";
+	private static string CreateExpectedJson(EnumerationPropertiesModel model) =>
+		$"{{\"Null\":{WrapJsonValue(model.Null)},\"Lion\":{WrapJsonValue(model.Lion)},\"Snake\":{WrapJsonValue(model.Snake)},\"LionAnimal\":{WrapJsonValue(model.LionAnimal)},\"SnakeAnimal\":{WrapJsonValue(model.SnakeAnimal)}}}";
 
-    private static string WrapJsonValue(Animal? value) =>
-        value == null ? "null" : $"\"{value.DisplayName}\"";
+	private static string WrapJsonValue(Animal? value) =>
+		value == null ? "null" : $"\"{value.DisplayName}\"";
 
-    public class EnumerationPropertiesModel
-    {
-        public Animal? Null { get; set; }
-        public Mammal? Lion { get; set; }
-        public Reptile? Snake { get; set; }
-        public Animal? LionAnimal { get; set; }
-        public Animal? SnakeAnimal { get; set; }
-    }
+	public class EnumerationPropertiesModel
+	{
+		public Animal? Null { get; set; }
+		public Mammal? Lion { get; set; }
+		public Reptile? Snake { get; set; }
+		public Animal? LionAnimal { get; set; }
+		public Animal? SnakeAnimal { get; set; }
+	}
 
-    public class Animal : BaseEnumeration<Animal, int>
-    {
-        public static readonly Animal Null = new(0, "Null");
+	public class Animal : BaseEnumeration<Animal, int>
+	{
+		public static readonly Animal Null = new(0, "Null");
 
-        protected Animal(int value, string displayName) : base(value, displayName) { }
-    }
+		protected Animal(int value, string displayName) : base(value, displayName) { }
+	}
 
-    public class Mammal : Animal
-    {
-        public static readonly Mammal Lion = new(1, "Lion");
-        public static readonly Mammal Tiger = new(2, "Tiger");
-        public static readonly Mammal Bear = new(3, "Bear");
+	public class Mammal : Animal
+	{
+		public static readonly Mammal Lion = new(1, "Lion");
+		public static readonly Mammal Tiger = new(2, "Tiger");
+		public static readonly Mammal Bear = new(3, "Bear");
 
-        protected Mammal(int value, string displayName) : base(value, displayName) { }
-    }
+		protected Mammal(int value, string displayName) : base(value, displayName) { }
+	}
 
-    public class Reptile : Animal
-    {
-        public static readonly Reptile Snake = new(4, "Snake");
-        public static readonly Reptile Turtle = new(5, "Turtle");
+	public class Reptile : Animal
+	{
+		public static readonly Reptile Snake = new(4, "Snake");
+		public static readonly Reptile Turtle = new(5, "Turtle");
 
-        protected Reptile(int value, string displayName) : base(value, displayName) { }
-    }
+		protected Reptile(int value, string displayName) : base(value, displayName) { }
+	}
 }

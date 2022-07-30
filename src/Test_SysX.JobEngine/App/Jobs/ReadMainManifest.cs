@@ -2,20 +2,20 @@
 
 public static class ReadMainManifest
 {
-    public readonly record struct JobData : IJob { }
+	public readonly record struct JobData : IJob { }
 
-    public class Executor : IJobExecutor<JobData>
-    {
-        private readonly AppAssetContext appAssetContext;
+	public class Executor : IJobExecutor<JobData>
+	{
+		private readonly AppAssetContext appAssetContext;
 
-        public Executor(AppAssetContext appAssetContext)
-        {
-            this.appAssetContext = appAssetContext;
-        }
+		public Executor(AppAssetContext appAssetContext)
+		{
+			this.appAssetContext = appAssetContext;
+		}
 
-        public void Execute(in JobData data)
-        {
-            var manifest = appAssetContext.Manifests.Get("main");
-        }
-    }
+		public void Execute(in JobData data)
+		{
+			var manifest = appAssetContext.Manifests.Get("main");
+		}
+	}
 }

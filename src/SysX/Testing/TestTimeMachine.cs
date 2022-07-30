@@ -5,129 +5,129 @@
 /// </summary>
 public class TestTimeMachine : IDisposable
 {
-    private static readonly DateTime defaultNowTime = new(2000, 1, 1);
-    private static readonly TimeSpan defaultTimeToWaitForOtherWork = TimeSpan.FromMilliseconds(200);
+	private static readonly DateTime defaultNowTime = new(2000, 1, 1);
+	private static readonly TimeSpan defaultTimeToWaitForOtherWork = TimeSpan.FromMilliseconds(200);
 
-    private readonly List<Delay> delays = new();
+	private readonly List<Delay> delays = new();
 
-    private bool disposed;
+	private bool disposed;
 
-    /// <summary>
-    /// Gets the currently set "now" time.
-    /// </summary>
-    public DateTime Now { get; private set; }
+	/// <summary>
+	/// Gets the currently set "now" time.
+	/// </summary>
+	public DateTime Now { get; private set; }
 
-    /// <summary>
-    /// After processing each delay the system will wait this long for other code to execute
-    /// before processing additional delays.
-    /// </summary>
-    public TimeSpan DefaultTimeToWaitForOtherWork { get; }
+	/// <summary>
+	/// After processing each delay the system will wait this long for other code to execute
+	/// before processing additional delays.
+	/// </summary>
+	public TimeSpan DefaultTimeToWaitForOtherWork { get; }
 
-    /// <summary>
-    /// Initializes a new <see cref="TestTimeMachine"/> with the default "now" time and delay.
-    /// </summary>
-    public TestTimeMachine() : this(defaultNowTime, defaultTimeToWaitForOtherWork) { }
+	/// <summary>
+	/// Initializes a new <see cref="TestTimeMachine"/> with the default "now" time and delay.
+	/// </summary>
+	public TestTimeMachine() : this(defaultNowTime, defaultTimeToWaitForOtherWork) { }
 
-    /// <summary>
-    /// Initializes a new <see cref="TestTimeMachine"/> with the default "now" time and the given delay.
-    /// </summary>
-    public TestTimeMachine(TimeSpan defaultTimeToWaitForOtherWork) : this(defaultNowTime, defaultTimeToWaitForOtherWork) { }
+	/// <summary>
+	/// Initializes a new <see cref="TestTimeMachine"/> with the default "now" time and the given delay.
+	/// </summary>
+	public TestTimeMachine(TimeSpan defaultTimeToWaitForOtherWork) : this(defaultNowTime, defaultTimeToWaitForOtherWork) { }
 
-    /// <summary>
-    /// Initializes a new <see cref="TestTimeMachine"/> with the given "now" time and default delay.
-    /// </summary>
-    public TestTimeMachine(DateTime now) : this(now, defaultTimeToWaitForOtherWork) { }
+	/// <summary>
+	/// Initializes a new <see cref="TestTimeMachine"/> with the given "now" time and default delay.
+	/// </summary>
+	public TestTimeMachine(DateTime now) : this(now, defaultTimeToWaitForOtherWork) { }
 
-    /// <summary>
-    /// Initializes a new <see cref="TestTimeMachine"/> with the given "now" time and delay.
-    /// </summary>
-    public TestTimeMachine(DateTime now, TimeSpan defaultTimeToWaitForOtherWork)
-    {
-        Now = now;
-        DefaultTimeToWaitForOtherWork = defaultTimeToWaitForOtherWork;
-    }
+	/// <summary>
+	/// Initializes a new <see cref="TestTimeMachine"/> with the given "now" time and delay.
+	/// </summary>
+	public TestTimeMachine(DateTime now, TimeSpan defaultTimeToWaitForOtherWork)
+	{
+		Now = now;
+		DefaultTimeToWaitForOtherWork = defaultTimeToWaitForOtherWork;
+	}
 
-    /// <inheritdoc cref="CreateDelay(DateTime, TimeSpan)" />
-    public Task CreateDelay(TimeSpan delay) => CreateDelay(Now.Add(delay), defaultTimeToWaitForOtherWork);
+	/// <inheritdoc cref="CreateDelay(DateTime, TimeSpan)" />
+	public Task CreateDelay(TimeSpan delay) => CreateDelay(Now.Add(delay), defaultTimeToWaitForOtherWork);
 
-    /// <inheritdoc cref="CreateDelay(DateTime, TimeSpan)" />
-    public Task CreateDelay(TimeSpan delay, TimeSpan timeToWaitForOtherWork) => CreateDelay(Now.Add(delay), timeToWaitForOtherWork);
+	/// <inheritdoc cref="CreateDelay(DateTime, TimeSpan)" />
+	public Task CreateDelay(TimeSpan delay, TimeSpan timeToWaitForOtherWork) => CreateDelay(Now.Add(delay), timeToWaitForOtherWork);
 
-    /// <inheritdoc cref="CreateDelay(DateTime, TimeSpan)" />
-    public Task CreateDelay(DateTime completesAt) => CreateDelay(completesAt, defaultTimeToWaitForOtherWork);
+	/// <inheritdoc cref="CreateDelay(DateTime, TimeSpan)" />
+	public Task CreateDelay(DateTime completesAt) => CreateDelay(completesAt, defaultTimeToWaitForOtherWork);
 
-    /// <summary>
-    /// Creates a mock delay that will be completed when the time is incremented passed it's completion time.
-    /// The system will wait at least <paramref name="timeToWaitForOtherWork"/> amount of time before continuing.
-    /// </summary>
-    public Task CreateDelay(DateTime completesAt, TimeSpan timeToWaitForOtherWork)
-    {
-        Ensure.That(this).IsNotDisposed(disposed);
-        EnsureArg.IsGte(completesAt, Now);
+	/// <summary>
+	/// Creates a mock delay that will be completed when the time is incremented passed it's completion time.
+	/// The system will wait at least <paramref name="timeToWaitForOtherWork"/> amount of time before continuing.
+	/// </summary>
+	public Task CreateDelay(DateTime completesAt, TimeSpan timeToWaitForOtherWork)
+	{
+		Ensure.That(this).IsNotDisposed(disposed);
+		EnsureArg.IsGte(completesAt, Now);
 
-        var completionSource = new TaskCompletionSource<object?>();
-        delays.Add(new Delay(completesAt, completionSource, timeToWaitForOtherWork));
+		var completionSource = new TaskCompletionSource<object?>();
+		delays.Add(new Delay(completesAt, completionSource, timeToWaitForOtherWork));
 
-        return completionSource.Task;
-    }
+		return completionSource.Task;
+	}
 
-    /// <inheritdoc cref="SetNow(DateTime)" />
-    public void IncrementNow(TimeSpan time) =>
-        SetNow(Now.Add(time));
+	/// <inheritdoc cref="SetNow(DateTime)" />
+	public void IncrementNow(TimeSpan time) =>
+		SetNow(Now.Add(time));
 
-    /// <summary>
-    /// Moves time forward and executes any delays that have occurred in that time period.
-    /// </summary>
-    /// <param name="now"></param>
-    public void SetNow(DateTime now)
-    {
-        Ensure.That(this).IsNotDisposed(disposed);
-        EnsureArg.IsGte(now, Now);
-        
-        while (true)
-        {
-            // Waits one tick so that task continuations and awaits fire
-            Task.Delay(1).Wait();
+	/// <summary>
+	/// Moves time forward and executes any delays that have occurred in that time period.
+	/// </summary>
+	/// <param name="now"></param>
+	public void SetNow(DateTime now)
+	{
+		Ensure.That(this).IsNotDisposed(disposed);
+		EnsureArg.IsGte(now, Now);
 
-            var nextCompletedDelays = delays
-                .GroupBy(x => x.CompletesAt)
-                .OrderBy(x => x.Key)
-                .Select(x => new 
-                {
-                    CompletesAt = x.Key,
-                    Delays = x.ToArray()
-                })
-                .FirstOrDefault();
+		while (true)
+		{
+			// Waits one tick so that task continuations and awaits fire
+			Task.Delay(1).Wait();
 
-            if (nextCompletedDelays == null || nextCompletedDelays.CompletesAt > now) break;
+			var nextCompletedDelays = delays
+				.GroupBy(x => x.CompletesAt)
+				.OrderBy(x => x.Key)
+				.Select(x => new
+				{
+					CompletesAt = x.Key,
+					Delays = x.ToArray()
+				})
+				.FirstOrDefault();
 
-            Now = nextCompletedDelays.CompletesAt;
+			if (nextCompletedDelays == null || nextCompletedDelays.CompletesAt > now) break;
 
-            foreach(var delay in nextCompletedDelays.Delays)
-            {
-                delay.CompletionSource.SetResult(null);
+			Now = nextCompletedDelays.CompletesAt;
 
-                delays.Remove(delay);
-            }
+			foreach (var delay in nextCompletedDelays.Delays)
+			{
+				delay.CompletionSource.SetResult(null);
 
-            var timeToWait = nextCompletedDelays.Delays.Max(x => x.TimeToWaitForOtherWork);
+				delays.Remove(delay);
+			}
 
-            // Wait for other work to finish
-            Thread.Sleep(timeToWait);
-        }
+			var timeToWait = nextCompletedDelays.Delays.Max(x => x.TimeToWaitForOtherWork);
 
-        Now = now;
-    }
+			// Wait for other work to finish
+			Thread.Sleep(timeToWait);
+		}
 
-    public void Dispose()
-    {
-        if (disposed) return;
+		Now = now;
+	}
 
-        disposed = true;
+	public void Dispose()
+	{
+		if (disposed) return;
 
-        foreach (var delay in delays)
-            delay.CompletionSource.SetCanceled();
-    }
+		disposed = true;
 
-    private record struct Delay(DateTime CompletesAt, TaskCompletionSource<object?> CompletionSource, TimeSpan TimeToWaitForOtherWork);
+		foreach (var delay in delays)
+			delay.CompletionSource.SetCanceled();
+	}
+
+	private record struct Delay(DateTime CompletesAt, TaskCompletionSource<object?> CompletionSource, TimeSpan TimeToWaitForOtherWork);
 }

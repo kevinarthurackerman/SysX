@@ -2,15 +2,15 @@
 
 public class ConfigQueue : Queue
 {
-    public ConfigQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
+	public ConfigQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
 }
 
 public class MainQueue : Queue
 {
-    public MainQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
+	public MainQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
 }
 
 public class ContouringQueue : Queue
 {
-    public ContouringQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
+	public ContouringQueue(IQueueServiceProvider queueServiceProvider) : base(queueServiceProvider) { }
 }

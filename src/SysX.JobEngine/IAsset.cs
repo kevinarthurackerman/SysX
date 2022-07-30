@@ -5,5 +5,5 @@
 /// </summary>
 public interface IAsset<TKey>
 {
-    public TKey Key { get; }
+	public TKey Key { get; }
 }

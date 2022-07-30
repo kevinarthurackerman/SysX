@@ -5,5 +5,5 @@
 /// </summary>
 public interface IQueueServiceProvider : IServiceProvider
 {
-    internal void SetServiceProvider(IServiceProvider serviceProvider);
+	internal void SetServiceProvider(IServiceProvider serviceProvider);
 }

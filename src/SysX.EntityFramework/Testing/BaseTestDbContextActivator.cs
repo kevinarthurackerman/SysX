@@ -1,141 +1,141 @@
 ﻿namespace SysX.EntityFramework.Testing;
 
 public abstract class BaseTestDbContextActivator<TDbContextOptionsBuilder, TBuilder, TExtension>
-    where TDbContextOptionsBuilder : RelationalDbContextOptionsBuilder<TBuilder, TExtension>
-    where TBuilder : RelationalDbContextOptionsBuilder<TBuilder, TExtension>
-    where TExtension : RelationalOptionsExtension, new()
+	where TDbContextOptionsBuilder : RelationalDbContextOptionsBuilder<TBuilder, TExtension>
+	where TBuilder : RelationalDbContextOptionsBuilder<TBuilder, TExtension>
+	where TExtension : RelationalOptionsExtension, new()
 {
-    private static readonly string workingDirectory;
+	private static readonly string workingDirectory;
 
-    private static readonly ConcurrentDictionary<DatabasePathLocator, string> baseDatabasePathLocator = new();
+	private static readonly ConcurrentDictionary<DatabasePathLocator, string> baseDatabasePathLocator = new();
 
-    static BaseTestDbContextActivator()
-    {
-        workingDirectory = GetWorkingDirectory();
+	static BaseTestDbContextActivator()
+	{
+		workingDirectory = GetWorkingDirectory();
 
-        Directory.CreateDirectory(workingDirectory);
+		Directory.CreateDirectory(workingDirectory);
 
-        CleanWorkingDirectory();
-        
-        AppDomain.CurrentDomain.ProcessExit += (s, e) => CleanWorkingDirectory();
+		CleanWorkingDirectory();
 
-        static void CleanWorkingDirectory()
-        {
-            foreach (var file in Directory.GetFiles(workingDirectory))
-                try { File.Delete(file); } catch (Exception) { }
-        }
+		AppDomain.CurrentDomain.ProcessExit += (s, e) => CleanWorkingDirectory();
 
-        static string GetWorkingDirectory()
-        {
-            var tempFilesRoot = "DbContextActivator";
-            var databasesDirectory = "TestDatabases";
-            
-            try
-            {
-                var basePath = Path.GetTempPath();
+		static void CleanWorkingDirectory()
+		{
+			foreach (var file in Directory.GetFiles(workingDirectory))
+				try { File.Delete(file); } catch (Exception) { }
+		}
 
-                if (!string.IsNullOrEmpty(basePath))
-                {
-                    return Path.Combine(basePath, tempFilesRoot, databasesDirectory);
-                }
-            }
-            catch (Exception) { }
+		static string GetWorkingDirectory()
+		{
+			var tempFilesRoot = "DbContextActivator";
+			var databasesDirectory = "TestDatabases";
 
-            return Path.Combine(Environment.CurrentDirectory, "Temp", tempFilesRoot, databasesDirectory);
-        }
-    }
+			try
+			{
+				var basePath = Path.GetTempPath();
 
-    /// <summary>
-    /// Creates a test database using the default EntityFramework migrations and returns a DbContext attached to that database.
-    /// A new test database is created each time this is called and is torn down at the end of the program execution.
-    /// </summary>
-    protected TDbContext CreateDbContext<TDbContext>(Action<CreateDbContextOptions<TDbContext>>? configure = null)
-        where TDbContext : DbContext
-    {
-        var baseDatabasePathLocatorKey = new DatabasePathLocator(GetType(), typeof(TDbContext));
-        var sourceDatabasePath = baseDatabasePathLocator.GetOrAdd(baseDatabasePathLocatorKey, key =>
-        {
-            var databasePath = Path.Combine(workingDirectory, GetDatabaseName(key.DbContextType));
+				if (!string.IsNullOrEmpty(basePath))
+				{
+					return Path.Combine(basePath, tempFilesRoot, databasesDirectory);
+				}
+			}
+			catch (Exception) { }
 
-            CreateDatabase(databasePath);
+			return Path.Combine(Environment.CurrentDirectory, "Temp", tempFilesRoot, databasesDirectory);
+		}
+	}
 
-            using var dbContext = CreateDbContext(databasePath);
+	/// <summary>
+	/// Creates a test database using the default EntityFramework migrations and returns a DbContext attached to that database.
+	/// A new test database is created each time this is called and is torn down at the end of the program execution.
+	/// </summary>
+	protected TDbContext CreateDbContext<TDbContext>(Action<CreateDbContextOptions<TDbContext>>? configure = null)
+		where TDbContext : DbContext
+	{
+		var baseDatabasePathLocatorKey = new DatabasePathLocator(GetType(), typeof(TDbContext));
+		var sourceDatabasePath = baseDatabasePathLocator.GetOrAdd(baseDatabasePathLocatorKey, key =>
+		{
+			var databasePath = Path.Combine(workingDirectory, GetDatabaseName(key.DbContextType));
 
-            dbContext!.Database.EnsureCreated();
+			CreateDatabase(databasePath);
 
-            return databasePath;
-        });
+			using var dbContext = CreateDbContext(databasePath);
 
-        var destinationDatabasePath = Path.Combine(workingDirectory, GetDatabaseName(typeof(TDbContext)));
+			dbContext!.Database.EnsureCreated();
 
-        CopyDatabase(sourceDatabasePath, destinationDatabasePath);
+			return databasePath;
+		});
 
-        return CreateDbContext(destinationDatabasePath);
+		var destinationDatabasePath = Path.Combine(workingDirectory, GetDatabaseName(typeof(TDbContext)));
 
-        void CopyDatabase(string sourceDatabasePath, string destinationDatabasePath)
-        {
-            var attempts = 0;
-            while (attempts < 30)
-            {
-                try
-                {
-                    File.Copy(sourceDatabasePath, destinationDatabasePath, true);
-                    return;
-                }
-                catch (Exception)
-                {
-                    attempts++;
-                    Thread.Sleep(100);
-                }
-            }
+		CopyDatabase(sourceDatabasePath, destinationDatabasePath);
 
-            throw new TimeoutException($"Failed to copy database from {sourceDatabasePath} to {destinationDatabasePath}");
-        }
+		return CreateDbContext(destinationDatabasePath);
 
-        TDbContext CreateDbContext(string databasePath)
-        {
-            var connection = CreateConnection(databasePath);
+		void CopyDatabase(string sourceDatabasePath, string destinationDatabasePath)
+		{
+			var attempts = 0;
+			while (attempts < 30)
+			{
+				try
+				{
+					File.Copy(sourceDatabasePath, destinationDatabasePath, true);
+					return;
+				}
+				catch (Exception)
+				{
+					attempts++;
+					Thread.Sleep(100);
+				}
+			}
 
-            var optionsCtor = typeof(TDbContext).GetConstructor(new[] { typeof(DbContextOptions<TDbContext>) })
-                ?? typeof(TDbContext).GetConstructor(new[] { typeof(DbContextOptions) });
+			throw new TimeoutException($"Failed to copy database from {sourceDatabasePath} to {destinationDatabasePath}");
+		}
 
-            if (optionsCtor != null)
-            {
-                var options = ConfigureDbContextOptions(connection, configure);
+		TDbContext CreateDbContext(string databasePath)
+		{
+			var connection = CreateConnection(databasePath);
 
-                return (TDbContext)optionsCtor.Invoke(new[] { options });
-            }
+			var optionsCtor = typeof(TDbContext).GetConstructor(new[] { typeof(DbContextOptions<TDbContext>) })
+				?? typeof(TDbContext).GetConstructor(new[] { typeof(DbContextOptions) });
 
-            if (configure != null)
-            {
-                throw new InvalidOperationException($"An options configuration was provided, but {nameof(DbContext)} {typeof(TDbContext).Name} does not have a constructor that takes a single parameter of type {typeof(DbContextOptions).Name} or {typeof(DbContextOptions<TDbContext>).Name}");
-            }
+			if (optionsCtor != null)
+			{
+				var options = ConfigureDbContextOptions(connection, configure);
 
-            var optionlessCtor = typeof(TDbContext).GetConstructor(Array.Empty<Type>());
+				return (TDbContext)optionsCtor.Invoke(new[] { options });
+			}
 
-            if (optionlessCtor != null)
-            {
-                var dbContext = (TDbContext)optionlessCtor.Invoke(Array.Empty<object>());
+			if (configure != null)
+			{
+				throw new InvalidOperationException($"An options configuration was provided, but {nameof(DbContext)} {typeof(TDbContext).Name} does not have a constructor that takes a single parameter of type {typeof(DbContextOptions).Name} or {typeof(DbContextOptions<TDbContext>).Name}");
+			}
 
-                dbContext.Database.SetDbConnection(connection);
+			var optionlessCtor = typeof(TDbContext).GetConstructor(Array.Empty<Type>());
 
-                return dbContext;
-            }
+			if (optionlessCtor != null)
+			{
+				var dbContext = (TDbContext)optionlessCtor.Invoke(Array.Empty<object>());
 
-            throw new InvalidOperationException($"{nameof(DbContext)} {typeof(TDbContext).Name} does not have a parameterless constructor or a constructor that takes a single parameter of type {typeof(DbContextOptions).Name} or {typeof(DbContextOptions<TDbContext>).Name}");
-        }
-    }
+				dbContext.Database.SetDbConnection(connection);
 
-    protected abstract string GetDatabaseName(Type dbContextType);
+				return dbContext;
+			}
 
-    protected abstract DbConnection CreateConnection(string databasePath);
+			throw new InvalidOperationException($"{nameof(DbContext)} {typeof(TDbContext).Name} does not have a parameterless constructor or a constructor that takes a single parameter of type {typeof(DbContextOptions).Name} or {typeof(DbContextOptions<TDbContext>).Name}");
+		}
+	}
 
-    protected abstract DbContextOptions<TDbContext> ConfigureDbContextOptions<TDbContext>(DbConnection dbConnection, Action<CreateDbContextOptions<TDbContext>>? configure)
-        where TDbContext : DbContext;
+	protected abstract string GetDatabaseName(Type dbContextType);
 
-    protected abstract void CreateDatabase(string databasePath);
+	protected abstract DbConnection CreateConnection(string databasePath);
 
-    public record struct CreateDbContextOptions<TDbContext>(DbContextOptionsBuilder<TDbContext> DbContext, TDbContextOptionsBuilder Provider) where TDbContext : DbContext;
+	protected abstract DbContextOptions<TDbContext> ConfigureDbContextOptions<TDbContext>(DbConnection dbConnection, Action<CreateDbContextOptions<TDbContext>>? configure)
+		where TDbContext : DbContext;
 
-    private record struct DatabasePathLocator(Type ActivatorType, Type DbContextType);
+	protected abstract void CreateDatabase(string databasePath);
+
+	public record struct CreateDbContextOptions<TDbContext>(DbContextOptionsBuilder<TDbContext> DbContext, TDbContextOptionsBuilder Provider) where TDbContext : DbContext;
+
+	private record struct DatabasePathLocator(Type ActivatorType, Type DbContextType);
 }

@@ -5,58 +5,58 @@
 /// </summary>
 public static class EnumerableX
 {
-    /// <summary>
-    /// Returns the descendants of the root nearest to furthest, breadth first.
-    /// </summary>
-    public static IEnumerable<T> Descendants<T>(T root, Func<T, IEnumerable<T>> childSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
-    {
-        EnsureArg.HasValue(root, nameof(root));
-        EnsureArg.IsNotNull(childSelector, nameof(childSelector));
-        EnsureArg.IsInRange(maxDepth, 0, int.MaxValue, nameof(maxDepth));
-            
-        if (includeRoot) yield return root;
+	/// <summary>
+	/// Returns the descendants of the root nearest to furthest, breadth first.
+	/// </summary>
+	public static IEnumerable<T> Descendants<T>(T root, Func<T, IEnumerable<T>> childSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
+	{
+		EnsureArg.HasValue(root, nameof(root));
+		EnsureArg.IsNotNull(childSelector, nameof(childSelector));
+		EnsureArg.IsInRange(maxDepth, 0, int.MaxValue, nameof(maxDepth));
 
-        var descendantsChecked = new HashSet<T>();
-        var descendantsToCheck = new List<T>();
-        var childrenBeingChecked = (IEnumerable<T>)childSelector(root).ToArray();
-        var depth = 0;
-        while (childrenBeingChecked.Any() && depth++ < maxDepth)
-        {
-            foreach (var childBeingChecked in childrenBeingChecked)
-            {
-                if (!descendantsChecked.Add(childBeingChecked)) continue;
+		if (includeRoot) yield return root;
 
-                var children = childSelector(childBeingChecked).ToArray();
+		var descendantsChecked = new HashSet<T>();
+		var descendantsToCheck = new List<T>();
+		var childrenBeingChecked = (IEnumerable<T>)childSelector(root).ToArray();
+		var depth = 0;
+		while (childrenBeingChecked.Any() && depth++ < maxDepth)
+		{
+			foreach (var childBeingChecked in childrenBeingChecked)
+			{
+				if (!descendantsChecked.Add(childBeingChecked)) continue;
 
-                descendantsToCheck.AddRange(children);
+				var children = childSelector(childBeingChecked).ToArray();
 
-                yield return childBeingChecked;
-            }
+				descendantsToCheck.AddRange(children);
 
-            childrenBeingChecked = descendantsToCheck;
-            descendantsToCheck = new List<T>();
-        }
-    }
-        
-    /// <summary>
-    /// Returns the ancestors of the root nearest to furthest.
-    /// </summary>
-    public static IEnumerable<T> Ancestors<T>(T root, Func<T, T?> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
-    {
-        EnsureArg.HasValue(root, nameof(root));
-        EnsureArg.IsNotNull(ancestorSelector, nameof(ancestorSelector));
-        EnsureArg.IsInRange(maxDepth, 0, int.MaxValue, nameof(maxDepth));
+				yield return childBeingChecked;
+			}
 
-        if (includeRoot) yield return root;
+			childrenBeingChecked = descendantsToCheck;
+			descendantsToCheck = new List<T>();
+		}
+	}
 
-        var ancestor = ancestorSelector(root);
-        var depth = 0;
+	/// <summary>
+	/// Returns the ancestors of the root nearest to furthest.
+	/// </summary>
+	public static IEnumerable<T> Ancestors<T>(T root, Func<T, T?> ancestorSelector, bool includeRoot = false, int maxDepth = int.MaxValue)
+	{
+		EnsureArg.HasValue(root, nameof(root));
+		EnsureArg.IsNotNull(ancestorSelector, nameof(ancestorSelector));
+		EnsureArg.IsInRange(maxDepth, 0, int.MaxValue, nameof(maxDepth));
 
-        while (ancestor != null && depth++ < maxDepth)
-        {
-            yield return ancestor;
+		if (includeRoot) yield return root;
 
-            ancestor = ancestorSelector(ancestor);
-        }
-    }
+		var ancestor = ancestorSelector(root);
+		var depth = 0;
+
+		while (ancestor != null && depth++ < maxDepth)
+		{
+			yield return ancestor;
+
+			ancestor = ancestorSelector(ancestor);
+		}
+	}
 }
