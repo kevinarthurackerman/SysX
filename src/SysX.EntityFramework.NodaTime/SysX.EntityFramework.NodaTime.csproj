@@ -9,7 +9,7 @@
   <Import Project="..\NugetPack.targets" />
 
   <ItemGroup Label="Nuget Packages">
-    <PackageReference Include="NodaTime" Version="3.1.0" />
+    <PackageReference Include="NodaTime" Version="3.1.2" />
   </ItemGroup>
 
   <ItemGroup>
