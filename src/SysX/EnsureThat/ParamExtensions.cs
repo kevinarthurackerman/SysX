@@ -5,7 +5,8 @@ public static class ParamExtensions
 	/// <summary>
 	/// Ensures that the <see cref="IDisposable"/> <paramref name="param"/> value is not disposed.
 	/// </summary>
-	public static void IsNotDisposed<T>(this Param<T> param, bool isDisposed) where T : IDisposable
+	public static void IsNotDisposed<T>(this Param<T> param, bool isDisposed)
+		where T : IDisposable
 	{
 		EnsureArg.HasValue(param.Value, nameof(param));
 
@@ -18,9 +19,10 @@ public static class ParamExtensions
 	}
 
 	/// <summary>
-	/// Ensure that the <see cref="IEnumerable"/> <paramref name="param"/> value does not contain a <see langword="null"/> value.
+	/// Ensures that the <see cref="IAsyncDisposable"/> <paramref name="param"/> value is not disposed.
 	/// </summary>
-	public static void IsNotAsyncDisposed<T>(this Param<T> param, bool isDisposed) where T : IAsyncDisposable
+	public static void IsNotAsyncDisposed<T>(this Param<T> param, bool isDisposed)
+		where T : IAsyncDisposable
 	{
 		EnsureArg.HasValue(param.Value, nameof(param));
 
@@ -127,7 +129,8 @@ public static class ParamExtensions
 		}
 	}
 
-	private static Exception ThrowException<T>(Param<T> param, string defaultMessage, DefaultExceptionFactory defaultExceptionFactory)
+	private static Exception ThrowException<T>(
+		Param<T> param, string defaultMessage, DefaultExceptionFactory defaultExceptionFactory)
 	{
 		var options = param.OptsFn?.Invoke(new EnsureOptions()) ?? new EnsureOptions();
 
@@ -140,7 +143,8 @@ public static class ParamExtensions
 		return exception;
 	}
 
-	private static Exception ThrowException(StringParam param, string defaultMessage, DefaultExceptionFactory defaultExceptionFactory)
+	private static Exception ThrowException(
+		StringParam param, string defaultMessage, DefaultExceptionFactory defaultExceptionFactory)
 	{
 		var options = param.OptsFn?.Invoke(new EnsureOptions()) ?? new EnsureOptions();
 
