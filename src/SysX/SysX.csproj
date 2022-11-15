@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netstandard2.1;net48</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.1;net48</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -13,9 +13,9 @@
     <PackageReference Include="Ensure.That" Version="10.1.0" />
     <PackageReference Include="Microsoft.Bcl" Version="1.1.10" Condition="'$(TargetFramework)' == 'net48'" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" Condition="'$(TargetFramework)' == 'net48'" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.19" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="7.0.0" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.23" />
   </ItemGroup>
   
 </Project>
